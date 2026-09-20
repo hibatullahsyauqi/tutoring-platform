@@ -1,0 +1,245 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// -------------------------------------------------------------
+// USER & STUDENT MANAGEMENT
+// -------------------------------------------------------------
+
+model Tutor {
+  id        String    @id @default(uuid()) @db.Uuid
+  name      String
+  email     String    @unique
+  createdAt DateTime  @default(now()) @map("created_at")
+  students  Student[]
+
+  @@map("tutors")
+}
+
+model Student {
+  id             String       @id @default(uuid()) @db.Uuid
+  tutorId        String       @map("tutor_id") @db.Uuid
+  name           String
+  targetExamDate DateTime?    @map("target_exam_date") @db.Date
+  createdAt      DateTime     @default(now()) @map("created_at")
+  
+  tutor          Tutor        @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+  enrollments    Enrollment[]
+  sessions       Session[]
+
+  @@map("students")
+}
+
+// -------------------------------------------------------------
+// CURRICULUM, COURSES & SYLLABI
+// -------------------------------------------------------------
+
+model ExamBoard {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  code      String   @unique
+  courses   Course[]
+
+  @@map("exam_boards")
+}
+
+enum EducationLevel {
+  PRIMARY
+  LOWER_SECONDARY
+  IGCSE
+  A_LEVEL
+  MYP
+  DP
+  OTHER
+}
+
+model Course {
+  id             String          @id @default(uuid()) @db.Uuid
+  boardId        String          @map("board_id") @db.Uuid
+  title          String
+  level          EducationLevel
+  subjectCode    String
+  
+  board          ExamBoard       @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  topics         SyllabusTopic[]
+  enrollments    Enrollment[]
+  sessions       Session[]
+
+  @@unique([boardId, subjectCode])
+  @@map("courses")
+}
+
+model SyllabusTopic {
+  id          String           @id @default(uuid()) @db.Uuid
+  courseId    String           @map("course_id") @db.Uuid
+  code        String
+  title       String
+  sourceUrl   String?          @map("source_url")
+  
+  course      Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  segments    SessionSegment[]
+
+  @@unique([courseId, code])
+  @@map("syllabus_topics")
+}
+
+model Enrollment {
+  id        String    @id @default(uuid()) @db.Uuid
+  studentId String    @map("student_id") @db.Uuid
+  courseId  String    @map("course_id") @db.Uuid
+  tier      String?   @default("Extended")
+  startedAt DateTime  @default(now()) @map("started_at") @db.Date
+
+  student   Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course    Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, courseId])
+  @@map("enrollments")
+}
+
+// -------------------------------------------------------------
+// SESSIONS, SEGMENTS & TIMEDOOR COMPLIANCE
+// -------------------------------------------------------------
+
+enum SessionType {
+  REGULAR_LESSON
+  TRIAL_CLASS
+  CONCEPT_INTRO
+  REVISION_RECALL
+  EXAM_SIMULATION
+  DIAGNOSTIC
+  HOMEWORK_HELP
+}
+
+enum SessionStatus {
+  SCHEDULED
+  COMPLETED
+  RESCHEDULED
+  CANCELLED_BY_STUDENT
+  CANCELLED_WITH_NOTICE
+  ABSENT_UNNOTIFIED
+}
+
+model Session {
+  id              String             @id @default(uuid()) @db.Uuid
+  studentId       String             @map("student_id") @db.Uuid
+  courseId        String             @map("course_id") @db.Uuid
+  sessionDate     DateTime           @default(now()) @map("session_date")
+  durationMinutes Int                @default(90) @map("duration_minutes")
+  sessionType     SessionType        @default(REGULAR_LESSON) @map("session_type")
+  status          SessionStatus      @default(COMPLETED)
+  
+  // Link online meeting & rekaman
+  meetingUrl      String?            @map("meeting_url")
+  recordingUrl    String?            @map("recording_url")
+  
+  // Tracking keterlambatan & denda
+  latenessMinutes Int                @default(0) @map("lateness_minutes")
+  fineAmount      Int                @default(0) @map("fine_amount")
+  
+  // Rencana sesi berikutnya & PR
+  assignedHomework String?           @map("assigned_homework") @db.Text
+  nextFocusTopic   String?           @map("next_focus_topic") @db.Text
+
+  student         Student            @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course          Course             @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  
+  segments        SessionSegment[]
+  rating          SessionRating?
+  checklist       SessionChecklist?
+  reflection      SessionReflection?
+
+  @@map("sessions")
+}
+
+enum ActivityType {
+  DIRECT_EXPLANATION
+  GUIDED_PRACTICE
+  INDEPENDENT_DRILL
+  TOOL_EXPLORATION
+  FORMATIVE_QUIZ
+  ERROR_ANALYSIS
+}
+
+enum MasteryStatus {
+  STRUGGLING
+  NEEDS_PRACTICE
+  MASTERED
+}
+
+model Tool {
+  id          String           @id @default(uuid()) @db.Uuid
+  name        String           @unique
+  category    String
+  url         String?
+  segments    SessionSegment[]
+
+  @@map("tools")
+}
+
+model SessionSegment {
+  id              String        @id @default(uuid()) @db.Uuid
+  sessionId       String        @map("session_id") @db.Uuid
+  topicId         String        @map("topic_id") @db.Uuid
+  toolId          String?       @map("tool_id") @db.Uuid
+  durationMinutes Int           @map("duration_minutes")
+  activityType    ActivityType  @map("activity_type")
+  masteryStatus   MasteryStatus  @default(NEEDS_PRACTICE) @map("mastery_status")
+
+  session         Session       @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  topic           SyllabusTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  tool            Tool?         @relation(fields: [toolId], references: [id], onDelete: SetNull)
+
+  @@map("session_segments")
+}
+
+// -------------------------------------------------------------
+// PEDAGOGICAL RATINGS & CHECKLISTS
+// -------------------------------------------------------------
+
+model SessionRating {
+  id             String   @id @default(uuid()) @db.Uuid
+  sessionId      String   @unique @map("session_id") @db.Uuid
+  engagement     Int
+  understanding  Int
+  independence   Int
+  tutorClarity   Int      @map("tutor_clarity")
+  toolUsefulness Int      @map("tool_usefulness")
+
+  session        Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@map("session_ratings")
+}
+
+model SessionChecklist {
+  id                  String   @id @default(uuid()) @db.Uuid
+  sessionId           String   @unique @map("session_id") @db.Uuid
+  
+  solvedCold          Boolean  @default(false) @map("solved_cold")
+  recallWarmupDone    Boolean  @default(false) @map("recall_warmup_done")
+  studentSummarized   Boolean  @default(false) @map("student_summarized")
+  visualToolUsed      Boolean  @default(false) @map("visual_tool_used")
+  interleavedPractice Boolean  @default(false) @map("interleaved_practice")
+
+  session             Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@map("session_checklists")
+}
+
+model SessionReflection {
+  id          String   @id @default(uuid()) @db.Uuid
+  sessionId   String   @unique @map("session_id") @db.Uuid
+  struggle    String?  @db.Text
+  workedWell  String?  @db.Text
+  adjustNext  String?  @db.Text
+
+  session     Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@map("session_reflections")
+}
