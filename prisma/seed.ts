@@ -6,7 +6,7 @@ async function main() {
   console.log('🌱 Starting database seed...');
 
   // -------------------------------------------------------------
-  // 1. BULLETPROOF TUTOR SETUP (Avoids P2002 email collisions)
+  // 1. BULLETPROOF TUTOR SETUP
   // -------------------------------------------------------------
   let tutor = await prisma.tutor.findFirst();
   if (!tutor) {
@@ -28,9 +28,9 @@ async function main() {
   // 2. TEACHING TOOLS
   // -------------------------------------------------------------
   const tools = [
-    { name: 'GeoGebra', category: 'Dynamic Geometry & Sliders', url: 'https://www.geogebra.org/calculator' },
+    { name: 'GeoGebra', category: 'Dynamic Geometry & Graphing', url: 'https://www.geogebra.org/calculator' },
     { name: 'Desmos', category: 'Function Graphing & Rapid Checks', url: 'https://www.desmos.com/calculator' },
-    { name: 'PhET Simulations', category: 'Physics & Interactive Sims', url: 'https://phet.colorado.edu' },
+    { name: 'PhET Simulations', category: 'Physics & Interactive Sims', url: 'https://phet.colorado.edu/' },
     { name: 'Manim Clip', category: 'Hero Animation (Pre-rendered)', url: null },
     { name: 'Python Live Script', category: 'Numerical Verification & Matplotlib', url: null },
     { name: 'Past Paper PDF', category: 'Official Exam Standard Practice', url: null },
@@ -312,13 +312,79 @@ async function main() {
           courseId: igcseMaths.id,
         },
       },
-      update: {} as any,
+      update: { tier: 'Extended' } as any,
       create: {
         studentId: maya.id,
         courseId: igcseMaths.id,
-        tier: 'Extended' as any,
+        tier: 'Extended',
       },
     });
+  }
+
+  // -------------------------------------------------------------
+  // 7. SEED MODULAR PORTAL VAULT (Clean, Non-misleading & Modular)
+  // -------------------------------------------------------------
+  if (igcseMaths) {
+    // Wipe previous duplicates before seeding fresh
+    await prisma.resource.deleteMany({});
+
+    const modularVault = [
+      {
+        courseId: igcseMaths.id,
+        title: 'Physics & Maths Tutor (PMT) Portal',
+        authorOrPublisher: 'PMT Education',
+        resourceType: 'PAST_PAPER' as const,
+        locationDetails: 'Online repository for past exam papers, mark schemes, and topic questions',
+        url: 'https://www.physicsandmathstutor.com/',
+      },
+      {
+        courseId: igcseMaths.id,
+        title: 'Save My Exams Portal',
+        authorOrPublisher: 'Save My Exams',
+        resourceType: 'WORKSHEET' as const,
+        locationDetails: 'Curriculum-aligned revision notes, practice questions, and worked solutions',
+        url: 'https://www.savemyexams.com/',
+      },
+      {
+        courseId: igcseMaths.id,
+        title: 'GeoGebra Graphing & Calculation Suite',
+        authorOrPublisher: 'GeoGebra International',
+        resourceType: 'SIMULATION' as const,
+        locationDetails: 'Dynamic mathematics tool for graphing functions, geometric shapes, and sliders',
+        url: 'https://www.geogebra.org/calculator',
+      },
+      {
+        courseId: igcseMaths.id,
+        title: 'PhET Interactive Simulations',
+        authorOrPublisher: 'University of Colorado Boulder',
+        resourceType: 'SIMULATION' as const,
+        locationDetails: 'Interactive simulations for physics, chemistry, and mathematics',
+        url: 'https://phet.colorado.edu/',
+      },
+      {
+        courseId: igcseMaths.id,
+        title: 'BetterExplained Concept Vault',
+        authorOrPublisher: 'Kalid Azad',
+        resourceType: 'INTUITION_ARTICLE' as const,
+        locationDetails: 'High-level conceptual articles and visual analogies for mathematics',
+        url: 'https://betterexplained.com/',
+      },
+      {
+        courseId: igcseMaths.id,
+        title: 'Cambridge IGCSE Mathematics Core and Extended Coursebook',
+        authorOrPublisher: 'Ric Pimentel & Terry Wall (Hodder Education)',
+        resourceType: 'TEXTBOOK' as const,
+        locationDetails: 'Standard coursebook reference and problem sets',
+        url: null,
+      },
+    ];
+
+    for (const r of modularVault) {
+      await prisma.resource.create({
+        data: r,
+      });
+    }
+    console.log(`✓ Seeded ${modularVault.length} modular teaching assets into the Library`);
   }
 
   console.log('🎉 Seeding completed successfully!');

@@ -70,6 +70,7 @@ model Course {
   topics         SyllabusTopic[]
   enrollments    Enrollment[]
   sessions       Session[]
+  resources      Resource[]
 
   @@unique([boardId, subjectCode])
   @@map("courses")
@@ -84,6 +85,7 @@ model SyllabusTopic {
   
   course      Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
   segments    SessionSegment[]
+  resources   Resource[]
 
   @@unique([courseId, code])
   @@map("syllabus_topics")
@@ -104,7 +106,7 @@ model Enrollment {
 }
 
 // -------------------------------------------------------------
-// SESSIONS, SEGMENTS & TIMEDOOR COMPLIANCE
+// SESSIONS, SEGMENTS & CONTINUITY
 // -------------------------------------------------------------
 
 enum SessionType {
@@ -127,33 +129,31 @@ enum SessionStatus {
 }
 
 model Session {
-  id              String             @id @default(uuid()) @db.Uuid
-  studentId       String             @map("student_id") @db.Uuid
-  courseId        String             @map("course_id") @db.Uuid
-  sessionDate     DateTime           @default(now()) @map("session_date")
-  durationMinutes Int                @default(90) @map("duration_minutes")
-  sessionType     SessionType        @default(REGULAR_LESSON) @map("session_type")
-  status          SessionStatus      @default(COMPLETED)
+  id               String             @id @default(uuid()) @db.Uuid
+  studentId        String             @map("student_id") @db.Uuid
+  courseId         String             @map("course_id") @db.Uuid
+  sessionDate      DateTime           @default(now()) @map("session_date")
+  durationMinutes  Int                @default(90) @map("duration_minutes")
+  sessionType      SessionType        @default(REGULAR_LESSON) @map("session_type")
+  status           SessionStatus      @default(COMPLETED)
   
-  // Link online meeting & rekaman
-  meetingUrl      String?            @map("meeting_url")
-  recordingUrl    String?            @map("recording_url")
+  meetingUrl       String?            @map("meeting_url")
+  recordingUrl     String?            @map("recording_url")
   
-  // Tracking keterlambatan & denda
-  latenessMinutes Int                @default(0) @map("lateness_minutes")
-  fineAmount      Int                @default(0) @map("fine_amount")
+  latenessMinutes  Int                @default(0) @map("lateness_minutes")
+  fineAmount       Int                @default(0) @map("fine_amount")
   
-  // Rencana sesi berikutnya & PR
-  assignedHomework String?           @map("assigned_homework") @db.Text
-  nextFocusTopic   String?           @map("next_focus_topic") @db.Text
+  assignedHomework String?            @map("assigned_homework") @db.Text
+  nextFocusTopic   String?            @map("next_focus_topic") @db.Text
 
-  student         Student            @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  course          Course             @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  student          Student            @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course           Course             @relation(fields: [courseId], references: [id], onDelete: Cascade)
   
-  segments        SessionSegment[]
-  rating          SessionRating?
-  checklist       SessionChecklist?
-  reflection      SessionReflection?
+  segments         SessionSegment[]
+  rating           SessionRating?
+  checklist        SessionChecklist?
+  reflection       SessionReflection?
+  resources        SessionResource[]
 
   @@map("sessions")
 }
@@ -184,24 +184,20 @@ model Tool {
 }
 
 model SessionSegment {
-  id              String        @id @default(uuid()) @db.Uuid
-  sessionId       String        @map("session_id") @db.Uuid
-  topicId         String        @map("topic_id") @db.Uuid
-  toolId          String?       @map("tool_id") @db.Uuid
-  durationMinutes Int           @map("duration_minutes")
-  activityType    ActivityType  @map("activity_type")
+  id              String         @id @default(uuid()) @db.Uuid
+  sessionId       String         @map("session_id") @db.Uuid
+  topicId         String         @map("topic_id") @db.Uuid
+  toolId          String?        @map("tool_id") @db.Uuid
+  durationMinutes Int            @map("duration_minutes")
+  activityType    ActivityType   @map("activity_type")
   masteryStatus   MasteryStatus  @default(NEEDS_PRACTICE) @map("mastery_status")
 
-  session         Session       @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  topic           SyllabusTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
-  tool            Tool?         @relation(fields: [toolId], references: [id], onDelete: SetNull)
+  session         Session        @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  topic           SyllabusTopic  @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  tool            Tool?          @relation(fields: [toolId], references: [id], onDelete: SetNull)
 
   @@map("session_segments")
 }
-
-// -------------------------------------------------------------
-// PEDAGOGICAL RATINGS & CHECKLISTS
-// -------------------------------------------------------------
 
 model SessionRating {
   id             String   @id @default(uuid()) @db.Uuid
@@ -220,7 +216,6 @@ model SessionRating {
 model SessionChecklist {
   id                  String   @id @default(uuid()) @db.Uuid
   sessionId           String   @unique @map("session_id") @db.Uuid
-  
   solvedCold          Boolean  @default(false) @map("solved_cold")
   recallWarmupDone    Boolean  @default(false) @map("recall_warmup_done")
   studentSummarized   Boolean  @default(false) @map("student_summarized")
@@ -242,4 +237,54 @@ model SessionReflection {
   session     Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   @@map("session_reflections")
+}
+
+// -------------------------------------------------------------
+// CURATED LIBRARY & BIBLIOGRAPHY
+// -------------------------------------------------------------
+
+enum ResourceType {
+  PAST_PAPER
+  TEXTBOOK
+  INTUITION_ARTICLE
+  SIMULATION
+  WORKSHEET
+}
+
+enum ResourceRole {
+  PRE_READING
+  IN_SESSION
+  POST_ASSIGNMENT
+}
+
+model Resource {
+  id                 String            @id @default(uuid()) @db.Uuid
+  courseId           String            @map("course_id") @db.Uuid
+  topicId            String?           @map("topic_id") @db.Uuid
+  title              String
+  authorOrPublisher  String?           @map("author_publisher")
+  resourceType       ResourceType      @map("resource_type")
+  url                String?
+  locationDetails    String?           @map("location_details")
+  createdAt          DateTime          @default(now()) @map("created_at")
+
+  course             Course            @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  topic              SyllabusTopic?    @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  sessionAssignments SessionResource[]
+
+  @@map("resources")
+}
+
+model SessionResource {
+  id                 String       @id @default(uuid()) @db.Uuid
+  sessionId          String       @map("session_id") @db.Uuid
+  resourceId         String       @map("resource_id") @db.Uuid
+  role               ResourceRole @default(POST_ASSIGNMENT)
+  customInstructions String?      @map("custom_instructions") @db.Text
+
+  session            Session      @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  resource           Resource     @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, resourceId, role])
+  @@map("session_resources")
 }

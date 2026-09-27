@@ -95,6 +95,12 @@ export default async function DashboardPage() {
 
           <div className="flex items-center gap-3">
             <Link
+              href="/library"
+              className="bg-white hover:bg-[#faf9f6] border border-[#ddd8cd] text-[#3d6b52] px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors shadow-sm inline-flex items-center gap-1.5"
+            >
+              📚 Library Vault
+            </Link>
+            <Link
               href="/sessions/new"
               className="bg-[#3d6b52] hover:bg-[#2d523e] text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors shadow-sm inline-flex items-center gap-2"
             >
@@ -177,7 +183,7 @@ export default async function DashboardPage() {
                 )}
               </div>
             ) : (
-              <p className="text-xs text-[#6f6b62]">No previous session notes yet. Log your first session to trigger automated briefings.</p>
+              <p className="text-xs text-[#6f6b62]">No previous session notes yet.</p>
             )}
           </section>
 
