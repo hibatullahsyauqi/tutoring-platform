@@ -1,11 +1,42 @@
 import { prisma } from '@/lib/prisma';
+import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { signOutAction } from '@/app/actions/auth';
 
 export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
-  const tutor = await prisma.tutor.findFirst();
+  // 1. Verify Authentication via Supabase
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user || !user.email) {
+    redirect('/login');
+  }
+
+  // 2. Fetch or Sync the logged-in Tutor profile
+  const tutor = await prisma.tutor.findUnique({
+    where: { email: user.email },
+  });
+
+  // If tutor profile isn't in DB yet, sync it
+  const activeTutor =
+    tutor ||
+    (await prisma.tutor.create({
+      data: {
+        email: user.email,
+        name: user.user_metadata?.full_name || user.email.split('@')[0],
+      },
+    }));
+
+  // 3. Multi-Tenant Query: Load ONLY this tutor's students!
   const students = await prisma.student.findMany({
+    where: {
+      tutorId: activeTutor.id,
+    },
     include: {
       enrollments: {
         include: {
@@ -32,12 +63,17 @@ export default async function DashboardPage() {
     },
   });
 
+  // Calculate earnings for ONLY this tutor's completed sessions
   const completedSessions = await prisma.session.findMany({
-    where: { status: 'COMPLETED' },
+    where: {
+      student: {
+        tutorId: activeTutor.id,
+      },
+      status: 'COMPLETED',
+    },
     include: { course: true },
   });
 
-  // Financial Engine
   let grossSalary = 0;
   let totalFines = 0;
 
@@ -67,10 +103,10 @@ export default async function DashboardPage() {
     totalFines += s.fineAmount;
   });
 
-  const pphTax = grossSalary * 0.025; // 2.5% withholding tax
+  const pphTax = grossSalary * 0.025;
   const netSalary = Math.max(0, grossSalary - pphTax - totalFines);
 
-  // Latest session for primary student (e.g. Maya)
+  // Latest session for primary student
   const primaryStudent = students[0];
   const lastSession = primaryStudent?.sessions[0];
   const lastReflection = lastSession?.reflection;
@@ -83,29 +119,37 @@ export default async function DashboardPage() {
         <header className="border-b border-[#ddd8cd] pb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <span className="text-xs font-semibold uppercase tracking-wider text-[#3d6b52] bg-[#e8efe9] px-2.5 py-1 rounded-full">
-              Pedagogical OS · STEM Tutoring
+              Pedagogical OS · Multi-Tenant
             </span>
             <h1 className="text-2xl font-bold tracking-tight mt-2">
               Tutoring Dashboard
             </h1>
             <p className="text-sm text-[#6f6b62]">
-              Tutor: <span className="font-semibold text-[#2b2b28]">{tutor?.name || 'Syauqi'}</span> · Schedule: Wed, Thu, Fri (18:30 WIB) & Sat
+              Logged in as: <span className="font-semibold text-[#2b2b28]">{activeTutor.name}</span> ({user.email})
             </p>
           </div>
 
           <div className="flex items-center gap-3">
             <Link
               href="/library"
-              className="bg-white hover:bg-[#faf9f6] border border-[#ddd8cd] text-[#3d6b52] px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors shadow-sm inline-flex items-center gap-1.5"
+              className="bg-white hover:bg-[#faf9f6] border border-[#ddd8cd] text-[#3d6b52] px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors shadow-sm inline-flex items-center gap-1.5"
             >
-              📚 Library Vault
+              📚 Library
             </Link>
             <Link
               href="/sessions/new"
-              className="bg-[#3d6b52] hover:bg-[#2d523e] text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors shadow-sm inline-flex items-center gap-2"
+              className="bg-[#3d6b52] hover:bg-[#2d523e] text-white px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors shadow-sm inline-flex items-center gap-1.5"
             >
-              <span>+</span> Log New Session
+              <span>+</span> Log Session
             </Link>
+            <form action={signOutAction}>
+              <button
+                type="submit"
+                className="bg-white hover:bg-red-50 text-[#a3462f] border border-[#ddd8cd] px-3 py-2 rounded-lg text-xs font-semibold transition-colors shadow-sm"
+              >
+                Sign Out
+              </button>
+            </form>
           </div>
         </header>
 
@@ -150,13 +194,13 @@ export default async function DashboardPage() {
         {/* METRICS & CONTINUITY BRIEFING */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           
-          {/* LEFT: PRE-SESSION CONTINUITY BRIEFING */}
+          {/* PRE-SESSION CONTINUITY BRIEFING */}
           <section className="bg-white border border-[#ddd8cd] rounded-xl p-5 shadow-sm space-y-4">
             <div>
               <h2 className="text-xs font-bold uppercase tracking-wider text-[#3d6b52]">
                 ⚡ Next Session Warm-up Briefing
               </h2>
-              <p className="text-[11px] text-[#6f6b62]">Actionable takeaways from Maya's latest session</p>
+              <p className="text-[11px] text-[#6f6b62]">Actionable takeaways from your student's latest session</p>
             </div>
 
             {lastSession ? (
@@ -187,15 +231,15 @@ export default async function DashboardPage() {
             )}
           </section>
 
-          {/* RIGHT: STUDENT ROSTER */}
+          {/* STUDENT ROSTER */}
           <section className="md:col-span-2 bg-white border border-[#ddd8cd] rounded-xl p-5 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <h2 className="text-xs font-bold uppercase tracking-wider text-[#6f6b62]">
-                  Active Students
+                  Your Active Students
                 </h2>
                 <span className="text-xs bg-[#e8efe9] text-[#3d6b52] font-semibold px-2 py-0.5 rounded">
-                  {students.length} Student{students.length > 1 ? 's' : ''}
+                  {students.length} Student{students.length !== 1 ? 's' : ''}
                 </span>
               </div>
 
@@ -207,42 +251,48 @@ export default async function DashboardPage() {
               </Link>
             </div>
 
-            <div className="divide-y divide-[#ddd8cd]">
-              {students.map((student) => {
-                const enrollment = student.enrollments[0];
-                return (
-                  <div key={student.id} className="py-3.5 first:pt-0 last:pb-0 flex items-center justify-between">
-                    <div>
-                      <h3 className="text-base font-bold text-[#2b2b28]">{student.name}</h3>
-                      <p className="text-xs text-[#6f6b62] mt-0.5">
-                        {enrollment ? (
-                          <>
-                            <span className="font-medium text-[#2b2b28]">
-                              {enrollment.course.title} ({enrollment.course.subjectCode})
-                            </span>{' '}
-                            · {enrollment.course.board.name}
-                          </>
-                        ) : (
-                          'No active enrollment'
+            {students.length === 0 ? (
+              <div className="p-8 text-center text-xs text-[#6f6b62] border border-dashed border-[#ddd8cd] rounded-xl">
+                You haven't onboarded any students yet. Click <strong>+ Add Student</strong> above to register your first student.
+              </div>
+            ) : (
+              <div className="divide-y divide-[#ddd8cd]">
+                {students.map((student) => {
+                  const enrollment = student.enrollments[0];
+                  return (
+                    <div key={student.id} className="py-3.5 first:pt-0 last:pb-0 flex items-center justify-between">
+                      <div>
+                        <h3 className="text-base font-bold text-[#2b2b28]">{student.name}</h3>
+                        <p className="text-xs text-[#6f6b62] mt-0.5">
+                          {enrollment ? (
+                            <>
+                              <span className="font-medium text-[#2b2b28]">
+                                {enrollment.course.title} ({enrollment.course.subjectCode})
+                              </span>{' '}
+                              · {enrollment.course.board.name}
+                            </>
+                          ) : (
+                            'No active enrollment'
+                          )}
+                        </p>
+                        {student.targetExamDate && (
+                          <span className="text-[11px] text-[#3d6b52] bg-[#e8efe9] px-2 py-0.5 rounded mt-1.5 inline-block font-medium">
+                            🎯 Target Exam: {new Date(student.targetExamDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                          </span>
                         )}
-                      </p>
-                      {student.targetExamDate && (
-                        <span className="text-[11px] text-[#3d6b52] bg-[#e8efe9] px-2 py-0.5 rounded mt-1.5 inline-block font-medium">
-                          🎯 Target Exam: {new Date(student.targetExamDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-                        </span>
-                      )}
-                    </div>
+                      </div>
 
-                    <Link
-                      href={`/students/${student.id}`}
-                      className="text-xs font-semibold text-[#3d6b52] hover:underline bg-[#faf9f6] border border-[#ddd8cd] px-3 py-1.5 rounded-lg"
-                    >
-                      View Dossier & History →
-                    </Link>
-                  </div>
-                );
-              })}
-            </div>
+                      <Link
+                        href={`/students/${student.id}`}
+                        className="text-xs font-semibold text-[#3d6b52] hover:underline bg-[#faf9f6] border border-[#ddd8cd] px-3 py-1.5 rounded-lg"
+                      >
+                        View Dossier & History →
+                      </Link>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </section>
 
         </div>
