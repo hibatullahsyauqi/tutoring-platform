@@ -22,7 +22,6 @@ export default async function DashboardPage() {
     where: { email: user.email },
   });
 
-  // If tutor profile isn't in DB yet, sync it
   const activeTutor =
     tutor ||
     (await prisma.tutor.create({
@@ -103,7 +102,7 @@ export default async function DashboardPage() {
     totalFines += s.fineAmount;
   });
 
-  const pphTax = grossSalary * 0.025;
+  const pphTax = grossSalary * 0.025; // 2.5% withholding tax
   const netSalary = Math.max(0, grossSalary - pphTax - totalFines);
 
   // Latest session for primary student
@@ -115,7 +114,7 @@ export default async function DashboardPage() {
     <main className="min-h-screen bg-[#faf9f6] text-[#2b2b28] p-6 md:p-10 font-sans">
       <div className="max-w-4xl mx-auto space-y-8">
         
-        {/* HEADER */}
+        {/* HEADER & TOPBAR */}
         <header className="border-b border-[#ddd8cd] pb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <span className="text-xs font-semibold uppercase tracking-wider text-[#3d6b52] bg-[#e8efe9] px-2.5 py-1 rounded-full">
@@ -130,6 +129,12 @@ export default async function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            <Link
+              href="/schedule"
+              className="bg-white hover:bg-[#faf9f6] border border-[#ddd8cd] text-[#3d6b52] px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors shadow-sm inline-flex items-center gap-1.5"
+            >
+              📅 Schedule
+            </Link>
             <Link
               href="/library"
               className="bg-white hover:bg-[#faf9f6] border border-[#ddd8cd] text-[#3d6b52] px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors shadow-sm inline-flex items-center gap-1.5"

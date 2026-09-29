@@ -8,6 +8,7 @@ import { ActivityType, SessionType } from '@prisma/client';
 export type MasteryStatus = 'STRUGGLING' | 'NEEDS_PRACTICE' | 'MASTERED';
 
 export type CreateSessionInput = {
+  existingSessionId?: string; // If completing a pre-scheduled session
   studentId: string;
   courseId: string;
   sessionDate: string;
@@ -41,37 +42,76 @@ export async function createSessionAction(data: CreateSessionInput) {
     fineAmount = Math.floor(data.latenessMinutes / 15) * 10000;
   }
 
-  await prisma.session.create({
-    data: {
-      studentId: data.studentId,
-      courseId: data.courseId,
-      sessionDate: new Date(data.sessionDate),
-      durationMinutes: data.durationMinutes,
-      sessionType: data.sessionType,
-      status: 'COMPLETED',
-      meetingUrl: data.meetingUrl || null,
-      recordingUrl: data.recordingUrl || null,
-      latenessMinutes: data.latenessMinutes,
-      fineAmount: fineAmount,
-      assignedHomework: data.assignedHomework || null,
-      nextFocusTopic: data.nextFocusTopic || null,
+  if (data.existingSessionId) {
+    // Update existing scheduled session to COMPLETED
+    await prisma.session.update({
+      where: { id: data.existingSessionId },
+      data: {
+        sessionDate: new Date(data.sessionDate),
+        durationMinutes: data.durationMinutes,
+        sessionType: data.sessionType,
+        status: 'COMPLETED',
+        meetingUrl: data.meetingUrl || null,
+        recordingUrl: data.recordingUrl || null,
+        latenessMinutes: data.latenessMinutes,
+        fineAmount: fineAmount,
+        assignedHomework: data.assignedHomework || null,
+        nextFocusTopic: data.nextFocusTopic || null,
 
-      segments: {
-        create: data.segments.map((seg) => ({
-          topicId: seg.topicId,
-          toolId: seg.toolId || null,
-          durationMinutes: seg.durationMinutes,
-          activityType: seg.activityType,
-          masteryStatus: seg.masteryStatus,
-        })),
+        segments: {
+          deleteMany: {}, // Clear any placeholders
+          create: data.segments.map((seg) => ({
+            topicId: seg.topicId,
+            toolId: seg.toolId || null,
+            durationMinutes: seg.durationMinutes,
+            activityType: seg.activityType,
+            masteryStatus: seg.masteryStatus,
+          })),
+        },
+
+        reflection: {
+          upsert: {
+            create: data.reflection,
+            update: data.reflection,
+          },
+        },
       },
+    });
+  } else {
+    // Create new session from scratch
+    await prisma.session.create({
+      data: {
+        studentId: data.studentId,
+        courseId: data.courseId,
+        sessionDate: new Date(data.sessionDate),
+        durationMinutes: data.durationMinutes,
+        sessionType: data.sessionType,
+        status: 'COMPLETED',
+        meetingUrl: data.meetingUrl || null,
+        recordingUrl: data.recordingUrl || null,
+        latenessMinutes: data.latenessMinutes,
+        fineAmount: fineAmount,
+        assignedHomework: data.assignedHomework || null,
+        nextFocusTopic: data.nextFocusTopic || null,
 
-      reflection: {
-        create: data.reflection,
+        segments: {
+          create: data.segments.map((seg) => ({
+            topicId: seg.topicId,
+            toolId: seg.toolId || null,
+            durationMinutes: seg.durationMinutes,
+            activityType: seg.activityType,
+            masteryStatus: seg.masteryStatus,
+          })),
+        },
+
+        reflection: {
+          create: data.reflection,
+        },
       },
-    },
-  });
+    });
+  }
 
+  revalidatePath('/schedule');
   revalidatePath('/');
   redirect('/');
 }
