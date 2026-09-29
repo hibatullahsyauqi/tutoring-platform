@@ -46,10 +46,8 @@ export default function ScheduleClientView({
   const [submitting, setSubmitting] = useState(false);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
 
-  // Inspector Modal for clicked sessions
   const [selectedSessionModal, setSelectedSessionModal] = useState<SessionItem | null>(null);
 
-  // New Booking State
   const [selectedStudentId, setSelectedStudentId] = useState(students[0]?.id || '');
   const [sessionDate, setSessionDate] = useState('2026-09-30T18:30');
   const [durationMinutes, setDurationMinutes] = useState(90);
@@ -58,7 +56,6 @@ export default function ScheduleClientView({
 
   const now = new Date();
 
-  // Strict Temporal State Machine
   const getSessionState = (s: SessionItem): 'UPCOMING' | 'NEEDS_LOG' | 'COMPLETED' | 'CANCELLED' => {
     if (s.status.startsWith('CANCELLED') || s.status === 'ABSENT_UNNOTIFIED') {
       return 'CANCELLED';
@@ -68,9 +65,9 @@ export default function ScheduleClientView({
     }
     const sessionTime = new Date(s.sessionDate);
     if (sessionTime <= now) {
-      return 'NEEDS_LOG'; // Class time has passed, but log hasn't been submitted
+      return 'NEEDS_LOG';
     }
-    return 'UPCOMING'; // Class is in the future
+    return 'UPCOMING';
   };
 
   const activeStudent = students.find((s) => s.id === selectedStudentId) || students[0];
@@ -118,12 +115,11 @@ export default function ScheduleClientView({
     }
   };
 
-  // --- DYNAMIC ROLLING WEEK ENGINE ---
   const [weekOffset, setWeekOffset] = useState(0);
 
   const getDynamicWeek = (offset: number) => {
     const current = new Date();
-    const dayOfWeek = (current.getDay() + 6) % 7; // Monday = 0 ... Sunday = 6
+    const dayOfWeek = (current.getDay() + 6) % 7;
     
     const monday = new Date(current);
     monday.setDate(current.getDate() - dayOfWeek + offset * 7);
@@ -201,7 +197,7 @@ export default function ScheduleClientView({
         </button>
       </div>
 
-      {/* SCHEDULE FORM MODAL / COLLAPSIBLE */}
+      {/* SCHEDULE FORM MODAL */}
       {showScheduleForm && (
         <form onSubmit={handleScheduleSubmit} className="bg-white border-2 border-[#3d6b52]/30 rounded-xl p-6 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
@@ -299,7 +295,6 @@ export default function ScheduleClientView({
       {viewMode === 'CALENDAR' && (
         <div className="space-y-3">
           <div className="text-xs font-semibold text-[#6f6b62] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            {/* Week Navigator */}
             <div className="flex items-center gap-2">
               <button
                 type="button"
@@ -353,7 +348,6 @@ export default function ScheduleClientView({
                     day.contractSlot ? 'border-[#3d6b52]/40 bg-[#faf9f6]/40' : 'border-[#ddd8cd]'
                   }`}
                 >
-                  {/* Day Header */}
                   <div className="border-b border-[#ddd8cd]/40 pb-1.5 mb-2 flex items-center justify-between">
                     <div>
                       <div className="flex items-center gap-1.5">
@@ -379,7 +373,6 @@ export default function ScheduleClientView({
                     )}
                   </div>
 
-                  {/* Sessions or Clickable Empty Slot */}
                   <div className="space-y-1.5 flex-1 flex flex-col justify-center">
                     {daySessions.length === 0 ? (
                       <button
@@ -483,9 +476,10 @@ export default function ScheduleClientView({
                     </div>
 
                     <div className="flex items-center gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
+                      {/* FIXED: Pass sessionId so scheduled row is updated, not duplicated! */}
                       {state === 'NEEDS_LOG' && (
                         <Link
-                          href={`/sessions/new?studentId=${s.studentId}`}
+                          href={`/sessions/new?studentId=${s.studentId}&sessionId=${s.id}`}
                           className="bg-[#a3462f] hover:bg-[#853623] text-white px-4 py-2 rounded-lg text-xs font-bold transition-colors shadow-sm"
                         >
                           Log Lesson Now →
@@ -524,7 +518,6 @@ export default function ScheduleClientView({
                     </div>
                   </div>
 
-                  {/* CANCEL OPTIONS DROPDOWN */}
                   {cancellingId === s.id && (
                     <div className="p-3.5 bg-red-50/50 border border-red-200 rounded-lg space-y-2 text-xs" onClick={(e) => e.stopPropagation()}>
                       <span className="font-bold text-[#a3462f] block">Select Cancellation Reason:</span>
@@ -554,7 +547,6 @@ export default function ScheduleClientView({
                     </div>
                   )}
 
-                  {/* Continuity Context */}
                   {(s.nextFocusTopic || s.assignedHomework || s.topicsSummary) && (
                     <div className="p-3 bg-[#faf9f6] border border-[#ddd8cd]/60 rounded-lg text-xs space-y-1">
                       {s.topicsSummary && (
@@ -581,7 +573,7 @@ export default function ScheduleClientView({
         </div>
       )}
 
-      {/* RATIONAL INSPECTOR MODAL: CLICKED BOOKED SESSION */}
+      {/* RATIONAL INSPECTOR MODAL */}
       {selectedSessionModal && (
         <div
           className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-150"
@@ -591,7 +583,7 @@ export default function ScheduleClientView({
             className="bg-white border border-[#ddd8cd] rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl text-left"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header with Rational State Badge */}
+            {/* Modal Header */}
             <div className="flex items-start justify-between border-b border-[#ddd8cd]/60 pb-3">
               <div>
                 <div className="flex items-center gap-2 mb-1">
@@ -606,7 +598,6 @@ export default function ScheduleClientView({
                   <span className="text-xs text-[#6f6b62]">
                     {selectedSessionModal.durationMinutes} mins
                   </span>
-                  {/* Status Indicator */}
                   {getSessionState(selectedSessionModal) === 'UPCOMING' && (
                     <span className="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-1.5 py-0.5 rounded">
                       🔵 Upcoming
@@ -640,7 +631,7 @@ export default function ScheduleClientView({
               </button>
             </div>
 
-            {/* Modal Body: Completed Session Recap vs Upcoming Briefing */}
+            {/* Modal Body */}
             {getSessionState(selectedSessionModal) === 'COMPLETED' ? (
               <div className="space-y-3 text-xs">
                 <span className="font-bold uppercase tracking-wider text-[#3d6b52] text-[10px] block">
@@ -699,34 +690,34 @@ export default function ScheduleClientView({
               </div>
             )}
 
-            {/* RATIONAL MODAL ACTIONS (NO DUPLICATE DOSSIER BUTTONS) */}
+            {/* RATIONAL MODAL FOOTER */}
             <div className="pt-3 border-t border-[#ddd8cd]/60 flex items-center justify-between gap-2">
               <Link
                 href={`/students/${selectedSessionModal.studentId}`}
                 className="text-xs text-[#3d6b52] hover:underline font-semibold"
               >
-                View Full Student Dossier →
+                View Student Dossier →
               </Link>
 
               <div className="flex items-center gap-2">
-                {/* State 1: UPCOMING (Future) -> Informative unlock time */}
+                {/* State 1: UPCOMING (Future) */}
                 {getSessionState(selectedSessionModal) === 'UPCOMING' && (
                   <span className="text-[11px] text-[#6f6b62] italic">
                     Opens at {new Date(selectedSessionModal.sessionDate).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })} WIB
                   </span>
                 )}
 
-                {/* State 2: NEEDS_LOG (Overdue/Present) -> Actionable Log button */}
+                {/* State 2: NEEDS_LOG (Overdue/Present) -> Passes sessionId to update existing row! */}
                 {getSessionState(selectedSessionModal) === 'NEEDS_LOG' && (
                   <Link
-                    href={`/sessions/new?studentId=${selectedSessionModal.studentId}`}
+                    href={`/sessions/new?studentId=${selectedSessionModal.studentId}&sessionId=${selectedSessionModal.id}`}
                     className="bg-[#a3462f] hover:bg-[#853623] text-white px-4 py-2 rounded-lg text-xs font-bold transition-colors shadow-sm"
                   >
                     Log Lesson Now →
                   </Link>
                 )}
 
-                {/* State 3: COMPLETED (Done) -> Clean Close button (No duplicate link!) */}
+                {/* State 3: COMPLETED (Done) -> Clean Close button */}
                 {getSessionState(selectedSessionModal) === 'COMPLETED' && (
                   <button
                     type="button"
@@ -739,7 +730,7 @@ export default function ScheduleClientView({
               </div>
             </div>
 
-            {/* Cancel Section (Only available for UPCOMING classes) */}
+            {/* Cancel Section (Only for UPCOMING classes) */}
             {getSessionState(selectedSessionModal) === 'UPCOMING' && (
               <div className="pt-2 border-t border-[#ddd8cd]/40">
                 <button

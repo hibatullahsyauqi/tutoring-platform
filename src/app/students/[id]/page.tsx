@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import CopyPresenceButton from '@/components/CopyPresenceButton';
+import DeleteStudentButton from '@/components/DeleteStudentButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,11 +21,10 @@ const DEFAULT_BADGE = {
   color: 'bg-amber-50 text-amber-700 border-amber-200',
 };
 
-// --- GOOGLE SHEETS DATA VALIDATION MAPPERS ---
 function getSheetType(sessionType: string, boardCode?: string): string {
   if (sessionType === 'TRIAL_CLASS') {
     if (boardCode === 'NEGERI') return 'Negeri Trials';
-    return 'Cambridge/ Adaptive Trial'; // Space after slash matches sheet dropdown
+    return 'Cambridge/ Adaptive Trial';
   }
   if (
     sessionType === 'REGULAR_LESSON' ||
@@ -47,7 +47,7 @@ function getSheetGrade(subjectCode?: string, level?: string, boardCode?: string)
   }
   if (level === 'IGCSE') return 'IGCSE';
   if (level === 'A_LEVEL' || level === 'DP' || subjectCode === 'SAT-MATH') {
-    return 'A level / AS Level'; // Exact case from your sheet dropdown
+    return 'A level / AS Level';
   }
   if (level === 'LOWER_SECONDARY' || level === 'MYP') return 'Level 7, 8, 9';
   if (level === 'PRIMARY') return 'Level 1 - 6';
@@ -88,7 +88,7 @@ export default async function StudentDossierPage({ params }: Props) {
         },
       },
       sessions: {
-        orderBy: { sessionDate: 'asc' }, // Ascending for deterministic meeting numbering
+        orderBy: { sessionDate: 'asc' },
         include: {
           segments: {
             include: {
@@ -111,7 +111,6 @@ export default async function StudentDossierPage({ params }: Props) {
   const allTopics = course?.topics || [];
   const tier = (enrollment as any)?.tier || 'Extended';
 
-  // Calculate Syllabus Coverage
   const coveredTopicIds = new Set<string>();
   const masteredTopicIds = new Set<string>();
   const strugglingTopicIds = new Set<string>();
@@ -128,7 +127,6 @@ export default async function StudentDossierPage({ params }: Props) {
   const coveredCount = coveredTopicIds.size;
   const coveragePercent = totalTopicsCount > 0 ? Math.round((coveredCount / totalTopicsCount) * 100) : 0;
 
-  // Derive Meeting Number chronologically, then reverse for display (newest first)
   const chronologicalSessions = student.sessions.map((s, idx) => ({
     ...s,
     meetingNumber: `Meeting ${idx + 1}`,
@@ -139,7 +137,7 @@ export default async function StudentDossierPage({ params }: Props) {
     <main className="min-h-screen bg-[#faf9f6] text-[#2b2b28] p-6 md:p-10 font-sans">
       <div className="max-w-4xl mx-auto space-y-8">
         
-        {/* HEADER */}
+        {/* HEADER WITH DELETE BUTTON */}
         <div>
           <Link href="/" className="text-xs font-semibold text-[#3d6b52] hover:underline mb-3 inline-block">
             ← Back to Dashboard
@@ -163,12 +161,15 @@ export default async function StudentDossierPage({ params }: Props) {
               )}
             </div>
 
-            <Link
-              href={`/sessions/new?studentId=${student.id}`}
-              className="bg-[#3d6b52] hover:bg-[#2d523e] text-white px-4 py-2 rounded-lg text-xs font-bold transition-colors shadow-sm self-start md:self-auto"
-            >
-              + Log Session for {student.name}
-            </Link>
+            <div className="flex items-center gap-2 self-start md:self-auto">
+              <DeleteStudentButton studentId={student.id} studentName={student.name} />
+              <Link
+                href={`/sessions/new?studentId=${student.id}`}
+                className="bg-[#3d6b52] hover:bg-[#2d523e] text-white px-4 py-2 rounded-lg text-xs font-bold transition-colors shadow-sm"
+              >
+                + Log Session
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -250,7 +251,6 @@ export default async function StudentDossierPage({ params }: Props) {
                     key={session.id}
                     className="bg-white border border-[#ddd8cd] rounded-xl p-5 shadow-sm space-y-4"
                   >
-                    {/* Header with Deterministic Meeting Number & Copier */}
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-[#ddd8cd]/50 pb-3">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-xs font-bold text-[#3d6b52] bg-[#e8efe9] px-2 py-0.5 rounded">
@@ -288,7 +288,6 @@ export default async function StudentDossierPage({ params }: Props) {
                       </div>
                     </div>
 
-                    {/* Topics Covered */}
                     <div className="space-y-2">
                       <div className="text-[11px] font-bold uppercase tracking-wider text-[#6f6b62]">
                         Topics & Concept Grasp
@@ -328,7 +327,6 @@ export default async function StudentDossierPage({ params }: Props) {
                       </div>
                     </div>
 
-                    {/* Continuity Notes */}
                     {session.reflection && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 text-xs">
                         {session.reflection.struggle && (
@@ -351,7 +349,6 @@ export default async function StudentDossierPage({ params }: Props) {
                       </div>
                     )}
 
-                    {/* Homework & Objective */}
                     {(session.assignedHomework || session.nextFocusTopic) && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1 border-t border-[#ddd8cd]/40 text-xs">
                         {session.assignedHomework && (

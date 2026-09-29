@@ -37,6 +37,17 @@ export type CreateSessionInput = {
 };
 
 export async function createSessionAction(data: CreateSessionInput) {
+  // Guard: You cannot record history before it happens!
+  // Allow a 5-minute buffer for local clock differences.
+  const sessionTime = new Date(data.sessionDate);
+  const maxAllowedTime = new Date(Date.now() + 5 * 60 * 1000);
+
+  if (sessionTime > maxAllowedTime) {
+    throw new Error(
+      "Cannot log a completed session in the future. To plan an upcoming class in advance, please use the Schedule page."
+    );
+  }
+
   let fineAmount = 0;
   if (data.latenessMinutes >= 15) {
     fineAmount = Math.floor(data.latenessMinutes / 15) * 10000;

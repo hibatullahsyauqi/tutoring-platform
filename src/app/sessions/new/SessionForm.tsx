@@ -19,25 +19,35 @@ type ToolItem = {
   category: string;
 };
 
+// Formats true local time string (YYYY-MM-DDTHH:mm)
+const getNowLocalISO = () => {
+  const now = new Date();
+  const offset = now.getTimezoneOffset() * 60000;
+  return new Date(now.getTime() - offset).toISOString().slice(0, 16);
+};
+
 export default function SessionForm({
   students,
   tools,
   preselectedStudentId,
+  existingSessionId,
 }: {
   students: StudentItem[];
   tools: ToolItem[];
   preselectedStudentId?: string;
+  existingSessionId?: string;
 }) {
   const [isPending, startTransition] = useTransition();
 
-  // Find preselected or fallback to first student
   const initialStudentId =
     preselectedStudentId && students.some((s) => s.id === preselectedStudentId)
       ? preselectedStudentId
       : students[0]?.id || '';
 
   const [selectedStudentId, setSelectedStudentId] = useState(initialStudentId);
-  const [sessionDate, setSessionDate] = useState(new Date().toISOString().slice(0, 16));
+  const [sessionDate, setSessionDate] = useState(getNowLocalISO());
+  const [dateWarning, setDateWarning] = useState<string | null>(null);
+
   const [durationMinutes, setDurationMinutes] = useState(90);
   const [sessionType, setSessionType] = useState<SessionType>('REGULAR_LESSON');
   const [meetingUrl, setMeetingUrl] = useState('');
@@ -46,7 +56,22 @@ export default function SessionForm({
 
   const activeStudent = students.find((s) => s.id === selectedStudentId) || students[0];
 
-  // Dynamic Segments: if student has topics, use first topic. If not, use placeholder.
+  // ACTIVE CLAMPING: Rejects keyboard bypass of future dates/times
+  const handleDateChange = (val: string) => {
+    const selected = new Date(val);
+    const now = new Date();
+
+    if (selected > now) {
+      // Future time typed! Clamp immediately to now
+      setSessionDate(getNowLocalISO());
+      setDateWarning('Future times are not permitted for completed logs. Clamped to current time.');
+      setTimeout(() => setDateWarning(null), 3500);
+    } else {
+      setSessionDate(val);
+      setDateWarning(null);
+    }
+  };
+
   const [segments, setSegments] = useState<
     {
       topicId: string;
@@ -67,14 +92,12 @@ export default function SessionForm({
     },
   ]);
 
-  // Qualitative Reflection & Continuity Fields
   const [struggle, setStruggle] = useState('');
   const [workedWell, setWorkedWell] = useState('');
   const [adjustNext, setAdjustNext] = useState('');
   const [assignedHomework, setAssignedHomework] = useState('');
   const [nextFocusTopic, setNextFocusTopic] = useState('');
 
-  // Handle student switch
   const handleStudentChange = (newStudentId: string) => {
     setSelectedStudentId(newStudentId);
     const newStudent = students.find((s) => s.id === newStudentId);
@@ -110,7 +133,6 @@ export default function SessionForm({
     setSegments(segments.filter((_, i) => i !== index));
   };
 
-  // Dynamic Continuity Engine
   const hasStruggling = segments.some((s) => s.masteryStatus === 'STRUGGLING');
   const allMastered = segments.length > 0 && segments.every((s) => s.masteryStatus === 'MASTERED');
 
@@ -125,7 +147,7 @@ export default function SessionForm({
       box1Border: 'focus:border-[#a3462f]',
       box1Placeholder: 'e.g. Struggled with sign conversion or negative exponents. Re-open simulation next session.',
       box2Label: '💡 Micro-Breakthrough / What Resonated Today',
-      box2Placeholder: 'e.g. Visualizing the vector helped, but algebraic component resolution was shaky.',
+      box2Placeholder: 'e.g. Visualizing the curve helped, but algebraic component resolution was shaky.',
       homeworkPlaceholder: 'e.g. 3 targeted scaffolded problems on resolving forces.',
       targetPlaceholder: 'e.g. 2-minute warm-up on vectors, then retry inclined plane problem.',
     },
@@ -159,9 +181,16 @@ export default function SessionForm({
     e.preventDefault();
     if (!activeStudent) return;
 
+    // Final safety check against future time before dispatching to server
+    if (new Date(sessionDate) > new Date()) {
+      setDateWarning('Future times are strictly forbidden.');
+      return;
+    }
+
     startTransition(async () => {
       try {
         await createSessionAction({
+          existingSessionId,
           studentId: activeStudent.id,
           courseId: activeStudent.courseId,
           sessionDate,
@@ -172,7 +201,6 @@ export default function SessionForm({
           latenessMinutes,
           assignedHomework,
           nextFocusTopic,
-          // If a student has no seeded topics yet, use fallback or first available
           segments: segments.map((seg) => ({
             topicId: seg.topicId || (activeStudent.topics[0]?.id ?? '00000000-0000-0000-0000-000000000000'),
             toolId: seg.toolId || undefined,
@@ -192,7 +220,14 @@ export default function SessionForm({
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* SECTION 1: CORE SESSION METADATA */}
       <section className="bg-white border border-[#ddd8cd] rounded-xl p-5 space-y-4 shadow-sm">
-        <h2 className="text-xs font-bold uppercase tracking-wider text-[#6f6b62]">1. Session Details</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-[#6f6b62]">1. Session Details</h2>
+          {existingSessionId && (
+            <span className="text-[10px] bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded border border-blue-200">
+              Updating Scheduled Booking
+            </span>
+          )}
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -221,19 +256,31 @@ export default function SessionForm({
               <option value="TRIAL_CLASS">Trial Class (New Prospect)</option>
               <option value="CONCEPT_INTRO">Concept Introduction (Deep Dive)</option>
               <option value="REVISION_RECALL">Revision & Interleaving</option>
-              <option value="EXAM_SIMULATION">Exam Simulation / Past Paper Drill</option>
+              <option value="EXAM_SIMULATION">Past Paper Mock Simulation</option>
               <option value="HOMEWORK_HELP">Homework Assistance / School Prep</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-[#6f6b62] mb-1">Date & Time</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-semibold text-[#6f6b62]">Date & Time Concluded</label>
+              <span className="text-[10px] text-[#6f6b62] font-medium">Past & current only</span>
+            </div>
+            {/* Actively guarded input */}
             <input
               type="datetime-local"
               value={sessionDate}
-              onChange={(e) => setSessionDate(e.target.value)}
-              className="w-full bg-[#faf9f6] border border-[#ddd8cd] rounded-lg p-2 text-sm"
+              max={getNowLocalISO()}
+              onChange={(e) => handleDateChange(e.target.value)}
+              className={`w-full bg-[#faf9f6] border rounded-lg p-2 text-sm focus:outline-none ${
+                dateWarning ? 'border-[#a3462f] bg-red-50/20' : 'border-[#ddd8cd] focus:border-[#3d6b52]'
+              }`}
             />
+            {dateWarning && (
+              <p className="text-[11px] text-[#a3462f] font-semibold mt-1 animate-in fade-in duration-150">
+                {dateWarning}
+              </p>
+            )}
           </div>
 
           <div>
@@ -242,7 +289,7 @@ export default function SessionForm({
               type="number"
               value={durationMinutes}
               onChange={(e) => setDurationMinutes(Number(e.target.value))}
-              className="w-full bg-[#faf9f6] border border-[#ddd8cd] rounded-lg p-2 text-sm"
+              className="w-full bg-[#faf9f6] border border-[#ddd8cd] rounded-lg p-2 text-sm focus:outline-none focus:border-[#3d6b52]"
             />
           </div>
         </div>
@@ -256,7 +303,7 @@ export default function SessionForm({
               value={latenessMinutes}
               onChange={(e) => setLatenessMinutes(Number(e.target.value))}
               placeholder="0"
-              className="w-full bg-[#faf9f6] border border-[#ddd8cd] rounded-lg p-2 text-sm"
+              className="w-full bg-[#faf9f6] border border-[#ddd8cd] rounded-lg p-2 text-sm focus:outline-none focus:border-[#3d6b52]"
             />
             <span className="text-[11px] text-[#a3462f]">≥15m unexcused triggers fine</span>
           </div>
@@ -267,7 +314,7 @@ export default function SessionForm({
               value={meetingUrl}
               onChange={(e) => setMeetingUrl(e.target.value)}
               placeholder="https://meet..."
-              className="w-full bg-[#faf9f6] border border-[#ddd8cd] rounded-lg p-2 text-sm"
+              className="w-full bg-[#faf9f6] border border-[#ddd8cd] rounded-lg p-2 text-sm focus:outline-none focus:border-[#3d6b52]"
             />
           </div>
           <div>
@@ -277,7 +324,7 @@ export default function SessionForm({
               value={recordingUrl}
               onChange={(e) => setRecordingUrl(e.target.value)}
               placeholder="https://drive..."
-              className="w-full bg-[#faf9f6] border border-[#ddd8cd] rounded-lg p-2 text-sm"
+              className="w-full bg-[#faf9f6] border border-[#ddd8cd] rounded-lg p-2 text-sm focus:outline-none focus:border-[#3d6b52]"
             />
           </div>
         </div>
@@ -427,7 +474,7 @@ export default function SessionForm({
         </div>
       </section>
 
-      {/* SECTION 3: DYNAMIC NEXT SESSION CONTINUITY BRIDGE */}
+      {/* SECTION 3: CONTINUITY BRIDGE */}
       <section className="bg-white border border-[#ddd8cd] rounded-xl p-5 space-y-4 shadow-sm transition-all">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-[#ddd8cd]/50 pb-3">
           <div>
@@ -511,7 +558,7 @@ export default function SessionForm({
           disabled={isPending}
           className="bg-[#3d6b52] hover:bg-[#2d523e] text-white px-6 py-2.5 rounded-lg text-xs font-bold transition-colors shadow-sm disabled:opacity-50"
         >
-          {isPending ? 'Saving Session...' : 'Save Session & Bridge Next Lesson'}
+          {isPending ? 'Saving...' : existingSessionId ? 'Complete & Log Scheduled Lesson' : 'Save Session & Bridge Next Lesson'}
         </button>
       </div>
     </form>

@@ -1,20 +1,9 @@
 import { prisma } from '@/lib/prisma';
-import Link from 'next/link';
-import NewStudentForm from './NewStudentForm';
+import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-const LEVEL_LABELS: Record<string, string> = {
-  PRIMARY: 'Primary Level',
-  LOWER_SECONDARY: 'Lower Secondary',
-  IGCSE: 'IGCSE Level',
-  A_LEVEL: 'A Level',
-  MYP: 'IB MYP',
-  DP: 'IB Diploma (DP)',
-  OTHER: 'General / SAT',
-};
-
-export default async function NewStudentPage() {
+export async function GET() {
   const courses = await prisma.course.findMany({
     include: {
       board: true,
@@ -26,7 +15,7 @@ export default async function NewStudentPage() {
     ],
   });
 
-  const formattedCourses = courses.map((c) => {
+  const formatted = courses.map((c) => {
     let tiers: { val: string; label: string; sub: string }[] = [];
 
     // CAMBRIDGE (CAIE)
@@ -86,7 +75,7 @@ export default async function NewStudentPage() {
         ];
       }
     } 
-    // SAT
+    // SAT (COLLEGE BOARD)
     else if (c.board.code === 'COLLEGEBOARD') {
       tiers = [
         { val: 'Digital SAT', label: 'Digital SAT (Adaptive)', sub: 'Module 1 (Routing) + Module 2 (Adaptive Difficulty)' },
@@ -99,28 +88,12 @@ export default async function NewStudentPage() {
       id: c.id,
       title: c.title,
       subjectCode: c.subjectCode,
-      level: LEVEL_LABELS[c.level] || c.level, // Clean human-readable label without underscores!
+      level: c.level,
       boardCode: c.board.code,
       boardName: c.board.name,
       availableTiers: tiers,
     };
   });
 
-  return (
-    <main className="min-h-screen bg-[#faf9f6] text-[#2b2b28] p-6 md:p-10 font-sans">
-      <div className="max-w-xl mx-auto space-y-6">
-        <div>
-          <Link href="/" className="text-xs font-semibold text-[#3d6b52] hover:underline mb-2 inline-block">
-            ← Back to Dashboard
-          </Link>
-          <h1 className="text-2xl font-bold tracking-tight text-[#2b2b28]">Onboard New Student</h1>
-          <p className="text-xs text-[#6f6b62] mt-1">
-            Configure student identity, board curriculum, and fluid examination tiering.
-          </p>
-        </div>
-
-        <NewStudentForm courses={formattedCourses} />
-      </div>
-    </main>
-  );
+  return NextResponse.json(formatted);
 }

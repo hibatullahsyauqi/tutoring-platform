@@ -1,6 +1,6 @@
 'use server';
 
-import { prisma } from '@/lib/prisma';
+import { prisma } from '../../lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
@@ -17,7 +17,6 @@ export async function createStudentAction(data: CreateStudentInput) {
     throw new Error('No active tutor found in database.');
   }
 
-  // Create Student and Enrollment in one atomic operation
   const student = await prisma.student.create({
     data: {
       name: data.name.trim(),
@@ -34,4 +33,15 @@ export async function createStudentAction(data: CreateStudentInput) {
 
   revalidatePath('/');
   redirect(`/students/${student.id}`);
+}
+
+export async function deleteStudentAction(studentId: string) {
+  // Cascades automatically to enrollments, sessions, segments, and reflections in Supabase
+  await prisma.student.delete({
+    where: { id: studentId },
+  });
+
+  revalidatePath('/');
+  revalidatePath('/schedule');
+  redirect('/');
 }

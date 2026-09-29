@@ -5,11 +5,11 @@ import SessionForm from './SessionForm';
 export const dynamic = 'force-dynamic';
 
 interface Props {
-  searchParams: Promise<{ studentId?: string }>;
+  searchParams: Promise<{ studentId?: string; sessionId?: string }>;
 }
 
 export default async function NewSessionPage({ searchParams }: Props) {
-  const { studentId } = await searchParams;
+  const { studentId, sessionId } = await searchParams;
 
   const students = await prisma.student.findMany({
     include: {
@@ -57,7 +57,9 @@ export default async function NewSessionPage({ searchParams }: Props) {
             <Link href="/" className="text-xs font-semibold text-[#3d6b52] hover:underline mb-1 inline-block">
               ← Back to Dashboard
             </Link>
-            <h1 className="text-2xl font-bold">Log Session & Evaluate Mastery</h1>
+            <h1 className="text-2xl font-bold">
+              {sessionId ? 'Complete & Log Scheduled Lesson' : 'Log Session & Evaluate Mastery'}
+            </h1>
           </div>
           <span className="text-xs bg-[#e8efe9] text-[#3d6b52] font-semibold px-3 py-1 rounded-full">
             Standard: 90 Mins
@@ -68,6 +70,7 @@ export default async function NewSessionPage({ searchParams }: Props) {
           students={formattedStudents}
           tools={tools}
           preselectedStudentId={studentId}
+          existingSessionId={sessionId}
         />
       </div>
     </main>
