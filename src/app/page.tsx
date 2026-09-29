@@ -7,7 +7,6 @@ import { signOutAction } from '@/app/actions/auth';
 export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
-  // 1. Verify Authentication via Supabase
   const supabase = await createClient();
   const {
     data: { user },
@@ -17,7 +16,6 @@ export default async function DashboardPage() {
     redirect('/login');
   }
 
-  // 2. Fetch or Sync the logged-in Tutor profile
   const tutor = await prisma.tutor.findUnique({
     where: { email: user.email },
   });
@@ -31,44 +29,30 @@ export default async function DashboardPage() {
       },
     }));
 
-  // 3. Multi-Tenant Query: Load ONLY this tutor's students!
-  const students = await prisma.student.findMany({
-    where: {
-      tutorId: activeTutor.id,
-    },
-    include: {
-      enrollments: {
-        include: {
-          course: {
-            include: {
-              board: true,
-            },
-          },
-        },
-      },
-      sessions: {
-        orderBy: { sessionDate: 'desc' },
-        take: 1,
-        include: {
-          segments: {
-            include: {
-              topic: true,
-              tool: true,
-            },
-          },
-          reflection: true,
-        },
-      },
-    },
+  const now = new Date();
+
+  // Monthly Payroll Engine
+  const currentYear = now.getFullYear();
+  const currentMonthIndex = now.getMonth();
+  const startOfMonth = new Date(currentYear, currentMonthIndex, 1, 0, 0, 0, 0);
+  const endOfMonth = new Date(currentYear, currentMonthIndex + 1, 0, 23, 59, 59, 999);
+
+  const activeMonthName = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  const nextMonthDisbursement = new Date(currentYear, currentMonthIndex + 1, 20);
+  const disbursementLabel = nextMonthDisbursement.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
   });
 
-  // Calculate earnings for ONLY this tutor's completed sessions
   const completedSessions = await prisma.session.findMany({
     where: {
-      student: {
-        tutorId: activeTutor.id,
-      },
+      student: { tutorId: activeTutor.id },
       status: 'COMPLETED',
+      sessionDate: {
+        gte: startOfMonth,
+        lte: endOfMonth,
+      },
     },
     include: { course: true },
   });
@@ -102,55 +86,105 @@ export default async function DashboardPage() {
     totalFines += s.fineAmount;
   });
 
-  const pphTax = grossSalary * 0.025; // 2.5% withholding tax
+  const pphTax = grossSalary * 0.025;
   const netSalary = Math.max(0, grossSalary - pphTax - totalFines);
 
-  // Latest session for primary student
-  const primaryStudent = students[0];
-  const lastSession = primaryStudent?.sessions[0];
-  const lastReflection = lastSession?.reflection;
+  // Smart Next Up Briefing
+  const nextUpcomingSession = await prisma.session.findFirst({
+    where: {
+      student: { tutorId: activeTutor.id },
+      status: 'SCHEDULED',
+      sessionDate: { gte: now },
+    },
+    orderBy: { sessionDate: 'asc' },
+    include: {
+      student: {
+        include: {
+          sessions: {
+            where: { status: 'COMPLETED' },
+            orderBy: { sessionDate: 'desc' },
+            take: 1,
+            include: { reflection: true },
+          },
+        },
+      },
+      course: true,
+    },
+  });
+
+  const fallbackRecentSession = await prisma.session.findFirst({
+    where: {
+      student: { tutorId: activeTutor.id },
+      status: 'COMPLETED',
+    },
+    orderBy: { sessionDate: 'desc' },
+    include: {
+      student: true,
+      course: true,
+      reflection: true,
+    },
+  });
+
+  const students = await prisma.student.findMany({
+    where: { tutorId: activeTutor.id },
+    include: {
+      enrollments: {
+        include: {
+          course: {
+            include: {
+              board: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: { name: 'asc' },
+  });
 
   return (
-    <main className="min-h-screen bg-[#faf9f6] text-[#2b2b28] p-6 md:p-10 font-sans">
+    <main className="min-h-screen p-6 md:p-10 font-sans selection:bg-[#0f172a] selection:text-white">
       <div className="max-w-4xl mx-auto space-y-8">
         
-        {/* HEADER & TOPBAR */}
-        <header className="border-b border-[#ddd8cd] pb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        {/* FROSTED TOPBAR FLOATING ON MOSAIC */}
+        <header className="glass-panel rounded-3xl p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 transition-all">
           <div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-[#3d6b52] bg-[#e8efe9] px-2.5 py-1 rounded-full">
-              Pedagogical OS · Multi-Tenant
-            </span>
-            <h1 className="text-2xl font-bold tracking-tight mt-2">
-              Tutoring Dashboard
+            <div className="flex items-center gap-2">
+              <span className="glass-pill text-[11px] font-bold uppercase tracking-wider text-[#0f172a] px-3 py-1 rounded-full inline-block">
+                Pedagogical OS
+              </span>
+              <span className="text-[11px] text-slate-600 font-medium">STEM Mosaic Edition</span>
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight text-[#0f172a] mt-2">
+              Tutoring Command Center
             </h1>
-            <p className="text-sm text-[#6f6b62]">
-              Logged in as: <span className="font-semibold text-[#2b2b28]">{activeTutor.name}</span> ({user.email})
+            <p className="text-xs text-slate-600 mt-0.5">
+              Tutor: <span className="font-semibold text-[#0f172a]">{activeTutor.name}</span> · {user.email}
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 flex-wrap">
             <Link
               href="/schedule"
-              className="bg-white hover:bg-[#faf9f6] border border-[#ddd8cd] text-[#3d6b52] px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors shadow-sm inline-flex items-center gap-1.5"
+              className="glass-card-subtle hover:bg-white text-[#0f172a] px-3.5 py-2 rounded-xl text-xs font-bold transition-all hover:shadow-xs active:scale-95 inline-flex items-center gap-1.5"
             >
               📅 Schedule
             </Link>
             <Link
               href="/library"
-              className="bg-white hover:bg-[#faf9f6] border border-[#ddd8cd] text-[#3d6b52] px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors shadow-sm inline-flex items-center gap-1.5"
+              className="glass-card-subtle hover:bg-white text-[#0f172a] px-3.5 py-2 rounded-xl text-xs font-bold transition-all hover:shadow-xs active:scale-95 inline-flex items-center gap-1.5"
             >
               📚 Library
             </Link>
             <Link
               href="/sessions/new"
-              className="bg-[#3d6b52] hover:bg-[#2d523e] text-white px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors shadow-sm inline-flex items-center gap-1.5"
+              className="bg-[#0f172a] hover:bg-[#1e293b] text-white px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-lg shadow-black/20 active:scale-95 inline-flex items-center gap-1.5"
             >
               <span>+</span> Log Session
             </Link>
             <form action={signOutAction}>
               <button
                 type="submit"
-                className="bg-white hover:bg-red-50 text-[#a3462f] border border-[#ddd8cd] px-3 py-2 rounded-lg text-xs font-semibold transition-colors shadow-sm"
+                className="text-rose-600 hover:bg-rose-50/80 px-3 py-2 rounded-xl text-xs font-semibold transition-all active:scale-95"
               >
                 Sign Out
               </button>
@@ -158,120 +192,192 @@ export default async function DashboardPage() {
           </div>
         </header>
 
-        {/* FINANCIAL TRACKER */}
-        <section className="bg-white border border-[#ddd8cd] rounded-xl p-5 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-[#6f6b62]">
-              Monthly Earnings Forecast (Disbursement on the 20th)
-            </h2>
-            <span className="text-xs text-[#6f6b62]">2.5% Tax Withholding</span>
+        {/* FINANCIAL FLOATING GLASS CARD */}
+        <section className="glass-panel rounded-3xl p-6 transition-all space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-black/5 pb-3">
+            <div>
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                {activeMonthName} Earnings Forecast
+              </h2>
+              <span className="text-[11px] text-[#0f172a] font-semibold">
+                Cutoff: 1st – {endOfMonth.getDate()} {activeMonthName} · Payout on {disbursementLabel}
+              </span>
+            </div>
+            <span className="text-[11px] text-slate-500 self-start sm:self-auto font-medium">
+              2.5% Tax Withheld
+            </span>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            <div className="p-3 bg-[#faf9f6] rounded-lg">
-              <div className="text-xs text-[#6f6b62]">Completed Sessions</div>
-              <div className="text-xl font-bold text-[#2b2b28] mt-1">{completedSessions.length}</div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+            <div className="glass-card-subtle p-4 rounded-2xl">
+              <div className="text-[11px] text-slate-600 font-medium">Completed ({activeMonthName})</div>
+              <div className="text-xl font-bold text-[#0f172a] mt-1">{completedSessions.length}</div>
             </div>
 
-            <div className="p-3 bg-[#faf9f6] rounded-lg">
-              <div className="text-xs text-[#6f6b62]">Gross Earnings</div>
-              <div className="text-xl font-bold text-[#2b2b28] mt-1">
+            <div className="glass-card-subtle p-4 rounded-2xl">
+              <div className="text-[11px] text-slate-600 font-medium">Gross Earnings</div>
+              <div className="text-xl font-bold text-[#0f172a] mt-1">
                 Rp {grossSalary.toLocaleString('id-ID')}
               </div>
             </div>
 
-            <div className="p-3 bg-[#faf9f6] rounded-lg">
-              <div className="text-xs text-[#6f6b62]">Deductions (Tax + Fines)</div>
-              <div className="text-xl font-bold text-[#a3462f] mt-1">
+            <div className="glass-card-subtle p-4 rounded-2xl">
+              <div className="text-[11px] text-slate-600 font-medium">Deductions (Tax + Fines)</div>
+              <div className="text-xl font-bold text-rose-600 mt-1">
                 -Rp {(pphTax + totalFines).toLocaleString('id-ID')}
               </div>
             </div>
 
-            <div className="p-3 bg-[#e8efe9] rounded-lg border border-[#3d6b52]/20">
-              <div className="text-xs font-semibold text-[#3d6b52]">Net Payout</div>
-              <div className="text-xl font-bold text-[#3d6b52] mt-1">
+            <div className="p-4 rounded-2xl glass-card-subtle bg-white/90! border-white! shadow-xs">
+              <div className="text-[11px] font-bold text-[#0f172a]">Net Due ({disbursementLabel})</div>
+              <div className="text-xl font-bold text-emerald-800 mt-1">
                 Rp {netSalary.toLocaleString('id-ID')}
               </div>
             </div>
           </div>
         </section>
 
-        {/* METRICS & CONTINUITY BRIEFING */}
+        {/* METRICS & SMART BRIEFING */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           
-          {/* PRE-SESSION CONTINUITY BRIEFING */}
-          <section className="bg-white border border-[#ddd8cd] rounded-xl p-5 shadow-sm space-y-4">
+          {/* SMART PRE-SESSION CONTINUITY BRIEFING */}
+          <section className="glass-panel rounded-3xl p-6 space-y-4">
             <div>
-              <h2 className="text-xs font-bold uppercase tracking-wider text-[#3d6b52]">
-                ⚡ Next Session Warm-up Briefing
-              </h2>
-              <p className="text-[11px] text-[#6f6b62]">Actionable takeaways from your student's latest session</p>
-            </div>
-
-            {lastSession ? (
-              <div className="space-y-3 text-xs">
-                {lastReflection?.struggle && (
-                  <div className="p-2.5 bg-[#faf9f6] border-l-2 border-[#a3462f] rounded">
-                    <span className="font-bold text-[#a3462f] block mb-0.5">⚠️ Struggle to Revisit (2m Warm-up):</span>
-                    <p className="text-[#2b2b28] leading-relaxed">{lastReflection.struggle}</p>
-                  </div>
-                )}
-
-                {lastSession.assignedHomework && (
-                  <div className="p-2.5 bg-[#faf9f6] border-l-2 border-[#3d6b52] rounded">
-                    <span className="font-bold text-[#3d6b52] block mb-0.5">📝 Assigned Homework to Check:</span>
-                    <p className="text-[#2b2b28] leading-relaxed">{lastSession.assignedHomework}</p>
-                  </div>
-                )}
-
-                {lastSession.nextFocusTopic && (
-                  <div className="p-2.5 bg-[#e8efe9] rounded">
-                    <span className="font-bold text-[#3d6b52] block mb-0.5">🎯 Next Focus Topic:</span>
-                    <p className="text-[#2b2b28] font-medium">{lastSession.nextFocusTopic}</p>
-                  </div>
+              <div className="flex items-center justify-between">
+                <h2 className="text-xs font-bold uppercase tracking-wider text-[#0f172a]">
+                  ⚡ Pre-Session Briefing
+                </h2>
+                {nextUpcomingSession ? (
+                  <span className="glass-pill text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+                    Next Up
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-medium text-slate-500">
+                    Latest Class
+                  </span>
                 )}
               </div>
-            ) : (
-              <p className="text-xs text-[#6f6b62]">No previous session notes yet.</p>
-            )}
+
+              {nextUpcomingSession ? (
+                <p className="text-xs font-bold text-[#0f172a] mt-1.5">
+                  {nextUpcomingSession.student.name} ·{' '}
+                  <span className="text-slate-600">
+                    {new Date(nextUpcomingSession.sessionDate).toLocaleDateString('en-US', {
+                      weekday: 'short',
+                      month: 'short',
+                      day: 'numeric',
+                    })}{' '}
+                    at{' '}
+                    {new Date(nextUpcomingSession.sessionDate).toLocaleTimeString('en-US', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: false,
+                    })}{' '}
+                    WIB
+                  </span>
+                </p>
+              ) : fallbackRecentSession ? (
+                <p className="text-xs font-bold text-[#0f172a] mt-1.5">
+                  {fallbackRecentSession.student.name} · Most recent class
+                </p>
+              ) : (
+                <p className="text-xs text-slate-500 mt-1.5">No upcoming or recent sessions.</p>
+              )}
+            </div>
+
+            {(() => {
+              const sessionContext = nextUpcomingSession
+                ? nextUpcomingSession.student.sessions[0]
+                : fallbackRecentSession;
+
+              if (!sessionContext) {
+                return (
+                  <div className="p-4 glass-card-subtle rounded-2xl text-xs text-slate-600 text-center">
+                    No continuity notes recorded yet.
+                  </div>
+                );
+              }
+
+              const struggle = sessionContext.reflection?.struggle;
+              const homework = sessionContext.assignedHomework;
+              const nextFocus = sessionContext.nextFocusTopic;
+
+              return (
+                <div className="space-y-3 text-xs">
+                  {struggle && (
+                    <div className="p-3.5 glass-card-subtle border-l-4 border-l-rose-500 rounded-2xl">
+                      <span className="font-bold text-rose-700 block mb-0.5">⚠️ Struggle to Revisit (2m Warm-up):</span>
+                      <p className="text-[#0f172a] leading-relaxed font-medium">{struggle}</p>
+                    </div>
+                  )}
+
+                  {homework && (
+                    <div className="p-3.5 glass-card-subtle border-l-4 border-l-[#0f172a] rounded-2xl">
+                      <span className="font-bold text-[#0f172a] block mb-0.5">📝 Homework to Audit:</span>
+                      <p className="text-slate-700 leading-relaxed font-medium">{homework}</p>
+                    </div>
+                  )}
+
+                  {nextFocus && (
+                    <div className="p-3.5 glass-card-subtle bg-white/85! rounded-2xl">
+                      <span className="font-bold text-[#0f172a] block mb-0.5">🎯 Planned Target:</span>
+                      <p className="text-[#0f172a] font-bold">{nextFocus}</p>
+                    </div>
+                  )}
+
+                  {nextUpcomingSession?.meetingUrl && (
+                    <div className="pt-1">
+                      <a
+                        href={nextUpcomingSession.meetingUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="w-full bg-[#0f172a] hover:bg-[#1e293b] text-white py-2.5 px-3 rounded-2xl text-xs font-bold transition-all shadow-md flex items-center justify-center gap-1 active:scale-98"
+                      >
+                        Launch Meeting ↗
+                      </a>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
           </section>
 
-          {/* STUDENT ROSTER */}
-          <section className="md:col-span-2 bg-white border border-[#ddd8cd] rounded-xl p-5 shadow-sm space-y-4">
-            <div className="flex items-center justify-between">
+          {/* ACTIVE STUDENTS ROSTER */}
+          <section className="md:col-span-2 glass-panel rounded-3xl p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-black/5 pb-3">
               <div className="flex items-center gap-2">
-                <h2 className="text-xs font-bold uppercase tracking-wider text-[#6f6b62]">
+                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700">
                   Your Active Students
                 </h2>
-                <span className="text-xs bg-[#e8efe9] text-[#3d6b52] font-semibold px-2 py-0.5 rounded">
+                <span className="glass-pill text-xs font-bold px-2.5 py-0.5 rounded-full">
                   {students.length} Student{students.length !== 1 ? 's' : ''}
                 </span>
               </div>
 
               <Link
                 href="/students/new"
-                className="text-xs font-bold text-[#3d6b52] hover:underline inline-flex items-center gap-1 bg-[#e8efe9] px-2.5 py-1 rounded-md"
+                className="glass-card-subtle hover:bg-white text-[#0f172a] text-xs font-bold px-3 py-1.5 rounded-xl border border-black/10 transition-all hover:shadow-xs active:scale-95 inline-flex items-center gap-1"
               >
                 + Add Student
               </Link>
             </div>
 
             {students.length === 0 ? (
-              <div className="p-8 text-center text-xs text-[#6f6b62] border border-dashed border-[#ddd8cd] rounded-xl">
-                You haven't onboarded any students yet. Click <strong>+ Add Student</strong> above to register your first student.
+              <div className="p-8 text-center text-xs text-slate-500 border border-dashed border-slate-300 rounded-2xl">
+                No active students yet. Click <strong>+ Add Student</strong> to onboard your first pupil.
               </div>
             ) : (
-              <div className="divide-y divide-[#ddd8cd]">
+              <div className="divide-y divide-black/5">
                 {students.map((student) => {
                   const enrollment = student.enrollments[0];
                   return (
-                    <div key={student.id} className="py-3.5 first:pt-0 last:pb-0 flex items-center justify-between">
+                    <div key={student.id} className="py-4 first:pt-0 last:pb-0 flex items-center justify-between gap-4">
                       <div>
-                        <h3 className="text-base font-bold text-[#2b2b28]">{student.name}</h3>
-                        <p className="text-xs text-[#6f6b62] mt-0.5">
+                        <h3 className="text-base font-bold text-[#0f172a]">{student.name}</h3>
+                        <p className="text-xs text-slate-600 mt-0.5 font-medium">
                           {enrollment ? (
                             <>
-                              <span className="font-medium text-[#2b2b28]">
+                              <span className="font-semibold text-[#0f172a]">
                                 {enrollment.course.title} ({enrollment.course.subjectCode})
                               </span>{' '}
                               · {enrollment.course.board.name}
@@ -281,7 +387,7 @@ export default async function DashboardPage() {
                           )}
                         </p>
                         {student.targetExamDate && (
-                          <span className="text-[11px] text-[#3d6b52] bg-[#e8efe9] px-2 py-0.5 rounded mt-1.5 inline-block font-medium">
+                          <span className="glass-pill text-[11px] px-2.5 py-0.5 rounded-md mt-2 inline-block font-semibold">
                             🎯 Target Exam: {new Date(student.targetExamDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
                           </span>
                         )}
@@ -289,9 +395,9 @@ export default async function DashboardPage() {
 
                       <Link
                         href={`/students/${student.id}`}
-                        className="text-xs font-semibold text-[#3d6b52] hover:underline bg-[#faf9f6] border border-[#ddd8cd] px-3 py-1.5 rounded-lg"
+                        className="glass-card-subtle hover:bg-white text-[#0f172a] text-xs font-bold px-4 py-2 rounded-2xl transition-all border border-black/10 hover:shadow-sm active:scale-95 whitespace-nowrap"
                       >
-                        View Dossier & History →
+                        View Dossier →
                       </Link>
                     </div>
                   );
