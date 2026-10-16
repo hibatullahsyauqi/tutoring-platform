@@ -1,17 +1,29 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: var(--font-nunito), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-serif: var(--font-besley), Georgia, serif;
+}
+
 :root {
   --text-primary: #0f172a;
 }
 
 body {
-  /* Scientific Mosaic Wallpaper with Ambient Depth Scrim */
+  /* Default Content / Body Font: Nunito */
+  font-family: var(--font-nunito), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background: 
     linear-gradient(rgba(15, 23, 42, 0.22), rgba(15, 23, 42, 0.35)),
     url('/science-mosaic.jpg') center / cover no-repeat fixed;
   color: var(--text-primary);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+}
+
+/* All Headings Globally: Besley Slab-Serif */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-besley), Georgia, serif !important;
+  letter-spacing: -0.015em;
 }
 
 /* Floating macOS Glass Panel */

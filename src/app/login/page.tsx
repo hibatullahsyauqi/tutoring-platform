@@ -28,7 +28,7 @@ export default function LoginPage() {
         
         <div>
           <span className="text-[11px] font-bold uppercase tracking-wider text-[#3d6b52] bg-[#e8efe9] px-2.5 py-1 rounded-full border border-[#3d6b52]/20">
-            Pedagogical OS
+            Pedagogical Dashboard
           </span>
           <h1 className="text-2xl font-bold text-[#2b2b28] mt-3">Teacher Portal</h1>
           <p className="text-xs text-[#6f6b62] mt-1">

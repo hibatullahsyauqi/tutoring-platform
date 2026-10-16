@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { signOutAction } from '@/app/actions/auth';
+import { getLiveExchangeRates } from '@/lib/currency';
+import FinancialGlassCard from '@/components/FinancialGlassCard';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,7 +33,10 @@ export default async function DashboardPage() {
 
   const now = new Date();
 
-  // Monthly Payroll Engine
+  // Fetch live exchange rates (Cached & updated hourly via Next.js)
+  const { rates } = await getLiveExchangeRates();
+
+  // Monthly Payroll Calculations
   const currentYear = now.getFullYear();
   const currentMonthIndex = now.getMonth();
   const startOfMonth = new Date(currentYear, currentMonthIndex, 1, 0, 0, 0, 0);
@@ -87,7 +92,8 @@ export default async function DashboardPage() {
   });
 
   const pphTax = grossSalary * 0.025;
-  const netSalary = Math.max(0, grossSalary - pphTax - totalFines);
+  const totalDeductions = pphTax + totalFines;
+  const netSalary = Math.max(0, grossSalary - totalDeductions);
 
   // Smart Next Up Briefing
   const nextUpcomingSession = await prisma.session.findFirst({
@@ -145,20 +151,19 @@ export default async function DashboardPage() {
     <main className="min-h-screen p-6 md:p-10 font-sans selection:bg-[#0f172a] selection:text-white">
       <div className="max-w-4xl mx-auto space-y-8">
         
-        {/* FROSTED TOPBAR FLOATING ON MOSAIC */}
+        {/* FROSTED TOPBAR */}
         <header className="glass-panel rounded-3xl p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 transition-all">
           <div>
             <div className="flex items-center gap-2">
               <span className="glass-pill text-[11px] font-bold uppercase tracking-wider text-[#0f172a] px-3 py-1 rounded-full inline-block">
-                Pedagogical OS
+                Pedagogical Dashboard
               </span>
-              <span className="text-[11px] text-slate-600 font-medium">STEM Mosaic Edition</span>
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-[#0f172a] mt-2">
               Tutoring Command Center
             </h1>
-            <p className="text-xs text-slate-600 mt-0.5">
-              Tutor: <span className="font-semibold text-[#0f172a]">{activeTutor.name}</span> · {user.email}
+            <p className="text-xs text-slate-600 mt-0.5 font-medium">
+              Tutor: <span className="font-bold text-[#0f172a]">{activeTutor.name}</span> · {user.email}
             </p>
           </div>
 
@@ -184,7 +189,7 @@ export default async function DashboardPage() {
             <form action={signOutAction}>
               <button
                 type="submit"
-                className="text-rose-600 hover:bg-rose-50/80 px-3 py-2 rounded-xl text-xs font-semibold transition-all active:scale-95"
+                className="text-rose-600 hover:bg-rose-50/80 px-3 py-2 rounded-xl text-xs font-bold transition-all active:scale-95"
               >
                 Sign Out
               </button>
@@ -192,50 +197,17 @@ export default async function DashboardPage() {
           </div>
         </header>
 
-        {/* FINANCIAL FLOATING GLASS CARD */}
-        <section className="glass-panel rounded-3xl p-6 transition-all space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-black/5 pb-3">
-            <div>
-              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                {activeMonthName} Earnings Forecast
-              </h2>
-              <span className="text-[11px] text-[#0f172a] font-semibold">
-                Cutoff: 1st – {endOfMonth.getDate()} {activeMonthName} · Payout on {disbursementLabel}
-              </span>
-            </div>
-            <span className="text-[11px] text-slate-500 self-start sm:self-auto font-medium">
-              2.5% Tax Withheld
-            </span>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
-            <div className="glass-card-subtle p-4 rounded-2xl">
-              <div className="text-[11px] text-slate-600 font-medium">Completed ({activeMonthName})</div>
-              <div className="text-xl font-bold text-[#0f172a] mt-1">{completedSessions.length}</div>
-            </div>
-
-            <div className="glass-card-subtle p-4 rounded-2xl">
-              <div className="text-[11px] text-slate-600 font-medium">Gross Earnings</div>
-              <div className="text-xl font-bold text-[#0f172a] mt-1">
-                Rp {grossSalary.toLocaleString('id-ID')}
-              </div>
-            </div>
-
-            <div className="glass-card-subtle p-4 rounded-2xl">
-              <div className="text-[11px] text-slate-600 font-medium">Deductions (Tax + Fines)</div>
-              <div className="text-xl font-bold text-rose-600 mt-1">
-                -Rp {(pphTax + totalFines).toLocaleString('id-ID')}
-              </div>
-            </div>
-
-            <div className="p-4 rounded-2xl glass-card-subtle bg-white/90! border-white! shadow-xs">
-              <div className="text-[11px] font-bold text-[#0f172a]">Net Due ({disbursementLabel})</div>
-              <div className="text-xl font-bold text-emerald-800 mt-1">
-                Rp {netSalary.toLocaleString('id-ID')}
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* MULTI-CURRENCY FINANCIAL GLASS CARD */}
+        <FinancialGlassCard
+          activeMonthName={activeMonthName}
+          endOfMonthDay={endOfMonth.getDate()}
+          disbursementLabel={disbursementLabel}
+          completedCount={completedSessions.length}
+          grossSalaryIDR={grossSalary}
+          totalDeductionsIDR={totalDeductions}
+          netSalaryIDR={netSalary}
+          rates={rates}
+        />
 
         {/* METRICS & SMART BRIEFING */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -244,7 +216,7 @@ export default async function DashboardPage() {
           <section className="glass-panel rounded-3xl p-6 space-y-4">
             <div>
               <div className="flex items-center justify-between">
-                <h2 className="text-xs font-bold uppercase tracking-wider text-[#0f172a]">
+                <h2 className="text-base font-bold text-[#0f172a]">
                   ⚡ Pre-Session Briefing
                 </h2>
                 {nextUpcomingSession ? (
@@ -261,7 +233,7 @@ export default async function DashboardPage() {
               {nextUpcomingSession ? (
                 <p className="text-xs font-bold text-[#0f172a] mt-1.5">
                   {nextUpcomingSession.student.name} ·{' '}
-                  <span className="text-slate-600">
+                  <span className="text-slate-600 font-medium">
                     {new Date(nextUpcomingSession.sessionDate).toLocaleDateString('en-US', {
                       weekday: 'short',
                       month: 'short',
@@ -346,8 +318,8 @@ export default async function DashboardPage() {
           <section className="md:col-span-2 glass-panel rounded-3xl p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-black/5 pb-3">
               <div className="flex items-center gap-2">
-                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                  Your Active Students
+                <h2 className="text-base font-bold text-[#0f172a]">
+                  Active Students
                 </h2>
                 <span className="glass-pill text-xs font-bold px-2.5 py-0.5 rounded-full">
                   {students.length} Student{students.length !== 1 ? 's' : ''}
