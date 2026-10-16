@@ -1,4 +1,4 @@
-# Pedagogical OS — STEM Tutoring Platform
+# Pedagogical Dashboard — Tutor\'s Command Center
 
 A multi-curriculum, syllabus-aligned pedagogical operating system designed for secondary and pre-university STEM educators. Engineered to replace administrative overhead and vanity metrics with genuine conceptual continuity, dynamic mastery tracking, and automated contract financial intelligence.
 
