@@ -1,4 +1,5 @@
 import { PrismaClient, EducationLevel } from '@prisma/client';
+import { seedAlevelTopics } from './seed-topics';
 
 const prisma = new PrismaClient();
 
@@ -289,6 +290,8 @@ async function main() {
       });
     }
   }
+
+  await seedAlevelTopics(prisma);
 
   // -------------------------------------------------------------
   // 6. SEED MODULAR PORTAL VAULT (Clean, Non-misleading & Modular)
