@@ -44,6 +44,13 @@ type SessionItem = {
   movedTo: { id: string; sessionDate: string } | null;
 };
 
+/** YYYY-MM-DD for a day offset from today, as a date input's min/max. */
+const dateInputBound = (days: number) => {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
 const formatMoved = (iso: string) =>
   new Date(iso).toLocaleString('en-US', {
     weekday: 'short',
@@ -160,6 +167,7 @@ export default function ScheduleClientView({
   view = 'week',
   totalSessions = 0,
   initialSessionId,
+  highlightDate,
   listFooter = null,
 }: {
   students?: StudentSummary[];
@@ -169,6 +177,8 @@ export default function ScheduleClientView({
   view?: 'week' | 'list';
   totalSessions?: number;
   initialSessionId?: string;
+  /** YYYY-MM-DD picked with the date picker; that day is outlined. */
+  highlightDate?: string;
   listFooter?: React.ReactNode;
 }) {
   const router = useRouter();
@@ -516,6 +526,22 @@ export default function ScheduleClientView({
               <span className="text-sm font-bold text-[#0f172a] ml-1">
                 {weekStartLabel} – {weekEndLabel}, {currentYear}
               </span>
+              <input
+                type="date"
+                aria-label="Jump to a date"
+                title="Jump to a date"
+                className="glass-input px-3 py-1.5 text-xs font-semibold"
+                value={highlightDate ?? weekDays[0].dateStr}
+                min={dateInputBound(-3650)}
+                max={dateInputBound(3650)}
+                onChange={(e) => {
+                  const [y, m, d] = e.target.value.split('-').map(Number);
+                  if (!y || !m || !d) return;
+                  const picked = new Date(y, m - 1, d);
+                  setWeekDirection(picked > new Date(weekDays[0].dateStr) ? 'next' : 'prev');
+                  navigate({ date: e.target.value, week: undefined });
+                }}
+              />
             </div>
 
             <div className="flex items-center gap-3 text-xs font-medium text-slate-700">
@@ -535,7 +561,12 @@ export default function ScheduleClientView({
               const daySessions = sessions.filter((s) => s.sessionDate.startsWith(day.dateStr));
 
               return (
-                <div key={day.dateStr} className="py-4 first:pt-0 last:pb-0 grid grid-cols-1 sm:grid-cols-[132px_1fr] gap-3">
+                <div
+                  key={day.dateStr}
+                  className={`py-4 first:pt-0 last:pb-0 grid grid-cols-1 sm:grid-cols-[132px_1fr] gap-3 ${
+                    highlightDate === day.dateStr ? 'rounded-2xl outline outline-2 outline-[#2d523e]/60 outline-offset-4' : ''
+                  }`}
+                >
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="text-base font-bold text-[#0f172a]">{day.name}</span>

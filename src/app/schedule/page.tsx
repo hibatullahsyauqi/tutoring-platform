@@ -189,6 +189,7 @@ export default async function SchedulePage({ searchParams }: Props) {
           view={view}
           totalSessions={view === 'list' ? listWindow.total : formattedSessions.length}
           initialSessionId={focusRow?.id}
+          highlightDate={explicitWeek === null && focusDate && sp.date && /^\d{4}-\d{2}-\d{2}$/.test(sp.date) ? sp.date : undefined}
           listFooter={
             view === 'list' ? (
               <Pagination
