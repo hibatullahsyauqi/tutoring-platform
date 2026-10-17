@@ -2,6 +2,11 @@ import RefreshButton from '@/components/RefreshButton';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import LibraryView from './LibraryView';
+import Pagination from '@/components/Pagination';
+import { paginate, parsePage } from '@/lib/pagination';
+import { ResourceType, type Prisma } from '@prisma/client';
+
+const PAGE_SIZE = 10;
 
 export const dynamic = 'force-dynamic';
 
@@ -36,8 +41,35 @@ const PARTNERS = [
   },
 ];
 
-export default async function LibraryPage() {
+interface Props {
+  searchParams: Promise<{ type?: string; q?: string; page?: string }>;
+}
+
+export default async function LibraryPage({ searchParams }: Props) {
+  const sp = await searchParams;
+  const type = Object.values(ResourceType).find((t) => t === sp.type);
+  const q = (sp.q ?? '').trim().slice(0, 100);
+
+  const where: Prisma.ResourceWhereInput = {
+    ...(type ? { resourceType: type } : {}),
+    ...(q
+      ? {
+          OR: [
+            { title: { contains: q, mode: 'insensitive' } },
+            { authorOrPublisher: { contains: q, mode: 'insensitive' } },
+            { locationDetails: { contains: q, mode: 'insensitive' } },
+          ],
+        }
+      : {}),
+  };
+
+  const total = await prisma.resource.count({ where });
+  const window = paginate(parsePage(sp.page), total, PAGE_SIZE);
+
   const resourcesQuery = prisma.resource.findMany({
+    where,
+    skip: window.skip,
+    take: window.take,
     include: {
       course: {
         include: {
@@ -46,9 +78,7 @@ export default async function LibraryPage() {
       },
       topic: true,
     },
-    orderBy: {
-      createdAt: 'desc',
-    },
+    orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
   });
 
   const coursesQuery = prisma.course.findMany({
@@ -105,7 +135,7 @@ export default async function LibraryPage() {
             </h1>
             <p className="text-xs font-medium text-slate-700 mt-0.5">
               Verified past papers, textbooks and intuitive media for Cambridge, Edexcel and IB ·{' '}
-              <span className="font-bold text-[#0f172a]">{resources.length}</span> assets indexed
+              <span className="font-bold text-[#0f172a]">{total}</span> assets indexed
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
@@ -151,7 +181,22 @@ export default async function LibraryPage() {
         </section>
 
         {/* CLIENT FILTERABLE VAULT & ADD FORM */}
-        <LibraryView resources={formattedResources} courses={formattedCourses} />
+        <LibraryView
+          resources={formattedResources}
+          courses={formattedCourses}
+          selectedType={type ?? 'ALL'}
+          query={q}
+          total={total}
+        >
+          <Pagination
+            basePath="/library"
+            params={{ type, q: q || undefined }}
+            page={window.page}
+            pageCount={window.pageCount}
+            total={total}
+            noun="asset"
+          />
+        </LibraryView>
 
       </div>
     </main>

@@ -284,6 +284,13 @@ export default function ScheduleClientView({
   };
 
   const [weekOffset, setWeekOffset] = useState(initialWeekOffset);
+  // Which way the week list slides in: later weeks from the right, earlier ones from the left.
+  const [weekDirection, setWeekDirection] = useState<'next' | 'prev' | 'none'>('none');
+  const goToWeek = (target: number) => {
+    if (target === weekOffset) return;
+    setWeekDirection(target > weekOffset ? 'next' : 'prev');
+    setWeekOffset(target);
+  };
 
   const getDynamicWeek = (offset: number) => {
     const current = new Date();
@@ -473,7 +480,7 @@ export default function ScheduleClientView({
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                onClick={() => setWeekOffset(weekOffset - 1)}
+                onClick={() => goToWeek(weekOffset - 1)}
                 className="glass-btn glass-btn-sm"
                 title="Previous Week"
               >
@@ -481,14 +488,14 @@ export default function ScheduleClientView({
               </button>
               <button
                 type="button"
-                onClick={() => setWeekOffset(0)}
+                onClick={() => goToWeek(0)}
                 className={`glass-btn glass-btn-sm ${weekOffset === 0 ? 'glass-btn-primary' : ''}`}
               >
                 Today
               </button>
               <button
                 type="button"
-                onClick={() => setWeekOffset(weekOffset + 1)}
+                onClick={() => goToWeek(weekOffset + 1)}
                 className="glass-btn glass-btn-sm"
                 title="Next Week"
               >
@@ -506,7 +513,12 @@ export default function ScheduleClientView({
             </div>
           </div>
 
-          <div className="divide-y divide-black/5">
+          <div
+            key={weekOffset}
+            className={`divide-y divide-black/5 ${
+              weekDirection === 'next' ? 'week-slide-next' : weekDirection === 'prev' ? 'week-slide-prev' : ''
+            }`}
+          >
             {weekDays.map((day) => {
               const daySessions = sessions.filter((s) => s.sessionDate.startsWith(day.dateStr));
 

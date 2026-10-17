@@ -397,3 +397,18 @@ main:not(.no-enter) > div > *:nth-child(n + 6) { animation-delay: 0.3s; }
     animation: none;
   }
 }
+
+/* Timetable: the week slides in from the side you navigated toward */
+@keyframes week-in-next {
+  from { opacity: 0; transform: translateX(28px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes week-in-prev {
+  from { opacity: 0; transform: translateX(-28px); }
+  to { opacity: 1; transform: none; }
+}
+.week-slide-next { animation: week-in-next 0.38s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.week-slide-prev { animation: week-in-prev 0.38s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@media (prefers-reduced-motion: reduce) {
+  .week-slide-next, .week-slide-prev { animation: none; }
+}

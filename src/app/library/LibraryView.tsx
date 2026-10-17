@@ -1,6 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
+import { hrefWith } from '@/lib/pagination';
 import { createResourceAction } from '@/app/actions/resource';
 import { ResourceType } from '@prisma/client';
 import { describeError, isRedirectError } from '@/lib/errors';
@@ -27,12 +29,32 @@ type CourseItem = {
 export default function LibraryView({
   resources,
   courses,
+  selectedType,
+  query,
+  total,
+  children,
 }: {
   resources: ResourceItem[];
   courses: CourseItem[];
+  selectedType: string;
+  query: string;
+  total: number;
+  children?: React.ReactNode;
 }) {
-  const [selectedType, setSelectedType] = useState<string>('ALL');
-  const [searchQuery, setSearchQuery] = useState('');
+  const router = useRouter();
+  const [isNavigating, startNavigation] = useTransition();
+  const [searchQuery, setSearchQuery] = useState(query);
+
+  // Type and search are applied on the server (one page of results at a time); changing either
+  // starts again from page 1.
+  const applyFilters = (type: string, q: string) => {
+    const href = hrefWith(
+      '/library',
+      {},
+      { type: type === 'ALL' ? undefined : type, q: q.trim() || undefined }
+    );
+    startNavigation(() => router.push(href, { scroll: false }));
+  };
   const [showAddForm, setShowAddForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -47,15 +69,7 @@ export default function LibraryView({
 
   const activeCourse = courses.find((c) => c.id === selectedCourseId);
 
-  // Filter Logic
-  const filtered = resources.filter((r) => {
-    const matchesType = selectedType === 'ALL' || r.resourceType === selectedType;
-    const matchesSearch =
-      r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      r.authorOrPublisher.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (r.locationDetails && r.locationDetails.toLowerCase().includes(searchQuery.toLowerCase()));
-    return matchesType && matchesSearch;
-  });
+  const filtered = resources;
 
   const handleAddSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -100,7 +114,7 @@ export default function LibraryView({
         <div className="flex flex-wrap items-center gap-2">
           <h2 className="text-base font-bold text-[#0f172a]">Teaching Assets</h2>
           <span className="glass-pill text-xs font-bold px-2.5 py-0.5">
-            {filtered.length} Asset{filtered.length !== 1 ? 's' : ''}
+            {total} Asset{total !== 1 ? 's' : ''}
           </span>
         </div>
         <button
@@ -126,7 +140,7 @@ export default function LibraryView({
             <button
               key={tab.val}
               type="button"
-              onClick={() => setSelectedType(tab.val)}
+              onClick={() => applyFilters(tab.val, searchQuery)}
               className={`glass-btn whitespace-nowrap glass-btn-sm  ${
                 selectedType === tab.val
                   ? 'glass-btn-primary'
@@ -138,15 +152,37 @@ export default function LibraryView({
           ))}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <form
+          className="flex flex-wrap items-center gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            applyFilters(selectedType, searchQuery);
+          }}
+        >
           <input
-            type="text"
+            type="search"
             value={searchQuery}
+            maxLength={100}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search title, author, or chapter..."
             className="w-full md:w-72 text-xs glass-input p-2.5"
           />
-        </div>
+          <button type="submit" className="glass-btn glass-btn-sm">
+            Search
+          </button>
+          {query && (
+            <button
+              type="button"
+              className="glass-btn glass-btn-sm"
+              onClick={() => {
+                setSearchQuery('');
+                applyFilters(selectedType, '');
+              }}
+            >
+              Clear
+            </button>
+          )}
+        </form>
       </div>
 
       {/* INLINE ADD RESOURCE FORM */}
@@ -258,7 +294,7 @@ export default function LibraryView({
           No teaching materials match this filter or search query.
         </div>
       ) : (
-        <div className="divide-y divide-black/5">
+        <div className={`divide-y divide-black/5 transition-opacity ${isNavigating ? 'opacity-50' : ''}`}>
           {filtered.map((item) => {
             const badge = TYPE_BADGES[item.resourceType];
             return (
@@ -301,6 +337,8 @@ export default function LibraryView({
           })}
         </div>
       )}
+
+      {children}
     </section>
   );
 }
