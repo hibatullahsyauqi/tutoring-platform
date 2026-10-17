@@ -198,9 +198,19 @@ export default function ScheduleClientView({
     setTimeout(() => setToast(null), 4000);
   };
 
-  const [selectedSessionModal, setSelectedSessionModal] = useState<SessionItem | null>(
+  // The popup stays mounted for its exit animation: "leaving" keeps the last lesson on screen
+  // while it shrinks away.
+  const [activeModal, setActiveModal] = useState<SessionItem | null>(
     () => sessions.find((s) => s.id === initialSessionId) ?? null
   );
+  const [leavingModal, setLeavingModal] = useState<SessionItem | null>(null);
+  const selectedSessionModal = activeModal ?? leavingModal;
+  const modalClosing = activeModal === null && leavingModal !== null;
+  const setSelectedSessionModal = (next: SessionItem | null) => {
+    if (next === null && activeModal) setLeavingModal(activeModal);
+    if (next !== null) setLeavingModal(null);
+    setActiveModal(next);
+  };
 
   const [selectedStudentId, setSelectedStudentId] = useState(students[0]?.id || '');
   // Today at the standard 18:30 slot, in the app's time zone.
@@ -767,12 +777,17 @@ export default function ScheduleClientView({
       {/* RATIONAL INSPECTOR MODAL */}
       {selectedSessionModal && (
         <div
-          className="modal-backdrop fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 z-50"
+          className={`modal-backdrop fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 ${
+            modalClosing ? 'modal-closing' : ''
+          }`}
           onClick={() => setSelectedSessionModal(null)}
         >
           <div
-            className="liquid-pop glass-panel max-w-md w-full p-6 space-y-4 text-left"
+            className={`${modalClosing ? 'liquid-pop-out' : 'liquid-pop'} glass-panel max-w-md w-full p-6 space-y-4 text-left`}
             onClick={(e) => e.stopPropagation()}
+            onAnimationEnd={(e) => {
+              if (e.target === e.currentTarget && modalClosing) setLeavingModal(null);
+            }}
           >
             {/* Modal Header */}
             <div className="flex items-start justify-between border-b border-black/10 pb-3">

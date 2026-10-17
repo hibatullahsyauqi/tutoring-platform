@@ -1492,3 +1492,33 @@ main:not(.no-enter) > div > *:nth-child(n + 6) { animation-delay: 0.3s; }
     display: none;
   }
 }
+
+/* Lesson popup exit: the same swell as the entrance, run backwards */
+@keyframes backdrop-out {
+  to {
+    opacity: 0;
+  }
+}
+.modal-closing {
+  pointer-events: none;
+  animation: backdrop-out 0.3s ease forwards;
+}
+@keyframes liquid-pop-out {
+  to {
+    opacity: 0;
+    transform: scale(0.82, 0.68);
+    filter: blur(6px);
+  }
+}
+.liquid-pop-out {
+  transform-origin: center;
+  animation: liquid-pop-out 0.3s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .modal-closing {
+    display: none;
+  }
+  .liquid-pop-out {
+    animation: none;
+  }
+}
