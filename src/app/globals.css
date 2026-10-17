@@ -236,3 +236,26 @@ h1, h2, h3, h4, h5, h6 {
     radial-gradient(120% 90% at 0% 0%, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0) 55%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.93), rgba(255, 255, 255, 0.88)) !important;
 }
+
+/* Soft edge under the frozen header: repaints the page background (fixed, so it lines up with
+   the body's) and fades it out downward, so content scrolling up dissolves instead of being cut. */
+.top-fade {
+  display: none;
+}
+@media (min-width: 768px) {
+  .top-fade {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 12.5rem;
+    z-index: 20;
+    pointer-events: none;
+    background:
+      linear-gradient(rgba(15, 23, 42, 0.22), rgba(15, 23, 42, 0.35)),
+      url('/science-mosaic.jpg') center / cover no-repeat fixed;
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 100%);
+  }
+}

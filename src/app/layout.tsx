@@ -29,6 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${nunito.variable} ${besley.variable}`}>
       <body className="antialiased">
+        <div className="top-fade" aria-hidden="true" />
         {children}
       </body>
     </html>
