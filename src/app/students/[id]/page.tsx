@@ -4,6 +4,10 @@ import { prisma } from '@/lib/prisma';
 import { requireTutor } from '@/lib/auth';
 import Link from 'next/link';
 import SyllabusMap from '@/components/SyllabusMap';
+import ProgressInsights from '@/components/ProgressInsights';
+import { computeExamPace } from '@/lib/exam-pace';
+import { monthlyMomentum } from '@/lib/momentum';
+import { matchesView, parseTimelineView, TIMELINE_PAGE_SIZE, TIMELINE_VIEWS } from '@/lib/timeline';
 import { computeTopicProgress, suggestNext } from '@/lib/syllabus-progress';
 import { notFound } from 'next/navigation';
 import CopyPresenceButton from '@/components/CopyPresenceButton';
@@ -13,6 +17,7 @@ export const dynamic = 'force-dynamic';
 
 interface Props {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ view?: string; show?: string }>;
 }
 
 const MASTERY_BADGES: Record<string, { label: string; color: string }> = {
@@ -74,8 +79,10 @@ function getSheetPlace(): string {
   return 'Online';
 }
 
-export default async function StudentDossierPage({ params }: Props) {
+export default async function StudentDossierPage({ params, searchParams }: Props) {
   const { id } = await params;
+  const { view: viewParam, show } = await searchParams;
+  const view = parseTimelineView(viewParam);
   const tutor = await requireTutor();
 
   const student = await prisma.student.findUnique({
@@ -145,6 +152,13 @@ export default async function StudentDossierPage({ params }: Props) {
     priorTopicIds
   );
   const suggestions = suggestNext(topicProgress);
+  const progressSessions = student.sessions.map((s) => ({
+    sessionDate: s.sessionDate,
+    status: s.status,
+    segments: s.segments.map((seg) => ({ topicId: seg.topicId, masteryStatus: seg.masteryStatus })),
+  }));
+  const examPace = computeExamPace(student.targetExamDate, new Date(), topicProgress, progressSessions);
+  const momentum = monthlyMomentum(progressSessions, new Date());
 
   const totalTopicsCount = allTopics.length;
   priorTopicIds.forEach((id) => coveredTopicIds.add(id));
@@ -166,7 +180,19 @@ export default async function StudentDossierPage({ params }: Props) {
             : 'Cancelled';
     return { ...s, meetingNumber: label };
   });
-  const displaySessions = [...chronologicalSessions].reverse();
+  const filteredSessions = [...chronologicalSessions]
+    .reverse()
+    .filter((s) => matchesView(s.status, view));
+  const showAll = show === 'all';
+  const displaySessions = showAll ? filteredSessions : filteredSessions.slice(0, TIMELINE_PAGE_SIZE);
+  const hiddenCount = filteredSessions.length - displaySessions.length;
+  const viewHref = (v: string, all = false) => {
+    const q = new URLSearchParams();
+    if (v !== 'all') q.set('view', v);
+    if (all) q.set('show', 'all');
+    const qs = q.toString();
+    return `/students/${student.id}${qs ? `?${qs}` : ''}`;
+  };
 
   return (
     <main className="min-h-screen bg-[#faf9f6] text-[#2b2b28] p-6 md:p-10 font-sans">
@@ -243,6 +269,8 @@ export default async function StudentDossierPage({ params }: Props) {
           </div>
         </section>
 
+        <ProgressInsights pace={examPace} momentum={momentum} />
+
         <SyllabusMap
           studentId={student.id}
           courseTitle={course?.title ?? 'this course'}
@@ -261,9 +289,27 @@ export default async function StudentDossierPage({ params }: Props) {
             </span>
           </div>
 
+          <div className="flex flex-wrap gap-2">
+            {TIMELINE_VIEWS.map((v) => (
+              <Link
+                key={v.value}
+                href={viewHref(v.value)}
+                className={`text-xs px-3 py-1.5 rounded-lg font-bold transition-colors ${
+                  view === v.value
+                    ? 'bg-[#3d6b52] text-white'
+                    : 'bg-[#faf9f6] text-[#6f6b62] border border-[#ddd8cd] hover:bg-[#e8efe9]'
+                }`}
+              >
+                {v.label}
+              </Link>
+            ))}
+          </div>
+
           {displaySessions.length === 0 ? (
             <div className="bg-white border border-[#ddd8cd] rounded-xl p-8 text-center text-xs text-[#6f6b62]">
-              No sessions recorded yet. Use the button above to log your first session with {student.name}.
+              {student.sessions.length === 0
+                ? `No sessions recorded yet. Use the button above to log your first session with ${student.name}.`
+                : 'No sessions match this filter.'}
             </div>
           ) : (
             <div className="space-y-4">
@@ -464,6 +510,17 @@ export default async function StudentDossierPage({ params }: Props) {
                   </article>
                 );
               })}
+            </div>
+          )}
+
+          {hiddenCount > 0 && (
+            <div className="text-center">
+              <Link
+                href={viewHref(view, true)}
+                className="text-xs font-bold text-[#3d6b52] hover:underline"
+              >
+                Show {hiddenCount} older session{hiddenCount !== 1 ? 's' : ''}
+              </Link>
             </div>
           )}
         </section>
