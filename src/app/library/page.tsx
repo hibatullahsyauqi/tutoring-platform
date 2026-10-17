@@ -94,7 +94,7 @@ export default async function LibraryPage() {
       <div className="max-w-5xl mx-auto space-y-8">
         
         {/* HEADER */}
-        <header className="glass-panel p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <header className="md:sticky md:top-3 z-30 glass-panel glass-sticky p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <span className="glass-pill text-[11px] font-bold uppercase tracking-wider px-3 py-1 inline-block">
               Teaching Vault

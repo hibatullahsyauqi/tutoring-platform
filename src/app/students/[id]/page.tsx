@@ -204,8 +204,8 @@ export default async function StudentDossierPage({ params, searchParams }: Props
       <div className="max-w-4xl mx-auto space-y-8">
         
         {/* HEADER WITH DELETE BUTTON */}
-        <div>
-          <div className="glass-panel p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="md:sticky md:top-3 z-30">
+          <div className="glass-panel glass-sticky p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="min-w-0">
                 <Link href="/" className="text-xs font-semibold text-[#2d523e] hover:underline mb-2 inline-block">
                   ← Back to Dashboard

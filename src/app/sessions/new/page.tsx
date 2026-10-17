@@ -85,7 +85,7 @@ export default async function NewSessionPage({ searchParams }: Props) {
   return (
     <main className="min-h-screen text-[#0f172a] p-6 md:p-10 font-sans">
       <div className="max-w-3xl mx-auto space-y-6">
-        <header className="glass-panel p-6 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+        <header className="md:sticky md:top-3 z-30 glass-panel glass-sticky p-6 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div>
             <span className="glass-pill text-[11px] font-bold uppercase tracking-wider px-3 py-1 inline-block">
               Standard: 90 Mins

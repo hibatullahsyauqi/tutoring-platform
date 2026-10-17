@@ -128,7 +128,7 @@ export default async function DashboardPage() {
       <div className="max-w-4xl mx-auto space-y-8">
         
         {/* FROSTED TOPBAR */}
-        <header className="glass-panel p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 transition-all">
+        <header className="md:sticky md:top-3 z-30 glass-panel glass-sticky p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 transition-all">
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <span className="glass-pill text-[11px] font-bold uppercase tracking-wider text-[#0f172a] px-3 py-1 rounded-full inline-block">
