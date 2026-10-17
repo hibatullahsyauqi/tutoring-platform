@@ -1,5 +1,5 @@
 import { PrismaClient, EducationLevel } from '@prisma/client';
-import { seedAlevelTopics } from './seed-topics';
+import { seedSyllabusTopics } from './seed-topics';
 
 const prisma = new PrismaClient();
 
@@ -228,7 +228,7 @@ async function main() {
   console.log(`✓ Seeded ${fullContractCourses.length} Courses covering Math & Physics across all contract levels`);
 
   // -------------------------------------------------------------
-  // 5. OFFICIAL TOPICS (Cambridge 0580)
+  // 5. SYLLABUS TOPICS
   // -------------------------------------------------------------
   const igcseMaths = await prisma.course.findUnique({
     where: {
@@ -239,59 +239,8 @@ async function main() {
     },
   });
 
-  if (igcseMaths) {
-    const cambridgeSourceUrl =
-      'https://www.cambridgeinternational.org/programmes-and-qualifications/cambridge-igcse-mathematics-0580/';
-
-    const topics0580 = [
-      { code: '1.1', title: 'Types of numbers (integers, primes, squares, cubes, factors, multiples, HCF, LCM)' },
-      { code: '1.2', title: 'Sets and Venn diagrams (notation, union, intersection, subsets)' },
-      { code: '1.3', title: 'Powers and roots (square roots, cube roots)' },
-      { code: '1.4', title: 'Fractions, decimals, and percentages' },
-      { code: '1.5', title: 'Ordering quantities and inequalities (<, >, ≤, ≥)' },
-      { code: '1.6', title: 'The four operations and order of operations (BODMAS)' },
-      { code: '1.7', title: 'Indices and index laws (positive, zero, negative, fractional)' },
-      { code: '1.8', title: 'Standard form (A × 10^n)' },
-      { code: '1.9', title: 'Estimation and rounding (decimal places, significant figures)' },
-      { code: '1.10', title: 'Limits of accuracy (upper and lower bounds)' },
-      { code: '1.11', title: 'Ratio and proportion (direct and inverse numerical proportion)' },
-      { code: '1.12', title: 'Rates and compound measures (speed, density, pressure)' },
-      { code: '1.13', title: 'Percentages (percentage increase/decrease, reverse percentages)' },
-      { code: '1.14', title: 'Exponential growth and decay (compound interest, depreciation)' },
-      { code: '1.15', title: 'Surds and rationalising denominators (Extended)' },
-      { code: '2.1', title: 'Introduction to algebra and substitution' },
-      { code: '2.2', title: 'Algebraic manipulation (collecting terms, expanding brackets, factorising)' },
-      { code: '2.3', title: 'Algebraic fractions (simplifying, operations with fractions)' },
-      { code: '2.4', title: 'Solution of linear equations and simultaneous linear equations' },
-      { code: '2.5', title: 'Solution of quadratic equations (factorisation, completing square, quadratic formula)' },
-      { code: '2.6', title: 'Linear inequalities and graphical regions' },
-      { code: '2.7', title: 'Sequences (nth term of linear, quadratic, and geometric sequences)' },
-      { code: '2.8', title: 'Graphs in practical situations (kinematics: distance-time and speed-time graphs)' },
-      { code: '2.9', title: 'Graphs of functions (linear, quadratic, cubic, reciprocal, exponential)' },
-      { code: '2.10', title: 'Sketching curves and recognizing transformations' },
-      { code: '2.11', title: 'Differentiation and gradient of tangents (dy/dx, turning points)' },
-    ];
-
-    for (const topic of topics0580) {
-      await prisma.syllabusTopic.upsert({
-        where: {
-          courseId_code: {
-            courseId: igcseMaths.id,
-            code: topic.code,
-          },
-        },
-        update: { title: topic.title, sourceUrl: cambridgeSourceUrl },
-        create: {
-          courseId: igcseMaths.id,
-          code: topic.code,
-          title: topic.title,
-          sourceUrl: cambridgeSourceUrl,
-        },
-      });
-    }
-  }
-
-  await seedAlevelTopics(prisma);
+  // Syllabus topics for every course (including 0580) live in prisma/seed-topics.ts
+  await seedSyllabusTopics(prisma);
 
   // -------------------------------------------------------------
   // 6. SEED MODULAR PORTAL VAULT (Clean, Non-misleading & Modular)
