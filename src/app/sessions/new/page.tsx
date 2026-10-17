@@ -13,7 +13,7 @@ export default async function NewSessionPage({ searchParams }: Props) {
   const tutor = await requireTutor();
   const { studentId, sessionId } = await searchParams;
 
-  const students = await prisma.student.findMany({
+  const studentsQuery = prisma.student.findMany({
     where: { tutorId: tutor.id, archivedAt: null },
     include: {
       enrollments: {
@@ -32,19 +32,19 @@ export default async function NewSessionPage({ searchParams }: Props) {
   });
 
   // When completing a scheduled lesson, prefill the form from it instead of "now".
-  const scheduled = sessionId
-    ? await prisma.session.findFirst({
+  const scheduledQuery = sessionId
+    ? prisma.session.findFirst({
         where: { id: sessionId, status: 'SCHEDULED', student: { tutorId: tutor.id, archivedAt: null } },
       })
-    : null;
+    : Promise.resolve(null);
 
   // Logging from a dossier with no lesson picked: surface any unlogged slot due today or earlier,
   // so a scheduled class isn't logged twice. The tutor can still log a brand-new session.
   const endOfToday = new Date();
   endOfToday.setHours(23, 59, 59, 999);
-  const pendingSessions =
-    !scheduled && studentId
-      ? await prisma.session.findMany({
+  const pendingQuery =
+    !sessionId && studentId
+      ? prisma.session.findMany({
           where: {
             studentId,
             status: 'SCHEDULED',
@@ -54,11 +54,18 @@ export default async function NewSessionPage({ searchParams }: Props) {
           orderBy: { sessionDate: 'desc' },
           take: 5,
         })
-      : [];
+      : Promise.resolve([]);
 
-  const tools = await prisma.tool.findMany({
+  const toolsQuery = prisma.tool.findMany({
     orderBy: { name: 'asc' },
   });
+
+  const [students, scheduled, pendingSessions, tools] = await Promise.all([
+    studentsQuery,
+    scheduledQuery,
+    pendingQuery,
+    toolsQuery,
+  ]);
 
   const formattedStudents = students.map((s) => {
     const primaryEnrollment = s.enrollments[0];

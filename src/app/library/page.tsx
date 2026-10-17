@@ -5,7 +5,7 @@ import LibraryView from './LibraryView';
 export const dynamic = 'force-dynamic';
 
 export default async function LibraryPage() {
-  const resources = await prisma.resource.findMany({
+  const resourcesQuery = prisma.resource.findMany({
     include: {
       course: {
         include: {
@@ -19,7 +19,7 @@ export default async function LibraryPage() {
     },
   });
 
-  const courses = await prisma.course.findMany({
+  const coursesQuery = prisma.course.findMany({
     include: {
       board: true,
       topics: {
@@ -32,6 +32,8 @@ export default async function LibraryPage() {
       { title: 'asc' },
     ],
   });
+
+  const [resources, courses] = await Promise.all([resourcesQuery, coursesQuery]);
 
   const formattedResources = resources.map((r) => ({
     id: r.id,

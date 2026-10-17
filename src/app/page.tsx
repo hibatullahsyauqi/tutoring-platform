@@ -16,7 +16,7 @@ export default async function DashboardPage() {
   const now = new Date();
 
   // Fetch live exchange rates (Cached & updated hourly via Next.js)
-  const { rates, lastUpdated, isLive } = await getLiveExchangeRates();
+  const ratesQuery = getLiveExchangeRates();
 
   // Monthly Payroll Calculations
   const { start: startOfMonth, end: endOfMonth } = monthBounds(now);
@@ -29,7 +29,7 @@ export default async function DashboardPage() {
     year: 'numeric',
   });
 
-  const payrollSessions = await prisma.session.findMany({
+  const payrollQuery = prisma.session.findMany({
     where: {
       student: { tutorId: activeTutor.id },
       status: { in: ['COMPLETED', 'ABSENT_UNNOTIFIED'] },
@@ -41,10 +41,8 @@ export default async function DashboardPage() {
     include: { course: true },
   });
 
-  const { grossSalary, pphTax, totalFines, totalDeductions, netSalary } = computePayroll(payrollSessions);
-
   // Smart Next Up Briefing
-  const nextUpcomingSession = await prisma.session.findFirst({
+  const nextUpcomingQuery = prisma.session.findFirst({
     where: {
       student: { tutorId: activeTutor.id, archivedAt: null },
       status: 'SCHEDULED',
@@ -66,7 +64,7 @@ export default async function DashboardPage() {
     },
   });
 
-  const fallbackRecentSession = await prisma.session.findFirst({
+  const fallbackQuery = prisma.session.findFirst({
     where: {
       student: { tutorId: activeTutor.id, archivedAt: null },
       status: 'COMPLETED',
@@ -79,7 +77,7 @@ export default async function DashboardPage() {
     },
   });
 
-  const students = await prisma.student.findMany({
+  const studentsQuery = prisma.student.findMany({
     where: { tutorId: activeTutor.id, archivedAt: null },
     include: {
       enrollments: {
@@ -95,7 +93,7 @@ export default async function DashboardPage() {
     orderBy: { name: 'asc' },
   });
 
-  const archivedStudents = await prisma.student.findMany({
+  const archivedQuery = prisma.student.findMany({
     where: { tutorId: activeTutor.id, archivedAt: { not: null } },
     select: {
       id: true,
@@ -105,6 +103,25 @@ export default async function DashboardPage() {
     },
     orderBy: { name: 'asc' },
   });
+
+  // Independent reads run together instead of one round trip after another.
+  const [
+    { rates, lastUpdated, isLive },
+    payrollSessions,
+    nextUpcomingSession,
+    fallbackRecentSession,
+    students,
+    archivedStudents,
+  ] = await Promise.all([
+    ratesQuery,
+    payrollQuery,
+    nextUpcomingQuery,
+    fallbackQuery,
+    studentsQuery,
+    archivedQuery,
+  ]);
+
+  const { grossSalary, pphTax, totalFines, totalDeductions, netSalary } = computePayroll(payrollSessions);
 
   return (
     <main className="min-h-screen p-6 md:p-10 font-sans selection:bg-[#0f172a] selection:text-white">

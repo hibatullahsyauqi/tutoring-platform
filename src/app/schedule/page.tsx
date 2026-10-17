@@ -16,7 +16,7 @@ export default async function SchedulePage({ searchParams }: Props) {
   const { session: focusSessionId, date: focusDate } = await searchParams;
 
   // 1. Fetch all students under this tutor
-  const students = await prisma.student.findMany({
+  const studentsQuery = prisma.student.findMany({
     where: { tutorId: tutor.id, archivedAt: null },
     include: {
       enrollments: {
@@ -40,7 +40,7 @@ export default async function SchedulePage({ searchParams }: Props) {
   });
 
   // 2. Fetch all sessions (Scheduled and Completed) to populate the timetable
-  const allSessions = await prisma.session.findMany({
+  const allSessionsQuery = prisma.session.findMany({
     where: {
       student: { tutorId: tutor.id, archivedAt: null },
     },
@@ -61,6 +61,8 @@ export default async function SchedulePage({ searchParams }: Props) {
       sessionDate: 'asc',
     },
   });
+
+  const [students, allSessions] = await Promise.all([studentsQuery, allSessionsQuery]);
 
   const formattedStudents = students.map((s) => ({
     id: s.id,

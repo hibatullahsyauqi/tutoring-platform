@@ -10,20 +10,31 @@ import { createClient } from './supabase/server';
  */
 export const requireTutor = cache(async () => {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
-  if (!user || !user.email) redirect('/login');
+  // The proxy already validated this session with Supabase on the same request, so verify the
+  // token locally (no network call). Fall back to a full lookup if that yields no identity.
+  const { data: claimsData } = await supabase.auth.getClaims();
+  let email = typeof claimsData?.claims?.email === 'string' ? claimsData.claims.email : null;
+  let fullName: string | null =
+    (claimsData?.claims?.user_metadata as { full_name?: string } | undefined)?.full_name ?? null;
 
-  const email = user.email;
+  if (!email) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user?.email) redirect('/login');
+    email = user.email;
+    fullName = user.user_metadata?.full_name ?? null;
+  }
+
+  // Read first: the tutor row almost always exists, and a read is cheaper than an upsert.
+  const existing = await prisma.tutor.findUnique({ where: { email } });
+  if (existing) return existing;
+
   return prisma.tutor.upsert({
     where: { email },
     update: {},
-    create: {
-      email,
-      name: user.user_metadata?.full_name || email.split('@')[0],
-    },
+    create: { email, name: fullName || email.split('@')[0] },
   });
 });
 
