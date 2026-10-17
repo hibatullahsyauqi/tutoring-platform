@@ -163,8 +163,13 @@ model Session {
   assignedHomework String?            @map("assigned_homework") @db.Text
   nextFocusTopic   String?            @map("next_focus_topic") @db.Text
 
+  // Set on the replacement lesson; points back at the lesson that was moved to it.
+  rescheduledFromId String?           @unique @map("rescheduled_from_id") @db.Uuid
+
   student          Student            @relation(fields: [studentId], references: [id], onDelete: Cascade)
   course           Course             @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  rescheduledFrom  Session?           @relation("RescheduleChain", fields: [rescheduledFromId], references: [id], onDelete: SetNull)
+  rescheduledTo    Session?           @relation("RescheduleChain")
   
   segments         SessionSegment[]
   rating           SessionRating?

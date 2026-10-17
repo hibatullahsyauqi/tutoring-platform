@@ -5,6 +5,7 @@ import { requireTutor } from '@/lib/auth';
 import Link from 'next/link';
 import SyllabusMap from '@/components/SyllabusMap';
 import ProgressInsights from '@/components/ProgressInsights';
+import { finalRescheduleTarget } from '@/lib/reschedule-chain';
 import { computeExamPace } from '@/lib/exam-pace';
 import { monthlyMomentum } from '@/lib/momentum';
 import { matchesView, parseTimelineView, TIMELINE_PAGE_SIZE, TIMELINE_VIEWS } from '@/lib/timeline';
@@ -180,7 +181,9 @@ export default async function StudentDossierPage({ params, searchParams }: Props
             : s.status === 'RESCHEDULED'
               ? 'Rescheduled'
               : 'Cancelled';
-    return { ...s, meetingNumber: label };
+    const movedTo =
+      s.status === 'RESCHEDULED' ? finalRescheduleTarget(s.id, student.sessions) : null;
+    return { ...s, meetingNumber: label, movedTo };
   });
   const filteredSessions = [...chronologicalSessions]
     .reverse()
@@ -225,6 +228,12 @@ export default async function StudentDossierPage({ params, searchParams }: Props
             </div>
 
             <div className="flex items-center gap-2 self-start md:self-auto">
+              <Link
+                href="/schedule"
+                className="text-xs font-semibold text-[#3d6b52] border border-[#3d6b52]/30 hover:bg-[#e8efe9] px-3 py-2 rounded-lg transition-colors"
+              >
+                📅 Open Timetable
+              </Link>
               <DeleteStudentButton studentId={student.id} studentName={student.name} />
               <Link
                 href={`/sessions/new?studentId=${student.id}`}
@@ -392,6 +401,12 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                             Log Lesson →
                           </Link>
                         )}
+                        <Link
+                          href={`/schedule?session=${session.id}`}
+                          className="text-xs text-[#3d6b52] hover:underline font-medium"
+                        >
+                          📅 Timetable
+                        </Link>
                         {session.fineAmount > 0 && (
                           <span className="text-[11px] font-bold text-[#a3462f] bg-red-50 border border-red-200 px-2 py-0.5 rounded">
                             Fine Rp {session.fineAmount.toLocaleString('id-ID')}
@@ -421,6 +436,32 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                         />
                       </div>
                     </div>
+
+                    {session.status === 'RESCHEDULED' && (
+                      <div className="p-3 bg-[#faf9f6] border border-[#ddd8cd] rounded-lg text-xs">
+                        {session.movedTo ? (
+                          <>
+                            <span className="font-bold text-[#6f6b62]">Rescheduled to </span>
+                            <Link
+                              href={`/schedule?session=${session.movedTo.id}`}
+                              className="font-semibold text-[#3d6b52] hover:underline"
+                            >
+                              {session.movedTo.sessionDate.toLocaleString('en-GB', {
+                                weekday: 'short',
+                                day: 'numeric',
+                                month: 'short',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                timeZone: 'Asia/Jakarta',
+                              })}{' '}
+                              WIB →
+                            </Link>
+                          </>
+                        ) : (
+                          <span className="text-[#6f6b62]">Rescheduled. The new lesson no longer exists.</span>
+                        )}
+                      </div>
+                    )}
 
                     {session.status === 'SCHEDULED' && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">

@@ -3,11 +3,17 @@ import { requireTutor } from '@/lib/auth';
 import Link from 'next/link';
 import ScheduleClientView from './ScheduleClientView';
 import { absenceFine } from '@/lib/payroll';
+import { finalRescheduleTarget, weekOffsetFor } from '@/lib/reschedule-chain';
 
 export const dynamic = 'force-dynamic';
 
-export default async function SchedulePage() {
+interface Props {
+  searchParams: Promise<{ session?: string; date?: string }>;
+}
+
+export default async function SchedulePage({ searchParams }: Props) {
   const tutor = await requireTutor();
+  const { session: focusSessionId, date: focusDate } = await searchParams;
 
   // 1. Fetch all students under this tutor
   const students = await prisma.student.findMany({
@@ -82,10 +88,24 @@ export default async function SchedulePage() {
     meetingUrl: s.meetingUrl,
     assignedHomework: s.assignedHomework,
     nextFocusTopic: s.nextFocusTopic,
+    movedTo: (() => {
+      if (s.status !== 'RESCHEDULED') return null;
+      const target = finalRescheduleTarget(s.id, allSessions);
+      return target ? { id: target.id, sessionDate: target.sessionDate.toISOString() } : null;
+    })(),
     fineAmount: s.fineAmount,
     absenceFineIDR: absenceFine(s.course.level),
     topicsSummary: s.segments.map((seg) => `${seg.topic.code} ${seg.topic.title}`).join(', '),
   }));
+
+  // Deep link from the dossier: open the week of the lesson, or of an explicit date.
+  const focusSession = focusSessionId ? formattedSessions.find((s) => s.id === focusSessionId) : null;
+  const focusTarget = focusSession
+    ? new Date(focusSession.sessionDate)
+    : focusDate && !Number.isNaN(new Date(focusDate).getTime())
+      ? new Date(focusDate)
+      : null;
+  const initialWeekOffset = focusTarget ? weekOffsetFor(focusTarget, new Date()) : 0;
 
   return (
     <main className="min-h-screen bg-[#faf9f6] text-[#2b2b28] p-6 md:p-10 font-sans">
@@ -110,6 +130,8 @@ export default async function SchedulePage() {
         <ScheduleClientView
           students={formattedStudents}
           sessions={formattedSessions}
+          initialWeekOffset={initialWeekOffset}
+          initialSessionId={focusSession?.id}
         />
 
       </div>

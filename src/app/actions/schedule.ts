@@ -129,6 +129,7 @@ export async function rescheduleSessionAction(sessionId: string, newDate: string
         durationMinutes: original.durationMinutes,
         sessionType: original.sessionType,
         status: 'SCHEDULED',
+        rescheduledFromId: original.id,
         meetingUrl: original.meetingUrl,
         assignedHomework: original.assignedHomework,
         nextFocusTopic: original.nextFocusTopic,

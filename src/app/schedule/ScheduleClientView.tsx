@@ -37,7 +37,18 @@ type SessionItem = {
   topicsSummary: string;
   fineAmount: number;
   absenceFineIDR: number;
+  /** For a rescheduled lesson: the lesson it ended up as. */
+  movedTo: { id: string; sessionDate: string } | null;
 };
+
+const formatMoved = (iso: string) =>
+  new Date(iso).toLocaleString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 
 const formatIDR = (n: number) => `Rp ${n.toLocaleString('id-ID')}`;
 
@@ -142,9 +153,13 @@ function CancelReasons({
 export default function ScheduleClientView({
   students = [],
   sessions = [],
+  initialWeekOffset = 0,
+  initialSessionId,
 }: {
   students?: StudentSummary[];
   sessions?: SessionItem[];
+  initialWeekOffset?: number;
+  initialSessionId?: string;
 }) {
   const [viewMode, setViewMode] = useState<'CALENDAR' | 'AGENDA'>('CALENDAR');
   const [showScheduleForm, setShowScheduleForm] = useState(false);
@@ -157,7 +172,9 @@ export default function ScheduleClientView({
     setTimeout(() => setToast(null), 4000);
   };
 
-  const [selectedSessionModal, setSelectedSessionModal] = useState<SessionItem | null>(null);
+  const [selectedSessionModal, setSelectedSessionModal] = useState<SessionItem | null>(
+    () => sessions.find((s) => s.id === initialSessionId) ?? null
+  );
 
   const [selectedStudentId, setSelectedStudentId] = useState(students[0]?.id || '');
   const [sessionDate, setSessionDate] = useState('2026-09-30T18:30');
@@ -265,7 +282,7 @@ export default function ScheduleClientView({
     }
   };
 
-  const [weekOffset, setWeekOffset] = useState(0);
+  const [weekOffset, setWeekOffset] = useState(initialWeekOffset);
 
   const getDynamicWeek = (offset: number) => {
     const current = new Date();
@@ -623,7 +640,11 @@ export default function ScheduleClientView({
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <span className={`text-xs px-2.5 py-0.5 rounded border ${stateBadge.color}`}>
-                          {stateBadge.label}
+                          {s.status === 'RESCHEDULED'
+                            ? s.movedTo
+                              ? `🔁 Rescheduled to ${formatMoved(s.movedTo.sessionDate)}`
+                              : '🔁 Rescheduled'
+                            : stateBadge.label}
                         </span>
                         <span className="text-xs font-bold text-[#2b2b28]">
                           {sDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} ·{' '}
@@ -929,6 +950,27 @@ export default function ScheduleClientView({
 
             {getSessionState(selectedSessionModal) === 'CANCELLED' && (
               <div className="pt-2 border-t border-[#ddd8cd]/40 space-y-1 text-center">
+                {selectedSessionModal.status === 'RESCHEDULED' && (
+                  <p className="text-[11px] text-[#3d6b52] font-semibold">
+                    {selectedSessionModal.movedTo ? (
+                      <>
+                        Rescheduled to{' '}
+                        <button
+                          type="button"
+                          className="underline"
+                          onClick={() => {
+                            const target = sessions.find((x) => x.id === selectedSessionModal.movedTo?.id);
+                            if (target) setSelectedSessionModal(target);
+                          }}
+                        >
+                          {formatMoved(selectedSessionModal.movedTo.sessionDate)}
+                        </button>
+                      </>
+                    ) : (
+                      'Rescheduled. The new lesson no longer exists.'
+                    )}
+                  </p>
+                )}
                 {selectedSessionModal.fineAmount > 0 && (
                   <p className="text-[11px] text-[#a3462f] font-semibold">
                     Unexcused absence: {formatIDR(selectedSessionModal.fineAmount)} fine applied to payroll.
