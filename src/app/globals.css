@@ -1707,3 +1707,25 @@ html[data-vt='theme']::view-transition-new(root) {
     opacity: 0;
   }
 }
+
+/* Dossier lesson header: when the actions row is too narrow for every label, Delete shrinks to
+   just its trash icon (the other buttons keep their words). */
+.session-head {
+  container: sessionhead / inline-size;
+}
+@container sessionhead (max-width: 38rem) {
+  .delete-compact {
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+  }
+  .delete-compact .delete-label {
+    display: none;
+  }
+}
+/* The smallest buttons: inline toggles inside lists */
+.glass-btn-xs {
+  padding: 0.2rem 0.6rem;
+  font-size: 0.625rem;
+  line-height: 1rem;
+}

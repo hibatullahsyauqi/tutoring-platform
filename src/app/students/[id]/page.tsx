@@ -370,7 +370,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                     key={session.id}
                     className="glass-panel p-6 space-y-4"
                   >
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-black/10 pb-3">
+                    <div className="session-head flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-b border-black/10 pb-3">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="glass-chip text-xs font-bold text-[#2d523e] px-2 py-0.5">
                           {session.meetingNumber}
@@ -402,7 +402,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                             href={session.recordingUrl}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-xs text-[#2d523e] hover:underline inline-flex items-center gap-1 font-medium"
+                            className="glass-btn glass-btn-sm"
                           >
                             📹 Recording
                           </a>
@@ -448,7 +448,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                         <DeleteSessionButton
                           sessionId={session.id}
                           completed={session.status === 'COMPLETED'}
-                          className="glass-btn glass-btn-danger glass-btn-sm"
+                          className="glass-btn glass-btn-danger glass-btn-sm delete-compact"
                         />
                       </div>
                     </div>
@@ -484,7 +484,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                               href={session.meetingUrl}
                               target="_blank"
                               rel="noreferrer"
-                              className="text-[#2d523e] font-semibold hover:underline break-all"
+                              className="glass-btn glass-btn-sm"
                             >
                               Join call ↗
                             </a>

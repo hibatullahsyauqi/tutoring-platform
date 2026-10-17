@@ -10,7 +10,7 @@ export default function BaselineButton({
   topicIds,
   covered,
   label,
-  className = 'text-[11px] font-semibold text-[#2d523e] hover:underline disabled:opacity-50',
+  className = 'glass-btn glass-btn-sm',
 }: {
   studentId: string;
   topicIds: string[];

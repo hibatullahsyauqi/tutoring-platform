@@ -122,7 +122,7 @@ export default function SyllabusMap({
                   const priorIds = group.topics.filter((t) => t.state === 'PRIOR').map((t) => t.id);
                   if (untouchedIds.length === 0 && priorIds.length === 0) return null;
                   return (
-                    <div className="px-3 pt-1 flex flex-wrap gap-x-4 gap-y-1">
+                    <div className="px-3 pt-1 flex flex-wrap gap-2">
                       {untouchedIds.length > 0 && (
                         <BaselineButton
                           studentId={studentId}
@@ -137,7 +137,6 @@ export default function SyllabusMap({
                           topicIds={priorIds}
                           covered={false}
                           label="Clear prior knowledge"
-                          className="text-[11px] font-semibold text-slate-600 hover:underline disabled:opacity-50"
                         />
                       )}
                     </div>
@@ -159,7 +158,7 @@ export default function SyllabusMap({
                           topicIds={[t.id]}
                           covered={t.state === 'UNTOUCHED'}
                           label={t.state === 'UNTOUCHED' ? 'Known' : 'Undo'}
-                          className="text-[10px] font-semibold text-slate-600 hover:text-[#2d523e] hover:underline disabled:opacity-50"
+                          className="glass-btn glass-btn-xs"
                         />
                       )}
                       <span
