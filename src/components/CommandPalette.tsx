@@ -32,9 +32,10 @@ export default function CommandPalette() {
   const [query, setQuery] = useState('');
   const [active, setActive] = useState(0);
   const [students, setStudents] = useState<PaletteStudent[] | null>(null);
-  const [isMac, setIsMac] = useState(false);
 
   const onAuthScreen = pathname === '/login' || pathname.startsWith('/auth');
+  // Only shown once the palette is open, i.e. in the browser, so it cannot mismatch the server.
+  const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
 
   const openPalette = () => {
     setQuery('');
@@ -55,7 +56,6 @@ export default function CommandPalette() {
 
   // Hotkeys, and a custom event so other buttons (the settings menu) can open it.
   useEffect(() => {
-    setIsMac(/Mac|iPhone|iPad/.test(navigator.platform));
     if (onAuthScreen) return;
     const onKey = (e: KeyboardEvent) => {
       const typing = (e.target as HTMLElement | null)?.closest('input, textarea, select, [contenteditable="true"]');
@@ -76,7 +76,6 @@ export default function CommandPalette() {
       window.removeEventListener(OPEN_PALETTE_EVENT, onOpen);
     };
     // openPalette only touches refs and setters, so it is safe to leave out.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, onAuthScreen]);
 
   // Remove it from the page once the exit animation has played.
@@ -158,8 +157,6 @@ export default function CommandPalette() {
 
   if (onAuthScreen || !rendered) return null;
 
-  let lastGroup = '';
-
   return createPortal(
     <div
       className={`modal-backdrop fixed inset-0 z-[85] flex items-start justify-center bg-black/40 p-4 pt-[14vh] backdrop-blur-xs ${
@@ -211,8 +208,7 @@ export default function CommandPalette() {
             </p>
           )}
           {results.map((item, i) => {
-            const showGroup = item.group !== lastGroup;
-            lastGroup = item.group;
+            const showGroup = i === 0 || results[i - 1].group !== item.group;
             return (
               <div key={item.id}>
                 {showGroup && <div className="glass-select-group">{item.group}</div>}
