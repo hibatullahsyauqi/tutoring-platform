@@ -8,7 +8,9 @@ export default function GlassPointer() {
     let frame = 0;
     const onMove = (e: PointerEvent) => {
       if (e.pointerType !== 'mouse') return;
-      const target = (e.target as Element | null)?.closest<HTMLElement>('.glass-btn, .glass-interactive');
+      // The target can be the document itself or a text node, which have no closest().
+      if (!(e.target instanceof Element)) return;
+      const target = e.target.closest<HTMLElement>('.glass-btn, .glass-interactive');
       if (!target) return;
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
