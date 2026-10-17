@@ -5,6 +5,7 @@ import GlassPointer from '@/components/GlassPointer';
 import CornerControls from '@/components/CornerControls';
 import { themeBootstrapScript } from '@/lib/theme';
 import { TimeZoneProvider } from '@/components/TimeZoneProvider';
+import { DialogProvider } from '@/components/DialogProvider';
 import TimeZoneSync from '@/components/TimeZoneSync';
 import { getTutorOrNull } from '@/lib/auth';
 import { resolveTimeZone } from '@/lib/time';
@@ -45,9 +46,11 @@ export default async function RootLayout({
         <div className="top-fade" aria-hidden="true" />
         <GlassPointer />
         <TimeZoneProvider timeZone={timeZone}>
-          <CornerControls savedTimeZone={tutor?.timeZone ?? null} />
-          <TimeZoneSync savedTimeZone={tutor?.timeZone ?? null} signedIn={!!tutor} />
-          {children}
+          <DialogProvider>
+            <CornerControls savedTimeZone={tutor?.timeZone ?? null} />
+            <TimeZoneSync savedTimeZone={tutor?.timeZone ?? null} signedIn={!!tutor} />
+            {children}
+          </DialogProvider>
         </TimeZoneProvider>
       </body>
     </html>

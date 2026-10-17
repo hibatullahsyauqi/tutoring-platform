@@ -1,6 +1,7 @@
 'use client';
 
 import LiquidPresence from '@/components/LiquidPresence';
+import { useDialog } from '@/components/DialogProvider';
 import GlassDatePicker from '@/components/GlassDatePicker';
 import GlassSelect from '@/components/GlassSelect';
 import { useState } from 'react';
@@ -25,6 +26,7 @@ type CourseItem = {
 };
 
 export default function NewStudentForm({ courses }: { courses: CourseItem[] }) {
+  const dialog = useDialog();
   const [name, setName] = useState('');
   const [selectedCourseId, setSelectedCourseId] = useState(courses[0]?.id || '');
   const [tier, setTier] = useState(courses[0]?.availableTiers[0]?.val || 'Standard');
@@ -50,7 +52,7 @@ export default function NewStudentForm({ courses }: { courses: CourseItem[] }) {
     e.preventDefault();
     if (!name.trim() || !selectedCourseId) return;
     if (hasTargetExam && !targetExamDate) {
-      alert('Pick the exam date, or switch the exam date off.');
+      void dialog.notify({ title: 'Exam date missing', message: 'Pick the exam date, or switch the exam date off.', tone: 'info' });
       return;
     }
     setSubmitting(true);
@@ -65,7 +67,7 @@ export default function NewStudentForm({ courses }: { courses: CourseItem[] }) {
     } catch (err) {
       if (isRedirectError(err)) throw err;
       console.error('Failed to create student:', err);
-      alert(describeError('Could not save. Please check the details and try again.', err));
+      void dialog.notify({ message: describeError('Could not save. Please check the details and try again.', err) });
       setSubmitting(false);
     }
   };

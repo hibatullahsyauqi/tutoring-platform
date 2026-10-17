@@ -1,5 +1,6 @@
 'use client';
 
+import { useDialog } from '@/components/DialogProvider';
 import { useTransition } from 'react';
 import { deleteSessionAction } from '@/app/actions/schedule';
 import { describeError } from '@/lib/errors';
@@ -18,12 +19,18 @@ export default function DeleteSessionButton({
   onDeleted?: () => void;
 }) {
   const [isPending, startTransition] = useTransition();
+  const dialog = useDialog();
 
-  const handleDelete = () => {
-    const message = completed
-      ? 'Permanently delete this logged lesson? Its topics, notes and ratings are removed, and it stops counting toward payroll. This cannot be undone.'
-      : 'Permanently delete this session? This cannot be undone.';
-    if (!window.confirm(message)) return;
+  const handleDelete = async () => {
+    const confirmed = await dialog.confirm({
+      title: completed ? 'Delete this logged lesson?' : 'Delete this session?',
+      message: completed
+        ? 'Its topics, notes and ratings are removed, and it stops counting toward payroll. This cannot be undone.'
+        : 'This cannot be undone.',
+      confirmLabel: 'Delete',
+      tone: 'danger',
+    });
+    if (!confirmed) return;
 
     startTransition(async () => {
       try {
@@ -31,7 +38,7 @@ export default function DeleteSessionButton({
         onDeleted?.();
       } catch (err) {
         console.error('Failed to delete session:', err);
-        alert(describeError('Could not delete this session.', err));
+        void dialog.notify({ message: describeError('Could not delete this session.', err) });
       }
     });
   };

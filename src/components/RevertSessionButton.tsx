@@ -1,5 +1,6 @@
 'use client';
 
+import { splitQuestion, useDialog } from '@/components/DialogProvider';
 import { useTransition } from 'react';
 import { revertSessionToScheduledAction } from '@/app/actions/schedule';
 import { describeError } from '@/lib/errors';
@@ -18,9 +19,12 @@ export default function RevertSessionButton({
   onReverted?: () => void;
 }) {
   const [isPending, startTransition] = useTransition();
+  const dialog = useDialog();
 
-  const handleRevert = () => {
-    if (!window.confirm(message)) return;
+  const handleRevert = async () => {
+    const { title, body } = splitQuestion(message, 'Put this lesson back on the schedule?');
+    const confirmed = await dialog.confirm({ title, message: body, confirmLabel: label === 'Revert to scheduled' ? 'Revert' : 'Reopen' });
+    if (!confirmed) return;
 
     startTransition(async () => {
       try {
@@ -28,7 +32,7 @@ export default function RevertSessionButton({
         onReverted?.();
       } catch (err) {
         console.error('Failed to revert session:', err);
-        alert(describeError('Could not revert this session.', err));
+        void dialog.notify({ message: describeError('Could not revert this session.', err) });
       }
     });
   };

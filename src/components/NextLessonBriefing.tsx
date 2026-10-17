@@ -1,5 +1,6 @@
 'use client';
 
+import { useDialog } from '@/components/DialogProvider';
 import LiquidText from '@/components/LiquidText';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -52,6 +53,7 @@ export default function NextLessonBriefing({
   suggestions: BriefingSuggestion[];
 }) {
   const zone = useTimeZone();
+  const dialog = useDialog();
   const [now, setNow] = useState(() => Date.now());
   const [copied, setCopied] = useState(false);
 
@@ -94,7 +96,7 @@ export default function NextLessonBriefing({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      alert('Could not copy. Your browser blocked clipboard access.');
+      void dialog.notify({ message: 'Could not copy. Your browser blocked clipboard access.' });
     }
   };
 

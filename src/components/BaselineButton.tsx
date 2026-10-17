@@ -1,5 +1,6 @@
 'use client';
 
+import { useDialog } from '@/components/DialogProvider';
 import { useTransition } from 'react';
 import { setTopicBaselineAction } from '@/app/actions/student';
 import { describeError } from '@/lib/errors';
@@ -18,6 +19,7 @@ export default function BaselineButton({
   className?: string;
 }) {
   const [isPending, startTransition] = useTransition();
+  const dialog = useDialog();
 
   const handleClick = () => {
     startTransition(async () => {
@@ -25,7 +27,7 @@ export default function BaselineButton({
         await setTopicBaselineAction({ studentId, topicIds, covered });
       } catch (err) {
         console.error('Failed to update prior knowledge:', err);
-        alert(describeError('Could not update prior knowledge.', err));
+        void dialog.notify({ message: describeError('Could not update prior knowledge.', err) });
       }
     });
   };

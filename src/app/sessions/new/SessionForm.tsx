@@ -1,5 +1,6 @@
 'use client';
 
+import { useDialog } from '@/components/DialogProvider';
 import GlassDatePicker from '@/components/GlassDatePicker';
 import GlassSelect from '@/components/GlassSelect';
 import LiquidPresence from '@/components/LiquidPresence';
@@ -55,6 +56,7 @@ export default function SessionForm({
 
   // The date field shows (and is read as) the tutor's time zone, whatever zone this browser is in.
   const zone = useTimeZone();
+  const dialog = useDialog();
   const toLocalInput = (date: Date) => zone.toDateTimeLocal(date);
   const getNowLocalISO = () => toLocalInput(new Date());
 
@@ -246,7 +248,7 @@ export default function SessionForm({
       } catch (err) {
         if (isRedirectError(err)) throw err;
         console.error('Failed to save session:', err);
-        alert(describeError('Could not save. Please check the details and try again.', err));
+        void dialog.notify({ message: describeError('Could not save. Please check the details and try again.', err) });
       }
     });
   };

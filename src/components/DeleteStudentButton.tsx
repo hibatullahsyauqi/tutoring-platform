@@ -1,5 +1,6 @@
 'use client';
 
+import { useDialog } from '@/components/DialogProvider';
 import { useState, useTransition } from 'react';
 import { deleteStudentAction } from '@/app/actions/student';
 import { describeError, isRedirectError } from '@/lib/errors';
@@ -12,11 +13,15 @@ export default function DeleteStudentButton({
   studentName: string;
 }) {
   const [isPending, startTransition] = useTransition();
+  const dialog = useDialog();
 
-  const handleDelete = () => {
-    const confirmed = window.confirm(
-      `Archive ${studentName}? They will disappear from your dashboard and schedule, but completed sessions still count toward payroll.`
-    );
+  const handleDelete = async () => {
+    const confirmed = await dialog.confirm({
+      title: `Archive ${studentName}?`,
+      message: 'They will disappear from your dashboard and schedule, but completed sessions still count toward payroll.',
+      confirmLabel: 'Archive',
+      tone: 'danger',
+    });
 
     if (confirmed) {
       startTransition(async () => {
@@ -25,7 +30,7 @@ export default function DeleteStudentButton({
         } catch (err) {
           if (isRedirectError(err)) throw err;
           console.error('Failed to delete student:', err);
-          alert(describeError('Could not archive this student.', err));
+          void dialog.notify({ message: describeError('Could not archive this student.', err) });
         }
       });
     }

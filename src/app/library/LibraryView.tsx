@@ -1,5 +1,6 @@
 'use client';
 
+import { useDialog } from '@/components/DialogProvider';
 import LiquidText from '@/components/LiquidText';
 import LiquidPresence from '@/components/LiquidPresence';
 import GlassSelect from '@/components/GlassSelect';
@@ -46,6 +47,7 @@ export default function LibraryView({
   children?: React.ReactNode;
 }) {
   const router = useRouter();
+  const dialog = useDialog();
   const [isNavigating, startNavigation] = useTransition();
   const [searchQuery, setSearchQuery] = useState(query);
 
@@ -97,7 +99,7 @@ export default function LibraryView({
     } catch (err) {
       if (isRedirectError(err)) throw err;
       console.error('Failed to create resource:', err);
-      alert(describeError('Could not save. Please check the details and try again.', err));
+      void dialog.notify({ message: describeError('Could not save. Please check the details and try again.', err) });
     } finally {
       setSubmitting(false);
     }

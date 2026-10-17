@@ -1,5 +1,6 @@
 'use client';
 
+import { useDialog } from '@/components/DialogProvider';
 import LiquidText from '@/components/LiquidText';
 import LiquidPresence from '@/components/LiquidPresence';
 import GlassDatePicker from '@/components/GlassDatePicker';
@@ -78,6 +79,7 @@ function CancelReasons({
   compact?: boolean;
 }) {
   const zone = useTimeZone();
+  const dialog = useDialog();
   const [rescheduling, setRescheduling] = useState(false);
   const toLocalInput = (d: Date) => zone.toDateTimeLocal(d);
   // Default to the same slot one week later (same wall-clock time, in the app zone).
@@ -141,14 +143,14 @@ function CancelReasons({
       {canMarkAbsent && (
         <button
           type="button"
-          onClick={() => {
-            if (
-              window.confirm(
-                `Record an unexcused absence for ${session.studentName}? A fine of ${formatIDR(session.absenceFineIDR)} will be deducted from this month's payroll.`
-              )
-            ) {
-              onPick('ABSENT_UNNOTIFIED');
-            }
+          onClick={async () => {
+            const confirmed = await dialog.confirm({
+              title: `Record an unexcused absence for ${session.studentName}?`,
+              message: `A fine of ${formatIDR(session.absenceFineIDR)} will be deducted from this month's payroll.`,
+              confirmLabel: 'Record absence',
+              tone: 'danger',
+            });
+            if (confirmed) onPick('ABSENT_UNNOTIFIED');
           }}
           className={danger}
         >
@@ -182,6 +184,7 @@ export default function ScheduleClientView({
 }) {
   const router = useRouter();
   const zone = useTimeZone();
+  const dialog = useDialog();
   const [isNavigating, startNavigation] = useTransition();
   const formatMoved = (iso: string) => zone.format(iso, SLOT_FORMAT);
   /** YYYY-MM-DD for a day offset from today, as a date input's min/max. */
@@ -271,7 +274,7 @@ export default function ScheduleClientView({
     } catch (err) {
       if (isRedirectError(err)) throw err;
       console.error('Failed to schedule session:', err);
-      alert(describeError('Could not save. Please check the details and try again.', err));
+      void dialog.notify({ message: describeError('Could not save. Please check the details and try again.', err) });
     } finally {
       setSubmitting(false);
     }
@@ -290,7 +293,7 @@ export default function ScheduleClientView({
       );
     } catch (err) {
       console.error('Failed to cancel session:', err);
-      alert(describeError('Could not update that session. It may no longer be scheduled.', err));
+      void dialog.notify({ message: describeError('Could not update that session. It may no longer be scheduled.', err) });
     }
   };
 
@@ -304,7 +307,7 @@ export default function ScheduleClientView({
       );
     } catch (err) {
       console.error('Failed to reschedule session:', err);
-      alert(describeError('Could not reschedule that session.', err));
+      void dialog.notify({ message: describeError('Could not reschedule that session.', err) });
     }
   };
 

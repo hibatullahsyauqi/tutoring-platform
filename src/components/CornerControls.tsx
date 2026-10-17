@@ -1,5 +1,6 @@
 'use client';
 
+import { useDialog } from '@/components/DialogProvider';
 import LiquidText from '@/components/LiquidText';
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
@@ -50,6 +51,7 @@ export default function CornerControls({ savedTimeZone }: { savedTimeZone: strin
 
   const { setting, cycle } = useTheme();
   const zone = useTimeZone();
+  const dialog = useDialog();
   const [switching, setSwitching] = useState(false);
   // Only read once the menu is open, i.e. in the browser, so it can never mismatch the server.
   const deviceZone = open ? Intl.DateTimeFormat().resolvedOptions().timeZone : null;
@@ -80,7 +82,7 @@ export default function CornerControls({ savedTimeZone }: { savedTimeZone: strin
       await setTimeZoneAction(deviceZone);
     } catch (err) {
       console.error('Could not change the time zone.', err);
-      alert('Could not change the time zone. Please try again.');
+      void dialog.notify({ message: 'Could not change the time zone. Please try again.' });
     } finally {
       setSwitching(false);
     }
