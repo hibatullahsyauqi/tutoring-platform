@@ -952,7 +952,7 @@ main:not(.no-enter) > div > *:nth-child(n + 6) { animation-delay: 0.3s; }
   animation: none;
   mix-blend-mode: normal;
 }
-::view-transition-new(root) {
+html[data-vt='theme']::view-transition-new(root) {
   animation: theme-reveal 0.75s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 @keyframes theme-reveal {
@@ -978,7 +978,7 @@ main:not(.no-enter) > div > *:nth-child(n + 6) { animation-delay: 0.3s; }
     animation-duration: 4s;
     animation-name: backdrop-in;
   }
-  ::view-transition-new(root) {
+  html[data-vt='theme']::view-transition-new(root) {
     animation: none;
   }
 }
@@ -1519,6 +1519,61 @@ main:not(.no-enter) > div > *:nth-child(n + 6) { animation-delay: 0.3s; }
     display: none;
   }
   .liquid-pop-out {
+    animation: none;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Page to page: the old page sinks away in a blur, the new one swells in like liquid.
+   (The corner controls and the top fade keep their own names so they stay put.)
+   ------------------------------------------------------------------ */
+.corner-rail {
+  view-transition-name: corner-rail;
+}
+.top-fade {
+  view-transition-name: top-fade;
+}
+::view-transition-group(.liquid-page-out),
+::view-transition-group(.liquid-page-in) {
+  animation-duration: 0.6s;
+}
+::view-transition-old(.liquid-page-out) {
+  animation: page-out 0.28s cubic-bezier(0.4, 0, 1, 1) both;
+}
+::view-transition-new(.liquid-page-in) {
+  animation: page-in 0.7s cubic-bezier(0.34, 1.25, 0.64, 1) 0.14s both;
+}
+@keyframes page-out {
+  to {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.975, 0.94);
+    filter: blur(8px);
+  }
+}
+@keyframes page-in {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.97, 0.92);
+    filter: blur(10px);
+  }
+  45% {
+    opacity: 1;
+    transform: translateY(-3px) scale(1.006, 1.02);
+    filter: blur(1px);
+  }
+  70% {
+    transform: scale(0.998, 0.992);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(.liquid-page-out),
+  ::view-transition-new(.liquid-page-in) {
     animation: none;
   }
 }

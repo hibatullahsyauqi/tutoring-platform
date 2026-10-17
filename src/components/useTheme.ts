@@ -68,7 +68,11 @@ export function useTheme() {
       const root = document.documentElement;
       root.style.setProperty('--vt-x', `${origin?.x ?? window.innerWidth}px`);
       root.style.setProperty('--vt-y', `${origin?.y ?? 0}px`);
-      doc.startViewTransition(change);
+      root.dataset.vt = 'theme';
+      const transition = doc.startViewTransition(change) as { finished?: Promise<unknown> } | undefined;
+      const clear = () => delete root.dataset.vt;
+      if (transition?.finished) transition.finished.then(clear, clear);
+      else setTimeout(clear, 900);
     } else {
       change();
     }
