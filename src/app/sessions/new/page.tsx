@@ -42,19 +42,17 @@ export default async function NewSessionPage({ searchParams }: Props) {
   // so a scheduled class isn't logged twice. The tutor can still log a brand-new session.
   const endOfToday = new Date();
   endOfToday.setHours(23, 59, 59, 999);
-  const pendingQuery =
-    !sessionId && studentId
-      ? prisma.session.findMany({
-          where: {
-            studentId,
-            status: 'SCHEDULED',
-            sessionDate: { lte: endOfToday },
-            student: { tutorId: tutor.id, archivedAt: null },
-          },
-          orderBy: { sessionDate: 'desc' },
-          take: 5,
-        })
-      : Promise.resolve([]);
+  const pendingQuery = sessionId
+    ? Promise.resolve([])
+    : prisma.session.findMany({
+        where: {
+          status: 'SCHEDULED',
+          sessionDate: { lte: endOfToday },
+          student: { tutorId: tutor.id, archivedAt: null },
+        },
+        orderBy: { sessionDate: 'desc' },
+        select: { id: true, studentId: true, sessionDate: true },
+      });
 
   const toolsQuery = prisma.tool.findMany({
     orderBy: { name: 'asc' },
@@ -101,35 +99,14 @@ export default async function NewSessionPage({ searchParams }: Props) {
           </Link>
         </header>
 
-        {pendingSessions.length > 0 && (
-          <div className="glass-inset p-4 space-y-2 text-xs">
-            <p className="font-bold text-amber-900">
-              This student already has a scheduled lesson waiting to be logged. Log that one instead of creating a duplicate?
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {pendingSessions.map((p) => (
-                <Link
-                  key={p.id}
-                  href={`/sessions/new?studentId=${p.studentId}&sessionId=${p.id}`}
-                  className="glass-btn glass-btn-sm"
-                >
-                  Log {p.sessionDate.toLocaleString('en-US', {
-                    weekday: 'short',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })} →
-                </Link>
-              ))}
-            </div>
-            <p className="text-amber-800">Or fill in the form below to log a separate, new session.</p>
-          </div>
-        )}
-
         <SessionForm
           students={formattedStudents}
           tools={tools}
+          pendingSessions={pendingSessions.map((p) => ({
+            id: p.id,
+            studentId: p.studentId,
+            sessionDate: p.sessionDate.toISOString(),
+          }))}
           preselectedStudentId={scheduled?.studentId ?? studentId}
           existingSessionId={scheduled ? sessionId : undefined}
           initialSession={

@@ -43,9 +43,12 @@ export default function SessionForm({
   preselectedStudentId,
   existingSessionId,
   initialSession,
+  pendingSessions = [],
 }: {
   students: StudentItem[];
   tools: ToolItem[];
+  /** Scheduled lessons due today or earlier that have not been logged yet. */
+  pendingSessions?: { id: string; studentId: string; sessionDate: string }[];
   preselectedStudentId?: string;
   existingSessionId?: string;
   initialSession?: InitialSession;
@@ -73,6 +76,11 @@ export default function SessionForm({
   const [latenessMinutes, setLatenessMinutes] = useState(0);
 
   const activeStudent = students.find((s) => s.id === selectedStudentId) || students[0];
+
+  // Offer to log an existing unlogged lesson for whoever is selected, instead of creating a duplicate.
+  const pendingForStudent = existingSessionId
+    ? []
+    : pendingSessions.filter((p) => p.studentId === selectedStudentId).slice(0, 5);
 
   // ACTIVE CLAMPING: Rejects keyboard bypass of future dates/times
   const handleDateChange = (val: string) => {
@@ -242,6 +250,34 @@ export default function SessionForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {pendingForStudent.length > 0 && (
+        <div className="glass-card-subtle p-4 space-y-2 text-xs border-l-4 border-l-amber-500">
+          <p className="font-bold text-[#0f172a]">
+            {activeStudent?.name} already has a scheduled lesson waiting to be logged. Log that one instead of creating a duplicate?
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {pendingForStudent.map((p) => (
+              <Link
+                key={p.id}
+                href={`/sessions/new?studentId=${p.studentId}&sessionId=${p.id}`}
+                className="glass-btn glass-btn-sm"
+              >
+                Log{' '}
+                {new Date(p.sessionDate).toLocaleString('en-US', {
+                  weekday: 'short',
+                  month: 'short',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}{' '}
+                →
+              </Link>
+            ))}
+          </div>
+          <p className="font-medium text-slate-700">Or fill in the form below to log a separate, new session.</p>
+        </div>
+      )}
+
       {/* SECTION 1: CORE SESSION METADATA */}
       <section className="glass-panel p-6 space-y-4">
         <div className="flex items-center justify-between">
