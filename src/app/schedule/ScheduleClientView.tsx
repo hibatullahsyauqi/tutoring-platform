@@ -357,7 +357,7 @@ export default function ScheduleClientView({
       {toast && (
         <div
           role="status"
-          className={`liquid-toast fixed bottom-6 right-6 z-50 max-w-sm glass-card-subtle px-4 py-3 text-sm font-semibold ${
+          className={`liquid-toast fixed bottom-6 right-6 z-[90] max-w-sm glass-card-subtle px-4 py-3 text-sm font-semibold ${
             toast.tone === 'ok'
               ? 'text-emerald-900 outline outline-1 outline-emerald-500'
               : 'glass-card-subtle text-[#0f172a]'
