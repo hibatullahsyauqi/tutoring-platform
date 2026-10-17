@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Besley, Nunito } from 'next/font/google';
 import './globals.css';
 import GlassPointer from '@/components/GlassPointer';
+import SignOutCorner from '@/components/SignOutCorner';
 
 // 1. Fetch Besley for Headers
 const besley = Besley({
@@ -32,6 +33,7 @@ export default function RootLayout({
       <body className="antialiased">
         <div className="top-fade" aria-hidden="true" />
         <GlassPointer />
+        <SignOutCorner />
         {children}
       </body>
     </html>

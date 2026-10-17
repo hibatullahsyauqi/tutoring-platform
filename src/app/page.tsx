@@ -5,7 +5,6 @@ import { prisma } from '@/lib/prisma';
 import { requireTutor } from '@/lib/auth';
 import { computePayroll, monthBounds, nextDisbursementDate } from '@/lib/payroll';
 import Link from 'next/link';
-import { signOutAction } from '@/app/actions/auth';
 import { getLiveExchangeRates } from '@/lib/currency';
 import FinancialGlassCard from '@/components/FinancialGlassCard';
 import DeleteStudentButton from '@/components/DeleteStudentButton';
@@ -191,14 +190,6 @@ export default async function DashboardPage({ searchParams }: Props) {
             >
               <span>+</span> Log Session
             </Link>
-            <form action={signOutAction}>
-              <button
-                type="submit"
-                className="glass-btn glass-btn-danger"
-              >
-                Sign Out
-              </button>
-            </form>
           </div>
         </header>
 
