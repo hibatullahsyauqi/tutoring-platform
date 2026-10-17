@@ -50,6 +50,9 @@ type SessionItem = {
   movedTo: { id: string; sessionDate: string } | null;
 };
 
+/** How long a toast stays: 0.3s in, about 5s to read, 0.22s out (see .liquid-toast in globals.css). */
+const TOAST_MS = 5500;
+
 const SLOT_FORMAT: Intl.DateTimeFormatOptions = {
   weekday: 'short',
   month: 'short',
@@ -199,7 +202,7 @@ export default function ScheduleClientView({
 
   const showToast = (text: string, tone: 'ok' | 'info' = 'ok') => {
     setToast({ text, tone });
-    setTimeout(() => setToast(null), 4000);
+    setTimeout(() => setToast(null), TOAST_MS);
   };
 
   // The popup stays mounted for its exit animation: "leaving" keeps the last lesson on screen
