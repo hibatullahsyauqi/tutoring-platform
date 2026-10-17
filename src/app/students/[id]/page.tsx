@@ -390,11 +390,27 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                             Log Lesson →
                           </Link>
                         )}
+                        {session.fineAmount > 0 && (
+                          <span className="text-[11px] font-bold text-[#a3462f] bg-red-50 border border-red-200 px-2 py-0.5 rounded">
+                            Fine Rp {session.fineAmount.toLocaleString('id-ID')}
+                          </span>
+                        )}
                         {session.status === 'COMPLETED' && (
                           <>
                             <CopyPresenceButton payload={presencePayload} />
                             <RevertSessionButton sessionId={session.id} />
                           </>
+                        )}
+                        {session.status !== 'COMPLETED' && session.status !== 'SCHEDULED' && (
+                          <RevertSessionButton
+                            sessionId={session.id}
+                            label="Reopen"
+                            message={
+                              session.fineAmount > 0
+                                ? `Put this lesson back on the schedule? The Rp ${session.fineAmount.toLocaleString('id-ID')} fine is removed from payroll.`
+                                : 'Put this lesson back on the schedule?'
+                            }
+                          />
                         )}
                         <DeleteSessionButton
                           sessionId={session.id}

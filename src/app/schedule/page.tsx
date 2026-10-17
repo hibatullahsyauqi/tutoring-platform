@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { requireTutor } from '@/lib/auth';
 import Link from 'next/link';
 import ScheduleClientView from './ScheduleClientView';
+import { absenceFine } from '@/lib/payroll';
 
 export const dynamic = 'force-dynamic';
 
@@ -81,6 +82,8 @@ export default async function SchedulePage() {
     meetingUrl: s.meetingUrl,
     assignedHomework: s.assignedHomework,
     nextFocusTopic: s.nextFocusTopic,
+    fineAmount: s.fineAmount,
+    absenceFineIDR: absenceFine(s.course.level),
     topicsSummary: s.segments.map((seg) => `${seg.topic.code} ${seg.topic.title}`).join(', '),
   }));
 

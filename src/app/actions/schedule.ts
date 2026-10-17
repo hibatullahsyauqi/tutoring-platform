@@ -53,6 +53,11 @@ export async function cancelSessionAction(sessionId: string, newStatus: SessionS
   });
   if (!session) throw new Error('Session not found.');
 
+  // An unexcused absence can only happen once the lesson time has arrived.
+  if (input.newStatus === 'ABSENT_UNNOTIFIED' && session.sessionDate > new Date()) {
+    throw new Error('A lesson that has not started yet cannot be marked as an absence.');
+  }
+
   // If absent without notice, contract enforces session fee fine
   const fineAmount =
     input.newStatus === 'ABSENT_UNNOTIFIED' ? absenceFine(session.course.level) : 0;
@@ -66,6 +71,8 @@ export async function cancelSessionAction(sessionId: string, newStatus: SessionS
 
   revalidatePath('/schedule');
   revalidatePath('/');
+  revalidatePath('/students/[id]', 'page');
+  return { ok: true as const, fineAmount };
 }
 
 export async function deleteSessionAction(sessionId: string) {
@@ -84,6 +91,14 @@ export async function deleteSessionAction(sessionId: string) {
   return { ok: true as const };
 }
 
+const REOPENABLE_STATUSES: SessionStatus[] = [
+  'COMPLETED',
+  'CANCELLED_BY_STUDENT',
+  'CANCELLED_WITH_NOTICE',
+  'ABSENT_UNNOTIFIED',
+];
+
+/** Puts a logged or cancelled lesson back on the schedule, clearing any fine it carried. */
 export async function revertSessionToScheduledAction(sessionId: string) {
   const { sessionId: id } = parseInput(deleteSessionSchema, { sessionId });
   const tutor = await requireTutor();
@@ -91,7 +106,7 @@ export async function revertSessionToScheduledAction(sessionId: string) {
   await prisma.$transaction(async (tx) => {
     // Status-guarded: only a logged lesson can be reverted, and only the owner's.
     const { count } = await tx.session.updateMany({
-      where: { id, status: 'COMPLETED', student: { tutorId: tutor.id } },
+      where: { id, status: { in: REOPENABLE_STATUSES }, student: { tutorId: tutor.id } },
       data: {
         status: 'SCHEDULED',
         latenessMinutes: 0,
@@ -99,7 +114,7 @@ export async function revertSessionToScheduledAction(sessionId: string) {
         recordingUrl: null,
       },
     });
-    if (count === 0) throw new Error('Only a logged session can be reverted to scheduled.');
+    if (count === 0) throw new Error('Only a logged or cancelled session can be put back on the schedule.');
 
     await tx.sessionSegment.deleteMany({ where: { sessionId: id } });
     await tx.sessionReflection.deleteMany({ where: { sessionId: id } });

@@ -1,4 +1,4 @@
-import type { EducationLevel, SessionType } from '@prisma/client';
+import type { EducationLevel, SessionStatus, SessionType } from '@prisma/client';
 
 /** All amounts are whole IDR. */
 export const PPH_RATE = 0.025;
@@ -42,6 +42,7 @@ export function absenceFine(level: EducationLevel): number {
 }
 
 export type PayrollSession = {
+  status: SessionStatus;
   sessionType: SessionType;
   fineAmount: number;
   course: { level: EducationLevel };
@@ -55,12 +56,21 @@ export type PayrollSummary = {
   netSalary: number;
 };
 
+/**
+ * Only taught lessons earn the session rate. Fines come from lessons taught late and from
+ * unexcused absences, which earn nothing but still cost the tutor. Cancellations with notice
+ * carry no fine, and anything else (scheduled, rescheduled) never reaches payroll.
+ */
 export function computePayroll(sessions: PayrollSession[]): PayrollSummary {
   let grossSalary = 0;
   let totalFines = 0;
   for (const s of sessions) {
-    grossSalary += sessionRate(s.course.level, s.sessionType);
-    totalFines += s.fineAmount;
+    if (s.status === 'COMPLETED') {
+      grossSalary += sessionRate(s.course.level, s.sessionType);
+      totalFines += s.fineAmount;
+    } else if (s.status === 'ABSENT_UNNOTIFIED') {
+      totalFines += s.fineAmount;
+    }
   }
   const pphTax = Math.round(grossSalary * PPH_RATE);
   const totalDeductions = pphTax + totalFines;

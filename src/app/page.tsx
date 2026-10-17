@@ -29,10 +29,10 @@ export default async function DashboardPage() {
     year: 'numeric',
   });
 
-  const completedSessions = await prisma.session.findMany({
+  const payrollSessions = await prisma.session.findMany({
     where: {
       student: { tutorId: activeTutor.id },
-      status: 'COMPLETED',
+      status: { in: ['COMPLETED', 'ABSENT_UNNOTIFIED'] },
       sessionDate: {
         gte: startOfMonth,
         lte: endOfMonth,
@@ -41,7 +41,7 @@ export default async function DashboardPage() {
     include: { course: true },
   });
 
-  const { grossSalary, pphTax, totalFines, totalDeductions, netSalary } = computePayroll(completedSessions);
+  const { grossSalary, pphTax, totalFines, totalDeductions, netSalary } = computePayroll(payrollSessions);
 
   // Smart Next Up Briefing
   const nextUpcomingSession = await prisma.session.findFirst({
@@ -161,7 +161,7 @@ export default async function DashboardPage() {
           activeMonthName={activeMonthName}
           endOfMonthDay={endOfMonth.getDate()}
           disbursementLabel={disbursementLabel}
-          completedCount={completedSessions.length}
+          completedCount={payrollSessions.filter((s) => s.status === 'COMPLETED').length}
           grossSalaryIDR={grossSalary}
           pphTaxIDR={pphTax}
           totalFinesIDR={totalFines}

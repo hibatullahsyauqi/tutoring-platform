@@ -35,7 +35,62 @@ type SessionItem = {
   assignedHomework: string | null;
   nextFocusTopic: string | null;
   topicsSummary: string;
+  fineAmount: number;
+  absenceFineIDR: number;
 };
+
+const formatIDR = (n: number) => `Rp ${n.toLocaleString('id-ID')}`;
+
+/**
+ * Cancellation choices. Prior notice and student cancellations never carry a fine; an unexcused
+ * absence does, so it is offered only once the lesson time has arrived and asks for confirmation.
+ */
+function CancelReasons({
+  session,
+  canMarkAbsent,
+  onPick,
+  compact = false,
+}: {
+  session: SessionItem;
+  canMarkAbsent: boolean;
+  onPick: (status: SessionStatus) => void;
+  compact?: boolean;
+}) {
+  const option = compact
+    ? 'text-left bg-white border border-[#ddd8cd] hover:bg-gray-50 px-2.5 py-1.5 rounded text-[11px] font-semibold text-[#2b2b28]'
+    : 'bg-white border border-[#ddd8cd] hover:bg-gray-50 px-3 py-1.5 rounded text-[11px] font-semibold text-[#2b2b28]';
+  const danger = compact
+    ? 'text-left bg-[#a3462f] text-white px-2.5 py-1.5 rounded text-[11px] font-bold hover:bg-[#853623]'
+    : 'bg-[#a3462f] text-white px-3 py-1.5 rounded text-[11px] font-bold hover:bg-[#853623]';
+
+  return (
+    <div className={compact ? 'flex flex-col gap-1.5' : 'flex flex-wrap gap-2'}>
+      <button type="button" onClick={() => onPick('CANCELLED_WITH_NOTICE')} className={option}>
+        Rescheduled / Prior Notice (Pasal 7: No fine)
+      </button>
+      <button type="button" onClick={() => onPick('CANCELLED_BY_STUDENT')} className={option}>
+        Student Cancelled (No fine)
+      </button>
+      {canMarkAbsent && (
+        <button
+          type="button"
+          onClick={() => {
+            if (
+              window.confirm(
+                `Record an unexcused absence for ${session.studentName}? A fine of ${formatIDR(session.absenceFineIDR)} will be deducted from this month's payroll.`
+              )
+            ) {
+              onPick('ABSENT_UNNOTIFIED');
+            }
+          }}
+          className={danger}
+        >
+          Tutor Unnotified Absence (Pasal 8: {formatIDR(session.absenceFineIDR)} fine)
+        </button>
+      )}
+    </div>
+  );
+}
 
 export default function ScheduleClientView({
   students = [],
@@ -128,10 +183,15 @@ export default function ScheduleClientView({
 
   const handleCancel = async (sessionId: string, status: SessionStatus) => {
     try {
-      await cancelSessionAction(sessionId, status);
+      const result = await cancelSessionAction(sessionId, status);
       setCancellingId(null);
       setSelectedSessionModal(null);
-      showToast('Session updated', 'info');
+      showToast(
+        result.fineAmount > 0
+          ? `Absence recorded. ${formatIDR(result.fineAmount)} will be deducted from this month's payroll.`
+          : 'Session cancelled. No fine applies.',
+        'info'
+      );
     } catch (err) {
       console.error('Failed to cancel session:', err);
       alert(describeError('Could not update that session. It may no longer be scheduled.', err));
@@ -542,7 +602,21 @@ export default function ScheduleClientView({
                         </Link>
                       )}
 
-                      {state === 'UPCOMING' && (
+                      {state === 'CANCELLED' && (
+                        <RevertSessionButton
+                          sessionId={s.id}
+                          label="Reopen"
+                          message={
+                            s.fineAmount > 0
+                              ? `Put this lesson back on the schedule? The ${formatIDR(s.fineAmount)} fine is removed from payroll.`
+                              : 'Put this lesson back on the schedule?'
+                          }
+                          className="text-xs text-[#3d6b52] border border-[#3d6b52]/30 hover:bg-[#e8efe9] px-3 py-2 rounded-lg font-semibold transition-colors disabled:opacity-50"
+                          onReverted={() => showToast('Lesson put back on the schedule', 'info')}
+                        />
+                      )}
+
+                      {(state === 'UPCOMING' || state === 'NEEDS_LOG') && (
                         <button
                           type="button"
                           onClick={() => setCancellingId(cancellingId === s.id ? null : s.id)}
@@ -563,29 +637,11 @@ export default function ScheduleClientView({
                   {cancellingId === s.id && (
                     <div className="p-3.5 bg-red-50/50 border border-red-200 rounded-lg space-y-2 text-xs" onClick={(e) => e.stopPropagation()}>
                       <span className="font-bold text-[#a3462f] block">Select Cancellation Reason:</span>
-                      <div className="flex flex-wrap gap-2">
-                        <button
-                          type="button"
-                          onClick={() => handleCancel(s.id, 'CANCELLED_WITH_NOTICE')}
-                          className="bg-white border border-[#ddd8cd] hover:bg-gray-50 px-3 py-1.5 rounded text-[11px] font-semibold text-[#2b2b28]"
-                        >
-                          Rescheduled / Prior Notice (Pasal 7: No fine)
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleCancel(s.id, 'CANCELLED_BY_STUDENT')}
-                          className="bg-white border border-[#ddd8cd] hover:bg-gray-50 px-3 py-1.5 rounded text-[11px] font-semibold text-[#2b2b28]"
-                        >
-                          Student Cancelled (No fine)
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleCancel(s.id, 'ABSENT_UNNOTIFIED')}
-                          className="bg-[#a3462f] text-white px-3 py-1.5 rounded text-[11px] font-bold hover:bg-[#853623]"
-                        >
-                          Tutor Unnotified Absence (Pasal 8: Fine applies)
-                        </button>
-                      </div>
+                      <CancelReasons
+                        session={s}
+                        canMarkAbsent={state === 'NEEDS_LOG'}
+                        onPick={(status) => handleCancel(s.id, status)}
+                      />
                     </div>
                   )}
 
@@ -772,8 +828,9 @@ export default function ScheduleClientView({
               </div>
             </div>
 
-            {/* Cancel Section (Only for UPCOMING classes) */}
-            {getSessionState(selectedSessionModal) === 'UPCOMING' && (
+            {/* Cancel section: before the lesson, and after it when it was never logged */}
+            {(getSessionState(selectedSessionModal) === 'UPCOMING' ||
+              getSessionState(selectedSessionModal) === 'NEEDS_LOG') && (
               <div className="pt-2 border-t border-[#ddd8cd]/40">
                 <button
                   type="button"
@@ -790,24 +847,38 @@ export default function ScheduleClientView({
                 {cancellingId === selectedSessionModal.id && (
                   <div className="mt-2 p-3 bg-red-50/60 border border-red-200 rounded-lg space-y-1.5 text-left text-xs">
                     <span className="font-bold text-[#a3462f] text-[10px] block">Select Reason:</span>
-                    <div className="flex flex-col gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => handleCancel(selectedSessionModal.id, 'CANCELLED_WITH_NOTICE')}
-                        className="text-left bg-white border border-[#ddd8cd] hover:bg-gray-50 px-2.5 py-1.5 rounded text-[11px] font-semibold text-[#2b2b28]"
-                      >
-                        Rescheduled / Prior Notice (Pasal 7: No fine)
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleCancel(selectedSessionModal.id, 'CANCELLED_BY_STUDENT')}
-                        className="text-left bg-white border border-[#ddd8cd] hover:bg-gray-50 px-2.5 py-1.5 rounded text-[11px] font-semibold text-[#2b2b28]"
-                      >
-                        Student Cancelled (No fine)
-                      </button>
-                    </div>
+                    <CancelReasons
+                      compact
+                      session={selectedSessionModal}
+                      canMarkAbsent={getSessionState(selectedSessionModal) === 'NEEDS_LOG'}
+                      onPick={(status) => handleCancel(selectedSessionModal.id, status)}
+                    />
                   </div>
                 )}
+              </div>
+            )}
+
+            {getSessionState(selectedSessionModal) === 'CANCELLED' && (
+              <div className="pt-2 border-t border-[#ddd8cd]/40 space-y-1 text-center">
+                {selectedSessionModal.fineAmount > 0 && (
+                  <p className="text-[11px] text-[#a3462f] font-semibold">
+                    Unexcused absence: {formatIDR(selectedSessionModal.fineAmount)} fine applied to payroll.
+                  </p>
+                )}
+                <RevertSessionButton
+                  sessionId={selectedSessionModal.id}
+                  label="Reopen this lesson"
+                  message={
+                    selectedSessionModal.fineAmount > 0
+                      ? `Put this lesson back on the schedule? The ${formatIDR(selectedSessionModal.fineAmount)} fine is removed from payroll.`
+                      : 'Put this lesson back on the schedule?'
+                  }
+                  className="text-[11px] text-[#3d6b52] hover:underline font-medium disabled:opacity-50"
+                  onReverted={() => {
+                    setSelectedSessionModal(null);
+                    showToast('Lesson put back on the schedule', 'info');
+                  }}
+                />
               </div>
             )}
 

@@ -60,9 +60,9 @@ describe('computePayroll', () => {
 
   test('gross, 2.5% PPh and fines', () => {
     const r = computePayroll([
-      { sessionType: 'REGULAR_LESSON', fineAmount: 0, course: { level: 'IGCSE' } },
-      { sessionType: 'REGULAR_LESSON', fineAmount: 10_000, course: { level: 'A_LEVEL' } },
-      { sessionType: 'TRIAL_CLASS', fineAmount: 0, course: { level: 'A_LEVEL' } },
+      { status: 'COMPLETED', sessionType: 'REGULAR_LESSON', fineAmount: 0, course: { level: 'IGCSE' } },
+      { status: 'COMPLETED', sessionType: 'REGULAR_LESSON', fineAmount: 10_000, course: { level: 'A_LEVEL' } },
+      { status: 'COMPLETED', sessionType: 'TRIAL_CLASS', fineAmount: 0, course: { level: 'A_LEVEL' } },
     ]);
     expect(r.grossSalary).toBe(310_000);
     expect(r.pphTax).toBe(7_750);
@@ -72,15 +72,36 @@ describe('computePayroll', () => {
 
   test('PPh is rounded to whole IDR', () => {
     const r = computePayroll([
-      { sessionType: 'REGULAR_LESSON', fineAmount: 0, course: { level: 'PRIMARY' } },
+      { status: 'COMPLETED', sessionType: 'REGULAR_LESSON', fineAmount: 0, course: { level: 'PRIMARY' } },
     ]);
     expect(r.pphTax).toBe(1_500);
     expect(Number.isInteger(r.pphTax)).toBe(true);
   });
 
+  test('an unexcused absence adds its fine but earns nothing', () => {
+    const r = computePayroll([
+      { status: 'COMPLETED', sessionType: 'REGULAR_LESSON', fineAmount: 0, course: { level: 'IGCSE' } },
+      { status: 'ABSENT_UNNOTIFIED', sessionType: 'REGULAR_LESSON', fineAmount: 100_000, course: { level: 'IGCSE' } },
+    ]);
+    expect(r.grossSalary).toBe(100_000);
+    expect(r.totalFines).toBe(100_000);
+    expect(r.pphTax).toBe(2_500);
+  });
+
+  test('cancellations with notice and scheduled lessons never count', () => {
+    const base = { sessionType: 'REGULAR_LESSON' as const, fineAmount: 0, course: { level: 'IGCSE' as const } };
+    const r = computePayroll([
+      { ...base, status: 'CANCELLED_WITH_NOTICE' },
+      { ...base, status: 'CANCELLED_BY_STUDENT' },
+      { ...base, status: 'SCHEDULED' },
+      { ...base, status: 'RESCHEDULED' },
+    ]);
+    expect(r).toEqual({ grossSalary: 0, pphTax: 0, totalFines: 0, totalDeductions: 0, netSalary: 0 });
+  });
+
   test('net never goes negative', () => {
     const r = computePayroll([
-      { sessionType: 'REGULAR_LESSON', fineAmount: 500_000, course: { level: 'PRIMARY' } },
+      { status: 'COMPLETED', sessionType: 'REGULAR_LESSON', fineAmount: 500_000, course: { level: 'PRIMARY' } },
     ]);
     expect(r.netSalary).toBe(0);
   });
