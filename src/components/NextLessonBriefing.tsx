@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { countdownLabel, reminderMessage } from '@/lib/lesson-briefing';
+import { APP_TIME_ZONE, zoneLabel } from '@/lib/time';
 
 export type BriefingLesson = {
   sessionId: string;
@@ -73,7 +74,7 @@ export default function NextLessonBriefing({
 
   const start = new Date(lesson.startIso);
   const countdown = mode === 'next' ? countdownLabel(start.getTime(), lesson.durationMinutes, now) : null;
-  const dateLine = `${start.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'Asia/Jakarta' })} at ${start.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' })} WIB`;
+  const dateLine = `${start.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: APP_TIME_ZONE })} at ${start.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: APP_TIME_ZONE })} ${zoneLabel()}`;
   const canLog = mode === 'next' && lesson.status === 'SCHEDULED' && start.getTime() <= now;
 
   const copyReminder = async () => {

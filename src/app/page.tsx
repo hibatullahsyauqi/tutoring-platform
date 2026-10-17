@@ -2,6 +2,7 @@ import RefreshButton from '@/components/RefreshButton';
 import NextLessonBriefing from '@/components/NextLessonBriefing';
 import { computeTopicProgress, shortTitle, suggestNext } from '@/lib/syllabus-progress';
 import { SESSION_HISTORY_CAP } from '@/lib/timeline';
+import { formatDateOnly, formatInZone, zonedParts } from '@/lib/time';
 import Pagination from '@/components/Pagination';
 import { paginate, parsePage, type PageWindow } from '@/lib/pagination';
 import { prisma } from '@/lib/prisma';
@@ -34,9 +35,9 @@ export default async function DashboardPage({ searchParams }: Props) {
   // Monthly Payroll Calculations
   const { start: startOfMonth, end: endOfMonth } = monthBounds(now);
 
-  const activeMonthName = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  const activeMonthName = formatInZone(now, { month: 'long', year: 'numeric' });
   const nextMonthDisbursement = nextDisbursementDate(now);
-  const disbursementLabel = nextMonthDisbursement.toLocaleDateString('en-US', {
+  const disbursementLabel = formatInZone(nextMonthDisbursement, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -252,7 +253,7 @@ export default async function DashboardPage({ searchParams }: Props) {
         {/* MULTI-CURRENCY FINANCIAL GLASS CARD */}
         <FinancialGlassCard
           activeMonthName={activeMonthName}
-          endOfMonthDay={endOfMonth.getDate()}
+          endOfMonthDay={zonedParts(endOfMonth).day}
           disbursementLabel={disbursementLabel}
           completedCount={payrollSessions.filter((s) => s.status === 'COMPLETED').length}
           grossSalaryIDR={grossSalary}
@@ -322,7 +323,7 @@ export default async function DashboardPage({ searchParams }: Props) {
                         </p>
                         {student.targetExamDate && (
                           <span className="glass-pill text-[11px] px-2.5 py-0.5 rounded-md mt-2 inline-block font-semibold">
-                            🎯 Target Exam: {new Date(student.targetExamDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                            🎯 Target Exam: {formatDateOnly(student.targetExamDate, { month: 'short', year: 'numeric' })}
                           </span>
                         )}
                       </div>
@@ -372,7 +373,7 @@ export default async function DashboardPage({ searchParams }: Props) {
                         </p>
                         {s.archivedAt && (
                           <p className="text-[11px] text-slate-500 mt-0.5">
-                            Archived {s.archivedAt.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            Archived {formatInZone(s.archivedAt, { day: 'numeric', month: 'short', year: 'numeric' })}
                           </p>
                         )}
                       </div>

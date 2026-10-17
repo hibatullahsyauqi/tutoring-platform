@@ -1,3 +1,5 @@
+import { APP_TIME_ZONE, zoneLabel } from './time';
+
 const MIN = 60_000;
 
 const plural = (n: number, unit: string) => `${n} ${unit}${n === 1 ? '' : 's'}`;
@@ -32,7 +34,7 @@ export function countdownLabel(startMs: number, durationMinutes: number, nowMs: 
   return { phase: 'over' as const, text: `Ended ${span(sinceStart - durationMinutes * MIN)} ago` };
 }
 
-/** A ready-to-paste reminder for the student or parent. Times are WIB. */
+/** A ready-to-paste reminder for the student or parent. Times are in the app time zone. */
 export function reminderMessage(opts: {
   studentName: string;
   courseTitle: string;
@@ -45,15 +47,15 @@ export function reminderMessage(opts: {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
-    timeZone: 'Asia/Jakarta',
+    timeZone: APP_TIME_ZONE,
   });
   const time = start.toLocaleTimeString('en-GB', {
     hour: '2-digit',
     minute: '2-digit',
-    timeZone: 'Asia/Jakarta',
+    timeZone: APP_TIME_ZONE,
   });
   const lines = [
-    `Hi! Reminder: ${opts.studentName}'s ${opts.courseTitle} lesson is on ${day} at ${time} WIB (${opts.durationMinutes} minutes).`,
+    `Hi! Reminder: ${opts.studentName}'s ${opts.courseTitle} lesson is on ${day} at ${time} ${zoneLabel()} (${opts.durationMinutes} minutes).`,
   ];
   if (opts.meetingUrl) lines.push(`Meeting link: ${opts.meetingUrl}`);
   return lines.join('\n');

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { createSessionAction, type MasteryStatus } from '@/app/actions/session';
 import { ActivityType, SessionType } from '@prisma/client';
 import { describeError, isRedirectError } from '@/lib/errors';
+import { formatInZone, fromDateTimeLocal, toDateTimeLocal } from '@/lib/time';
 
 type StudentItem = {
   id: string;
@@ -20,11 +21,8 @@ type ToolItem = {
   category: string;
 };
 
-// Formats true local time string (YYYY-MM-DDTHH:mm)
-const toLocalInput = (date: Date) => {
-  const offset = date.getTimezoneOffset() * 60000;
-  return new Date(date.getTime() - offset).toISOString().slice(0, 16);
-};
+// The date field shows (and is read as) the app's time zone, whatever zone this browser is in.
+const toLocalInput = (date: Date) => toDateTimeLocal(date);
 const getNowLocalISO = () => toLocalInput(new Date());
 
 type InitialSession = {
@@ -84,7 +82,7 @@ export default function SessionForm({
 
   // ACTIVE CLAMPING: Rejects keyboard bypass of future dates/times
   const handleDateChange = (val: string) => {
-    const selected = new Date(val);
+    const selected = fromDateTimeLocal(val);
     const now = new Date();
 
     if (selected > now) {
@@ -208,7 +206,7 @@ export default function SessionForm({
     if (!activeStudent) return;
 
     // Final safety check against future time before dispatching to server
-    if (new Date(sessionDate) > new Date()) {
+    if (fromDateTimeLocal(sessionDate) > new Date()) {
       setDateWarning('Future times are strictly forbidden.');
       return;
     }
@@ -220,7 +218,7 @@ export default function SessionForm({
           studentId: activeStudent.id,
           courseId: activeStudent.courseId,
           // Absolute instant, so the server's timezone can't shift the logged time.
-          sessionDate: new Date(sessionDate).toISOString(),
+          sessionDate: fromDateTimeLocal(sessionDate).toISOString(),
           durationMinutes,
           sessionType,
           meetingUrl,
@@ -263,7 +261,7 @@ export default function SessionForm({
                 className="glass-btn glass-btn-sm"
               >
                 Log{' '}
-                {new Date(p.sessionDate).toLocaleString('en-US', {
+                {formatInZone(p.sessionDate, {
                   weekday: 'short',
                   month: 'short',
                   day: 'numeric',

@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { requireTutor } from '@/lib/auth';
 import Link from 'next/link';
+import { endOfDayIn } from '@/lib/time';
 import SessionForm from './SessionForm';
 
 export const dynamic = 'force-dynamic';
@@ -41,8 +42,7 @@ export default async function NewSessionPage({ searchParams }: Props) {
 
   // Logging from a dossier with no lesson picked: surface any unlogged slot due today or earlier,
   // so a scheduled class isn't logged twice. The tutor can still log a brand-new session.
-  const endOfToday = new Date();
-  endOfToday.setHours(23, 59, 59, 999);
+  const endOfToday = endOfDayIn(new Date());
   const pendingQuery = sessionId
     ? Promise.resolve([])
     : prisma.session.findMany({

@@ -3,7 +3,7 @@ import { finalRescheduleTarget, reopenMessage, weekOffsetFor, type ChainSession 
 
 const s = (id: string, day: number, status: string, from: string | null = null): ChainSession => ({
   id,
-  sessionDate: new Date(2026, 9, day, 18, 30),
+  sessionDate: new Date(Date.UTC(2026, 9, day, 11, 30)),
   status,
   rescheduledFromId: from,
 });
@@ -35,17 +35,17 @@ describe('finalRescheduleTarget', () => {
 });
 
 describe('weekOffsetFor', () => {
-  const now = new Date(2026, 9, 17, 12); // Sat 17 Oct 2026
+  const now = new Date('2026-10-17T05:00:00Z'); // Saturday 17 Oct 2026, noon in Jakarta
 
-  test('same week is 0, Monday and Sunday included', () => {
-    expect(weekOffsetFor(new Date(2026, 9, 12), now)).toBe(0);
-    expect(weekOffsetFor(new Date(2026, 9, 18, 23), now)).toBe(0);
+  test('same week is 0, from Monday 00:00 to Sunday 23:59 Jakarta time', () => {
+    expect(weekOffsetFor(new Date('2026-10-11T17:00:00Z'), now)).toBe(0);
+    expect(weekOffsetFor(new Date('2026-10-18T16:59:00Z'), now)).toBe(0);
   });
 
   test('next and previous weeks', () => {
-    expect(weekOffsetFor(new Date(2026, 9, 19), now)).toBe(1);
-    expect(weekOffsetFor(new Date(2026, 9, 11), now)).toBe(-1);
-    expect(weekOffsetFor(new Date(2026, 10, 14), now)).toBe(4);
+    expect(weekOffsetFor(new Date('2026-10-18T17:00:00Z'), now)).toBe(1);
+    expect(weekOffsetFor(new Date('2026-10-11T16:59:00Z'), now)).toBe(-1);
+    expect(weekOffsetFor(new Date('2026-11-14T05:00:00Z'), now)).toBe(4);
   });
 });
 

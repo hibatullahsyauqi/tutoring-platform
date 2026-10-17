@@ -1,9 +1,13 @@
 import { firstTaughtDates } from './exam-pace';
+import { formatInZone, wallTimeToUtc, zonedParts } from './time';
 import type { ProgressSession } from './syllabus-progress';
 
 export type MonthMomentum = { key: string; label: string; covered: number; mastered: number };
 
-const monthKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+const monthKey = (d: Date) => {
+  const p = zonedParts(d);
+  return `${p.year}-${String(p.month).padStart(2, '0')}`;
+};
 
 /** Per month: topics taught for the first time, and topics rated mastered for the first time. */
 export function monthlyMomentum(
@@ -13,10 +17,12 @@ export function monthlyMomentum(
 ): MonthMomentum[] {
   const buckets: MonthMomentum[] = [];
   for (let i = months - 1; i >= 0; i -= 1) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    // Mid-month noon in the app zone: safely inside the month whatever the offset.
+    const p = zonedParts(now);
+    const d = wallTimeToUtc(p.year, p.month - i, 15, 12, 0);
     buckets.push({
       key: monthKey(d),
-      label: d.toLocaleDateString('en-US', { month: 'short' }),
+      label: formatInZone(d, { month: 'short' }),
       covered: 0,
       mastered: 0,
     });

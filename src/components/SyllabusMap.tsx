@@ -1,4 +1,5 @@
 import BaselineButton from '@/components/BaselineButton';
+import { formatInZone } from '@/lib/time';
 import {
   groupTopics,
   shortTitle,
@@ -163,7 +164,7 @@ export default function SyllabusMap({
                         className={`glass-badge ${STATE_STYLE[t.state].chip}`}
                         title={
                           t.lastTaught
-                            ? `Taught ${t.lessons}×, last ${t.lastTaught.toLocaleDateString('en-GB')}`
+                            ? `Taught ${t.lessons}×, last ${formatInZone(t.lastTaught, { day: '2-digit', month: '2-digit', year: 'numeric' }, 'en-GB')}`
                             : 'Not taught yet'
                         }
                       >

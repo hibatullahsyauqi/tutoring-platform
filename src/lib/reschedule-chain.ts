@@ -1,3 +1,5 @@
+import { weekOffsetBetween } from './time';
+
 export type ChainSession = {
   id: string;
   sessionDate: Date;
@@ -30,15 +32,9 @@ export function finalRescheduleTarget(
   return current;
 }
 
-/** How many weeks the week containing `target` is from the week containing `now` (Monday start). */
+/** How many weeks the week containing `target` is from the week containing `now` (Monday start, app zone). */
 export function weekOffsetFor(target: Date, now: Date): number {
-  const mondayOf = (d: Date) => {
-    const m = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    m.setDate(m.getDate() - ((m.getDay() + 6) % 7));
-    return m;
-  };
-  const weekMs = 7 * 24 * 60 * 60 * 1000;
-  return Math.round((mondayOf(target).getTime() - mondayOf(now).getTime()) / weekMs);
+  return weekOffsetBetween(target, now);
 }
 
 /** Confirmation text for reopening a cancelled, absent or rescheduled lesson. */

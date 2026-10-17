@@ -108,14 +108,24 @@ describe('computePayroll', () => {
 });
 
 describe('dates', () => {
-  test('monthBounds covers the full month incl. leap February', () => {
-    const { start, end } = monthBounds(new Date(2028, 1, 10));
-    expect(start).toEqual(new Date(2028, 1, 1, 0, 0, 0, 0));
-    expect(end).toEqual(new Date(2028, 1, 29, 23, 59, 59, 999));
+  const JKT = 'Asia/Jakarta';
+
+  test('monthBounds covers the full month incl. leap February, in the given zone', () => {
+    const { start, end } = monthBounds(new Date('2028-02-10T05:00:00Z'), JKT);
+    expect(start.toISOString()).toBe('2028-01-31T17:00:00.000Z'); // 1 Feb 00:00 WIB
+    expect(end.toISOString()).toBe('2028-02-29T16:59:59.999Z'); // 29 Feb 23:59:59.999 WIB
+  });
+
+  test('the month follows the zone, not UTC: a lesson at 06:00 WIB on the 1st counts in that month', () => {
+    const firstLesson = new Date('2026-10-31T23:00:00Z'); // 1 Nov 06:00 WIB
+    const october = monthBounds(new Date('2026-10-15T05:00:00Z'), JKT);
+    const november = monthBounds(new Date('2026-11-15T05:00:00Z'), JKT);
+    expect(firstLesson > october.end).toBe(true);
+    expect(firstLesson >= november.start && firstLesson <= november.end).toBe(true);
   });
 
   test('disbursement is the 20th of next month, across year end', () => {
-    expect(nextDisbursementDate(new Date(2026, 11, 31))).toEqual(new Date(2027, 0, 20));
-    expect(nextDisbursementDate(new Date(2026, 9, 17))).toEqual(new Date(2026, 10, 20));
+    expect(nextDisbursementDate(new Date('2026-12-31T05:00:00Z'), JKT).toISOString()).toBe('2027-01-19T17:00:00.000Z');
+    expect(nextDisbursementDate(new Date('2026-10-17T05:00:00Z'), JKT).toISOString()).toBe('2026-11-19T17:00:00.000Z');
   });
 });

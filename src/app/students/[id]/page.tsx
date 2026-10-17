@@ -10,6 +10,7 @@ import { finalRescheduleTarget, reopenMessage } from '@/lib/reschedule-chain';
 import { computeExamPace } from '@/lib/exam-pace';
 import { monthlyMomentum } from '@/lib/momentum';
 import Pagination from '@/components/Pagination';
+import { formatDateOnly, formatInZone, zoneLabel } from '@/lib/time';
 import { paginate, parsePage } from '@/lib/pagination';
 import {
   matchesView,
@@ -24,6 +25,15 @@ import CopyPresenceButton from '@/components/CopyPresenceButton';
 import DeleteStudentButton from '@/components/DeleteStudentButton';
 
 export const dynamic = 'force-dynamic';
+
+const MOVED_FORMAT: Intl.DateTimeFormatOptions = {
+  weekday: 'short',
+  day: 'numeric',
+  month: 'short',
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false,
+};
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -237,7 +247,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
               </p>
               {student.targetExamDate && (
                 <p className="text-[11px] text-[#2d523e] font-semibold mt-2">
-                  🎯 Target Exam Series: {new Date(student.targetExamDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                  🎯 Target Exam Series: {formatDateOnly(student.targetExamDate, { month: 'long', year: 'numeric' })}
                 </p>
               )}
             </div>
@@ -342,10 +352,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
             <div className="space-y-4">
               {displaySessions.map((session) => {
                 const sDate = new Date(session.sessionDate);
-                const day = String(sDate.getDate()).padStart(2, '0');
-                const month = String(sDate.getMonth() + 1).padStart(2, '0');
-                const year = sDate.getFullYear();
-                const formattedDate = `${day}/${month}/${year}`;
+                const formattedDate = formatInZone(sDate, { day: '2-digit', month: '2-digit', year: 'numeric' }, 'en-GB');
 
                 const primaryTopicTitle = session.segments[0]?.topic?.title
                   ? `${session.segments[0].topic.code} ${session.segments[0].topic.title}`
@@ -372,22 +379,17 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                           {session.meetingNumber}
                         </span>
                         <span className="text-xs font-bold text-[#0f172a]">
-                          {sDate.toLocaleDateString('en-US', {
-                            weekday: 'short',
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric',
-                          })}
+                          {formatInZone(sDate, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
                         </span>
                         <span className="text-xs font-semibold text-slate-600">
-                          {sDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' })}
+                          {formatInZone(sDate, { hour: '2-digit', minute: '2-digit', hour12: false }, 'en-GB')}
                           {'–'}
-                          {new Date(sDate.getTime() + session.durationMinutes * 60000).toLocaleTimeString('en-GB', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            timeZone: 'Asia/Jakarta',
-                          })}{' '}
-                          WIB
+                          {formatInZone(
+                            new Date(sDate.getTime() + session.durationMinutes * 60000),
+                            { hour: '2-digit', minute: '2-digit', hour12: false },
+                            'en-GB'
+                          )}{' '}
+                          {zoneLabel()}
                         </span>
                         <span className="text-[11px] px-2 py-0.5 text-slate-600 glass-chip">
                           {session.durationMinutes} mins
@@ -441,14 +443,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                             message={reopenMessage({
                               fineAmount: session.fineAmount,
                               movedToLabel: session.movedTo
-                                ? session.movedTo.sessionDate.toLocaleString('en-GB', {
-                                    weekday: 'short',
-                                    day: 'numeric',
-                                    month: 'short',
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                    timeZone: 'Asia/Jakarta',
-                                  }) + ' WIB'
+                                ? `${formatInZone(session.movedTo.sessionDate, MOVED_FORMAT, 'en-GB')} ${zoneLabel()}`
                                 : null,
                             })}
                           />
@@ -470,15 +465,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                               href={`/schedule?session=${session.movedTo.id}`}
                               className="font-semibold text-[#2d523e] hover:underline"
                             >
-                              {session.movedTo.sessionDate.toLocaleString('en-GB', {
-                                weekday: 'short',
-                                day: 'numeric',
-                                month: 'short',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                                timeZone: 'Asia/Jakarta',
-                              })}{' '}
-                              WIB →
+                              {formatInZone(session.movedTo.sessionDate, MOVED_FORMAT, 'en-GB')} {zoneLabel()} →
                             </Link>
                           </>
                         ) : (
