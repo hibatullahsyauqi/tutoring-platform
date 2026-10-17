@@ -1732,3 +1732,12 @@ html[data-vt='theme']::view-transition-new(root) {
   font-size: 0.625rem;
   line-height: 1rem;
 }
+
+/* During a theme change everything must be part of the one spreading reveal. Elements that keep
+   their own view-transition name (the top fade, the corner controls, or anything React names for
+   page changes) would cross-fade on their own timing and flash against it. */
+html[data-vt='theme'] *,
+html[data-vt='theme'] *::before,
+html[data-vt='theme'] *::after {
+  view-transition-name: none !important;
+}
