@@ -100,6 +100,7 @@ export default function ScheduleClientView({
       setShowScheduleForm(false);
     } catch (err) {
       console.error('Failed to schedule session:', err);
+      alert('Could not save. Please check the details and try again.');
     } finally {
       setSubmitting(false);
     }
@@ -112,6 +113,7 @@ export default function ScheduleClientView({
       setSelectedSessionModal(null);
     } catch (err) {
       console.error('Failed to cancel session:', err);
+      alert('Could not update that session. It may no longer be scheduled.');
     }
   };
 

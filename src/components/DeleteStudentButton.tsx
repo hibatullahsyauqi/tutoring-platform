@@ -14,7 +14,7 @@ export default function DeleteStudentButton({
 
   const handleDelete = () => {
     const confirmed = window.confirm(
-      `Are you sure you want to permanently delete ${studentName} and all associated session logs? This cannot be undone.`
+      `Archive ${studentName}? They will disappear from your dashboard and schedule, but completed sessions still count toward payroll.`
     );
 
     if (confirmed) {
@@ -23,6 +23,7 @@ export default function DeleteStudentButton({
           await deleteStudentAction(studentId);
         } catch (err) {
           console.error('Failed to delete student:', err);
+          alert('Could not archive this student.');
         }
       });
     }
@@ -35,7 +36,7 @@ export default function DeleteStudentButton({
       disabled={isPending}
       className="text-xs text-[#a3462f] border border-[#a3462f]/30 hover:bg-red-50 px-3 py-2 rounded-lg font-semibold transition-colors disabled:opacity-50"
     >
-      {isPending ? 'Deleting...' : 'Delete Profile'}
+      {isPending ? 'Archiving...' : 'Archive Profile'}
     </button>
   );
 }

@@ -4,6 +4,7 @@ import { prisma } from '../../lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { requireTutor } from '../../lib/auth';
+import { createStudentSchema, idSchema, parseInput } from '../../lib/validation';
 
 export type CreateStudentInput = {
   name: string;
@@ -12,12 +13,13 @@ export type CreateStudentInput = {
   targetExamDate?: string;
 };
 
-export async function createStudentAction(data: CreateStudentInput) {
+export async function createStudentAction(input: CreateStudentInput) {
+  const data = parseInput(createStudentSchema, input);
   const tutor = await requireTutor();
 
   const student = await prisma.student.create({
     data: {
-      name: data.name.trim(),
+      name: data.name,
       tutorId: tutor.id,
       targetExamDate: data.targetExamDate ? new Date(data.targetExamDate) : null,
       enrollments: {
@@ -34,10 +36,13 @@ export async function createStudentAction(data: CreateStudentInput) {
 }
 
 export async function deleteStudentAction(studentId: string) {
-  // Cascades automatically to enrollments, sessions, segments, and reflections in Supabase
+  parseInput(idSchema, studentId);
   const tutor = await requireTutor();
-  const { count } = await prisma.student.deleteMany({
-    where: { id: studentId, tutorId: tutor.id },
+
+  // Archive rather than delete: completed sessions are payroll history and must survive.
+  const { count } = await prisma.student.updateMany({
+    where: { id: studentId, tutorId: tutor.id, archivedAt: null },
+    data: { archivedAt: new Date() },
   });
   if (count === 0) throw new Error('Student not found.');
 

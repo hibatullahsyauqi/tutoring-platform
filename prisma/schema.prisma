@@ -28,6 +28,7 @@ model Student {
   name           String
   targetExamDate DateTime?    @map("target_exam_date") @db.Date
   createdAt      DateTime     @default(now()) @map("created_at")
+  archivedAt     DateTime?    @map("archived_at")
   
   tutor          Tutor        @relation(fields: [tutorId], references: [id], onDelete: Cascade)
   enrollments    Enrollment[]

@@ -4,8 +4,9 @@ import { prisma } from '../../lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { ActivityType, SessionType } from '@prisma/client';
-import { assertOwnsStudent, requireTutor } from '../../lib/auth';
+import { assertEnrolled, assertOwnsStudent, requireTutor } from '../../lib/auth';
 import { latenessFine } from '../../lib/payroll';
+import { createSessionSchema, parseInput } from '../../lib/validation';
 
 export type MasteryStatus = 'STRUGGLING' | 'NEEDS_PRACTICE' | 'MASTERED';
 
@@ -38,7 +39,8 @@ export type CreateSessionInput = {
   };
 };
 
-export async function createSessionAction(data: CreateSessionInput) {
+export async function createSessionAction(input: CreateSessionInput) {
+  const data = parseInput(createSessionSchema, input);
   const tutor = await requireTutor();
   await assertOwnsStudent(tutor.id, data.studentId);
 
@@ -53,79 +55,80 @@ export async function createSessionAction(data: CreateSessionInput) {
     );
   }
 
+  // The course comes from the scheduled session when completing one, otherwise from the request.
+  let courseId = data.courseId;
+  if (data.existingSessionId) {
+    const scheduled = await prisma.session.findFirst({
+      where: { id: data.existingSessionId, studentId: data.studentId, status: 'SCHEDULED' },
+      select: { courseId: true },
+    });
+    if (!scheduled) throw new Error('That session is not scheduled (it may already be logged).');
+    courseId = scheduled.courseId;
+  }
+
+  await assertEnrolled(data.studentId, courseId);
+
+  // Every segment must point at a topic of this course.
+  const topicIds = [...new Set(data.segments.map((seg) => seg.topicId))];
+  if (topicIds.length > 0) {
+    const validTopics = await prisma.syllabusTopic.count({
+      where: { id: { in: topicIds }, courseId },
+    });
+    if (validTopics !== topicIds.length) {
+      throw new Error('One or more topics do not belong to this course.');
+    }
+  }
+
   const fineAmount = latenessFine(data.latenessMinutes);
 
+  const sessionFields = {
+    sessionDate: sessionTime,
+    durationMinutes: data.durationMinutes,
+    sessionType: data.sessionType,
+    status: 'COMPLETED' as const,
+    meetingUrl: data.meetingUrl || null,
+    recordingUrl: data.recordingUrl || null,
+    latenessMinutes: data.latenessMinutes,
+    fineAmount,
+    assignedHomework: data.assignedHomework || null,
+    nextFocusTopic: data.nextFocusTopic || null,
+  };
+  const segmentRows = data.segments.map((seg) => ({
+    topicId: seg.topicId,
+    toolId: seg.toolId || null,
+    durationMinutes: seg.durationMinutes,
+    activityType: seg.activityType,
+    masteryStatus: seg.masteryStatus,
+  }));
+
   if (data.existingSessionId) {
-    // Update existing scheduled session to COMPLETED
-    const existing = await prisma.session.findFirst({
-      where: { id: data.existingSessionId, studentId: data.studentId },
-      select: { id: true },
-    });
-    if (!existing) throw new Error('Session not found.');
+    const sessionId = data.existingSessionId;
+    await prisma.$transaction(async (tx) => {
+      // Status-guarded so two concurrent submits cannot both complete (and pay for) one session.
+      const { count } = await tx.session.updateMany({
+        where: { id: sessionId, studentId: data.studentId, status: 'SCHEDULED' },
+        data: sessionFields,
+      });
+      if (count === 0) throw new Error('That session is not scheduled (it may already be logged).');
 
-    await prisma.session.update({
-      where: { id: data.existingSessionId },
-      data: {
-        sessionDate: new Date(data.sessionDate),
-        durationMinutes: data.durationMinutes,
-        sessionType: data.sessionType,
-        status: 'COMPLETED',
-        meetingUrl: data.meetingUrl || null,
-        recordingUrl: data.recordingUrl || null,
-        latenessMinutes: data.latenessMinutes,
-        fineAmount: fineAmount,
-        assignedHomework: data.assignedHomework || null,
-        nextFocusTopic: data.nextFocusTopic || null,
-
-        segments: {
-          deleteMany: {}, // Clear any placeholders
-          create: data.segments.map((seg) => ({
-            topicId: seg.topicId,
-            toolId: seg.toolId || null,
-            durationMinutes: seg.durationMinutes,
-            activityType: seg.activityType,
-            masteryStatus: seg.masteryStatus,
-          })),
-        },
-
-        reflection: {
-          upsert: {
-            create: data.reflection,
-            update: data.reflection,
-          },
-        },
-      },
+      await tx.sessionSegment.deleteMany({ where: { sessionId } });
+      await tx.sessionSegment.createMany({
+        data: segmentRows.map((row) => ({ ...row, sessionId })),
+      });
+      await tx.sessionReflection.upsert({
+        where: { sessionId },
+        create: { sessionId, ...data.reflection },
+        update: data.reflection,
+      });
     });
   } else {
-    // Create new session from scratch
     await prisma.session.create({
       data: {
         studentId: data.studentId,
-        courseId: data.courseId,
-        sessionDate: new Date(data.sessionDate),
-        durationMinutes: data.durationMinutes,
-        sessionType: data.sessionType,
-        status: 'COMPLETED',
-        meetingUrl: data.meetingUrl || null,
-        recordingUrl: data.recordingUrl || null,
-        latenessMinutes: data.latenessMinutes,
-        fineAmount: fineAmount,
-        assignedHomework: data.assignedHomework || null,
-        nextFocusTopic: data.nextFocusTopic || null,
-
-        segments: {
-          create: data.segments.map((seg) => ({
-            topicId: seg.topicId,
-            toolId: seg.toolId || null,
-            durationMinutes: seg.durationMinutes,
-            activityType: seg.activityType,
-            masteryStatus: seg.masteryStatus,
-          })),
-        },
-
-        reflection: {
-          create: data.reflection,
-        },
+        courseId,
+        ...sessionFields,
+        segments: { create: segmentRows },
+        reflection: { create: data.reflection },
       },
     });
   }

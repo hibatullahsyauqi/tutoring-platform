@@ -4,7 +4,8 @@ import { prisma } from '../../lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { SessionStatus, SessionType } from '@prisma/client';
-import { assertOwnsStudent, requireTutor } from '../../lib/auth';
+import { assertEnrolled, assertOwnsStudent, requireTutor } from '../../lib/auth';
+import { cancelSessionSchema, parseInput, scheduleSessionSchema } from '../../lib/validation';
 import { absenceFine } from '../../lib/payroll';
 
 export type ScheduleSessionInput = {
@@ -18,9 +19,11 @@ export type ScheduleSessionInput = {
   nextFocusTopic?: string;
 };
 
-export async function scheduleSessionAction(data: ScheduleSessionInput) {
+export async function scheduleSessionAction(input: ScheduleSessionInput) {
+  const data = parseInput(scheduleSessionSchema, input);
   const tutor = await requireTutor();
   await assertOwnsStudent(tutor.id, data.studentId);
+  await assertEnrolled(data.studentId, data.courseId);
 
   await prisma.session.create({
     data: {
@@ -42,24 +45,25 @@ export async function scheduleSessionAction(data: ScheduleSessionInput) {
 }
 
 export async function cancelSessionAction(sessionId: string, newStatus: SessionStatus) {
+  const input = parseInput(cancelSessionSchema, { sessionId, newStatus });
   const tutor = await requireTutor();
 
   const session = await prisma.session.findFirst({
-    where: { id: sessionId, student: { tutorId: tutor.id } },
+    where: { id: input.sessionId, student: { tutorId: tutor.id } },
     include: { course: true },
   });
   if (!session) throw new Error('Session not found.');
 
   // If absent without notice, contract enforces session fee fine
-  const fineAmount = newStatus === 'ABSENT_UNNOTIFIED' ? absenceFine(session.course.level) : 0;
+  const fineAmount =
+    input.newStatus === 'ABSENT_UNNOTIFIED' ? absenceFine(session.course.level) : 0;
 
-  await prisma.session.update({
-    where: { id: sessionId },
-    data: {
-      status: newStatus,
-      fineAmount,
-    },
+  // Only a still-scheduled session can be cancelled; a completed one is already payroll history.
+  const { count } = await prisma.session.updateMany({
+    where: { id: input.sessionId, status: 'SCHEDULED' },
+    data: { status: input.newStatus, fineAmount },
   });
+  if (count === 0) throw new Error('Only scheduled sessions can be cancelled.');
 
   revalidatePath('/schedule');
   revalidatePath('/');

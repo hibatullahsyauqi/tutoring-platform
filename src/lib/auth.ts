@@ -27,11 +27,20 @@ export const requireTutor = cache(async () => {
   });
 });
 
-/** Throws unless the student belongs to the tutor. */
+/** Throws unless the student belongs to the tutor and is not archived. */
 export async function assertOwnsStudent(tutorId: string, studentId: string) {
   const student = await prisma.student.findFirst({
-    where: { id: studentId, tutorId },
+    where: { id: studentId, tutorId, archivedAt: null },
     select: { id: true },
   });
   if (!student) throw new Error('Student not found.');
+}
+
+/** Throws unless the student is enrolled in the course. */
+export async function assertEnrolled(studentId: string, courseId: string) {
+  const enrollment = await prisma.enrollment.findUnique({
+    where: { studentId_courseId: { studentId, courseId } },
+    select: { id: true },
+  });
+  if (!enrollment) throw new Error('Student is not enrolled in that course.');
 }

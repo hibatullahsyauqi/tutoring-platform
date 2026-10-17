@@ -14,7 +14,7 @@ export default async function NewSessionPage({ searchParams }: Props) {
   const { studentId, sessionId } = await searchParams;
 
   const students = await prisma.student.findMany({
-    where: { tutorId: tutor.id },
+    where: { tutorId: tutor.id, archivedAt: null },
     include: {
       enrollments: {
         include: {

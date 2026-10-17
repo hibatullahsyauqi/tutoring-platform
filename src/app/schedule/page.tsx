@@ -10,7 +10,7 @@ export default async function SchedulePage() {
 
   // 1. Fetch all students under this tutor
   const students = await prisma.student.findMany({
-    where: { tutorId: tutor.id },
+    where: { tutorId: tutor.id, archivedAt: null },
     include: {
       enrollments: {
         include: {
@@ -35,7 +35,7 @@ export default async function SchedulePage() {
   // 2. Fetch all sessions (Scheduled and Completed) to populate the timetable
   const allSessions = await prisma.session.findMany({
     where: {
-      student: { tutorId: tutor.id },
+      student: { tutorId: tutor.id, archivedAt: null },
     },
     include: {
       student: true,

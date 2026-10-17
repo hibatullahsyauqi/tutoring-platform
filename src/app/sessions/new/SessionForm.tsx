@@ -212,6 +212,7 @@ export default function SessionForm({
         });
       } catch (err) {
         console.error('Failed to save session:', err);
+        alert('Could not save. Please check the details and try again.');
       }
     });
   };

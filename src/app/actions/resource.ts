@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { ResourceType } from '@prisma/client';
 import { requireTutor } from '../../lib/auth';
+import { createResourceSchema, parseInput } from '../../lib/validation';
 
 export type CreateResourceInput = {
   courseId: string;
@@ -16,7 +17,8 @@ export type CreateResourceInput = {
   locationDetails?: string;
 };
 
-export async function createResourceAction(data: CreateResourceInput) {
+export async function createResourceAction(input: CreateResourceInput) {
+  const data = parseInput(createResourceSchema, input);
   await requireTutor();
 
   await prisma.resource.create({

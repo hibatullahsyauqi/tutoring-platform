@@ -75,7 +75,7 @@ export default async function StudentDossierPage({ params }: Props) {
   const tutor = await requireTutor();
 
   const student = await prisma.student.findUnique({
-    where: { id, tutorId: tutor.id },
+    where: { id, tutorId: tutor.id, archivedAt: null },
     include: {
       enrollments: {
         include: {

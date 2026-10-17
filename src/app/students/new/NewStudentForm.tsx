@@ -56,6 +56,7 @@ export default function NewStudentForm({ courses }: { courses: CourseItem[] }) {
       });
     } catch (err) {
       console.error('Failed to create student:', err);
+      alert('Could not save. Please check the details and try again.');
       setSubmitting(false);
     }
   };
