@@ -39,6 +39,31 @@ function dayDate(key: string): Date {
   return new Date(Date.UTC(y, m - 1, d));
 }
 
+const HOLD_DELAY_MS = 420;
+const HOLD_REPEAT_MS = 85;
+
+function Chevron({ up }: { up: boolean }) {
+  return (
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <polyline points={up ? '6 15 12 9 18 15' : '6 9 12 15 18 9'} />
+    </svg>
+  );
+}
+
+/**
+ * Hour or minute control: glass buttons above and below a glass pill. Digits roll up or down as
+ * the value changes, and holding a button keeps stepping. The value also answers the arrow keys.
+ */
 function Stepper({
   label,
   value,
@@ -48,16 +73,92 @@ function Stepper({
   value: string;
   onStep: (delta: number) => void;
 }) {
+  const [direction, setDirection] = useState<1 | -1>(1);
+  const hold = useRef<{ delay: ReturnType<typeof setTimeout> | null; repeat: ReturnType<typeof setInterval> | null }>({
+    delay: null,
+    repeat: null,
+  });
+
+  const stop = () => {
+    if (hold.current.delay) clearTimeout(hold.current.delay);
+    if (hold.current.repeat) clearInterval(hold.current.repeat);
+    hold.current = { delay: null, repeat: null };
+  };
+  useEffect(() => stop, []);
+
+  const step = (delta: 1 | -1) => {
+    setDirection(delta);
+    onStep(delta);
+  };
+  const start = (delta: 1 | -1) => {
+    step(delta);
+    stop();
+    hold.current.delay = setTimeout(() => {
+      hold.current.repeat = setInterval(() => step(delta), HOLD_REPEAT_MS);
+    }, HOLD_DELAY_MS);
+  };
+
   return (
     <div className="glass-date-stepper" role="group" aria-label={label}>
-      <button type="button" className="glass-date-step" aria-label={`Increase ${label}`} onClick={() => onStep(1)}>
-        ▲
+      <button
+        type="button"
+        className="glass-btn glass-step"
+        aria-label={`Increase ${label}`}
+        onPointerDown={(e) => {
+          e.preventDefault();
+          start(1);
+        }}
+        onPointerUp={stop}
+        onPointerLeave={stop}
+        onPointerCancel={stop}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            step(1);
+          }
+        }}
+      >
+        <Chevron up />
       </button>
-      <span className="glass-date-time" aria-live="polite">
-        {value}
+      <span
+        className="glass-inset glass-date-time"
+        role="spinbutton"
+        tabIndex={0}
+        aria-label={label}
+        aria-valuenow={Number(value)}
+        onKeyDown={(e) => {
+          if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            step(1);
+          } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            step(-1);
+          }
+        }}
+      >
+        <span key={value} className={direction === 1 ? 'digit-up' : 'digit-down'}>
+          {value}
+        </span>
       </span>
-      <button type="button" className="glass-date-step" aria-label={`Decrease ${label}`} onClick={() => onStep(-1)}>
-        ▼
+      <button
+        type="button"
+        className="glass-btn glass-step"
+        aria-label={`Decrease ${label}`}
+        onPointerDown={(e) => {
+          e.preventDefault();
+          start(-1);
+        }}
+        onPointerUp={stop}
+        onPointerLeave={stop}
+        onPointerCancel={stop}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            step(-1);
+          }
+        }}
+      >
+        <Chevron up={false} />
       </button>
     </div>
   );
@@ -238,6 +339,11 @@ export default function GlassDatePicker({
     const total = (h * 60 + m + (part === 'h' ? delta * 60 : delta * 5) + 1440) % 1440;
     emit(valueDate ?? cursor, `${pad(Math.floor(total / 60))}:${pad(total % 60)}`);
   };
+  // A held button keeps firing the handler it started with, so route it to the latest one.
+  const stepRef = useRef(stepTime);
+  useEffect(() => {
+    stepRef.current = stepTime;
+  });
 
   const label = valueDate
     ? `${formatDateOnly(dayDate(valueDate), { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}${
@@ -359,9 +465,9 @@ export default function GlassDatePicker({
 
             {withTime && (
               <div className="glass-date-timebar">
-                <Stepper label="hour" value={valueTime.slice(0, 2)} onStep={(d) => stepTime('h', d)} />
+                <Stepper label="hour" value={valueTime.slice(0, 2)} onStep={(d) => stepRef.current('h', d)} />
                 <span className="glass-date-colon">:</span>
-                <Stepper label="minute" value={valueTime.slice(3)} onStep={(d) => stepTime('m', d)} />
+                <Stepper label="minute" value={valueTime.slice(3)} onStep={(d) => stepRef.current('m', d)} />
                 <div className="glass-date-quick">
                   <button
                     type="button"
