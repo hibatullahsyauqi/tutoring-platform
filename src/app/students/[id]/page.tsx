@@ -131,10 +131,21 @@ export default async function StudentDossierPage({ params }: Props) {
   const coveredCount = coveredTopicIds.size;
   const coveragePercent = totalTopicsCount > 0 ? Math.round((coveredCount / totalTopicsCount) * 100) : 0;
 
-  const chronologicalSessions = student.sessions.map((s, idx) => ({
-    ...s,
-    meetingNumber: `Meeting ${idx + 1}`,
-  }));
+  // Only lessons that actually happened get a meeting number (it feeds the attendance sheet).
+  const completedCount = student.sessions.filter((s) => s.status === 'COMPLETED').length;
+  const chronologicalSessions = student.sessions.map((s, idx) => {
+    const label =
+      s.status === 'COMPLETED'
+        ? `Meeting ${student.sessions.slice(0, idx + 1).filter((x) => x.status === 'COMPLETED').length}`
+        : s.status === 'SCHEDULED'
+          ? new Date(s.sessionDate) <= new Date()
+            ? 'Needs log'
+            : 'Upcoming'
+          : s.status === 'ABSENT_UNNOTIFIED'
+            ? 'Absent'
+            : 'Cancelled';
+    return { ...s, meetingNumber: label };
+  });
   const displaySessions = [...chronologicalSessions].reverse();
 
   return (
@@ -219,7 +230,7 @@ export default async function StudentDossierPage({ params }: Props) {
               Learning Journey & Session Timeline
             </h2>
             <span className="text-xs text-[#6f6b62]">
-              {displaySessions.length} Recorded Session{displaySessions.length !== 1 ? 's' : ''}
+              {completedCount} Recorded Session{completedCount !== 1 ? 's' : ''}
             </span>
           </div>
 
@@ -288,8 +299,20 @@ export default async function StudentDossierPage({ params }: Props) {
                           </a>
                         )}
 
-                        <CopyPresenceButton payload={presencePayload} />
-                        {session.status === 'COMPLETED' && <RevertSessionButton sessionId={session.id} />}
+                        {session.status === 'SCHEDULED' && new Date(session.sessionDate) <= new Date() && (
+                          <Link
+                            href={`/sessions/new?studentId=${student.id}&sessionId=${session.id}`}
+                            className="bg-[#a3462f] hover:bg-[#853623] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"
+                          >
+                            Log Lesson →
+                          </Link>
+                        )}
+                        {session.status === 'COMPLETED' && (
+                          <>
+                            <CopyPresenceButton payload={presencePayload} />
+                            <RevertSessionButton sessionId={session.id} />
+                          </>
+                        )}
                         <DeleteSessionButton
                           sessionId={session.id}
                           completed={session.status === 'COMPLETED'}
@@ -298,6 +321,7 @@ export default async function StudentDossierPage({ params }: Props) {
                       </div>
                     </div>
 
+                    {session.status === 'COMPLETED' && (
                     <div className="space-y-2">
                       <div className="text-[11px] font-bold uppercase tracking-wider text-[#6f6b62]">
                         Topics & Concept Grasp
@@ -336,6 +360,7 @@ export default async function StudentDossierPage({ params }: Props) {
                         })}
                       </div>
                     </div>
+                    )}
 
                     {session.reflection && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 text-xs">
