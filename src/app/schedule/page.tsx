@@ -1,28 +1,12 @@
 import { prisma } from '@/lib/prisma';
-import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
+import { requireTutor } from '@/lib/auth';
 import Link from 'next/link';
 import ScheduleClientView from './ScheduleClientView';
 
 export const dynamic = 'force-dynamic';
 
 export default async function SchedulePage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user || !user.email) {
-    redirect('/login');
-  }
-
-  const tutor = await prisma.tutor.findUnique({
-    where: { email: user.email },
-  });
-
-  if (!tutor) {
-    redirect('/login');
-  }
+  const tutor = await requireTutor();
 
   // 1. Fetch all students under this tutor
   const students = await prisma.student.findMany({

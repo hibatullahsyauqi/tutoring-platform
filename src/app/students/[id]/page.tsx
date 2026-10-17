@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { requireTutor } from '@/lib/auth';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import CopyPresenceButton from '@/components/CopyPresenceButton';
@@ -71,9 +72,10 @@ function getSheetPlace(): string {
 
 export default async function StudentDossierPage({ params }: Props) {
   const { id } = await params;
+  const tutor = await requireTutor();
 
   const student = await prisma.student.findUnique({
-    where: { id },
+    where: { id, tutorId: tutor.id },
     include: {
       enrollments: {
         include: {

@@ -4,6 +4,8 @@ import { prisma } from '../../lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { ActivityType, SessionType } from '@prisma/client';
+import { assertOwnsStudent, requireTutor } from '../../lib/auth';
+import { latenessFine } from '../../lib/payroll';
 
 export type MasteryStatus = 'STRUGGLING' | 'NEEDS_PRACTICE' | 'MASTERED';
 
@@ -37,6 +39,9 @@ export type CreateSessionInput = {
 };
 
 export async function createSessionAction(data: CreateSessionInput) {
+  const tutor = await requireTutor();
+  await assertOwnsStudent(tutor.id, data.studentId);
+
   // Guard: You cannot record history before it happens!
   // Allow a 5-minute buffer for local clock differences.
   const sessionTime = new Date(data.sessionDate);
@@ -48,13 +53,16 @@ export async function createSessionAction(data: CreateSessionInput) {
     );
   }
 
-  let fineAmount = 0;
-  if (data.latenessMinutes >= 15) {
-    fineAmount = Math.floor(data.latenessMinutes / 15) * 10000;
-  }
+  const fineAmount = latenessFine(data.latenessMinutes);
 
   if (data.existingSessionId) {
     // Update existing scheduled session to COMPLETED
+    const existing = await prisma.session.findFirst({
+      where: { id: data.existingSessionId, studentId: data.studentId },
+      select: { id: true },
+    });
+    if (!existing) throw new Error('Session not found.');
+
     await prisma.session.update({
       where: { id: data.existingSessionId },
       data: {

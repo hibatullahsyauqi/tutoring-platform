@@ -4,6 +4,7 @@ import { prisma } from '../../lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { ResourceType } from '@prisma/client';
+import { requireTutor } from '../../lib/auth';
 
 export type CreateResourceInput = {
   courseId: string;
@@ -16,6 +17,8 @@ export type CreateResourceInput = {
 };
 
 export async function createResourceAction(data: CreateResourceInput) {
+  await requireTutor();
+
   await prisma.resource.create({
     data: {
       courseId: data.courseId,

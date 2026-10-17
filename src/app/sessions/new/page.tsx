@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { requireTutor } from '@/lib/auth';
 import Link from 'next/link';
 import SessionForm from './SessionForm';
 
@@ -9,9 +10,11 @@ interface Props {
 }
 
 export default async function NewSessionPage({ searchParams }: Props) {
+  const tutor = await requireTutor();
   const { studentId, sessionId } = await searchParams;
 
   const students = await prisma.student.findMany({
+    where: { tutorId: tutor.id },
     include: {
       enrollments: {
         include: {

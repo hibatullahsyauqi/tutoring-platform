@@ -4,6 +4,8 @@ import { prisma } from '../../lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { SessionStatus, SessionType } from '@prisma/client';
+import { assertOwnsStudent, requireTutor } from '../../lib/auth';
+import { absenceFine } from '../../lib/payroll';
 
 export type ScheduleSessionInput = {
   studentId: string;
@@ -17,6 +19,9 @@ export type ScheduleSessionInput = {
 };
 
 export async function scheduleSessionAction(data: ScheduleSessionInput) {
+  const tutor = await requireTutor();
+  await assertOwnsStudent(tutor.id, data.studentId);
+
   await prisma.session.create({
     data: {
       studentId: data.studentId,
@@ -37,18 +42,16 @@ export async function scheduleSessionAction(data: ScheduleSessionInput) {
 }
 
 export async function cancelSessionAction(sessionId: string, newStatus: SessionStatus) {
+  const tutor = await requireTutor();
+
+  const session = await prisma.session.findFirst({
+    where: { id: sessionId, student: { tutorId: tutor.id } },
+    include: { course: true },
+  });
+  if (!session) throw new Error('Session not found.');
+
   // If absent without notice, contract enforces session fee fine
-  let fineAmount = 0;
-  if (newStatus === 'ABSENT_UNNOTIFIED') {
-    const session = await prisma.session.findUnique({
-      where: { id: sessionId },
-      include: { course: true },
-    });
-    // Contract rate lookup
-    if (session?.course.level === 'IGCSE') fineAmount = 100000;
-    else if (session?.course.level === 'A_LEVEL' || session?.course.level === 'DP') fineAmount = 150000;
-    else fineAmount = 75000;
-  }
+  const fineAmount = newStatus === 'ABSENT_UNNOTIFIED' ? absenceFine(session.course.level) : 0;
 
   await prisma.session.update({
     where: { id: sessionId },

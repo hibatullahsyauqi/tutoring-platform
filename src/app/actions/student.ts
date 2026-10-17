@@ -3,6 +3,7 @@
 import { prisma } from '../../lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { requireTutor } from '../../lib/auth';
 
 export type CreateStudentInput = {
   name: string;
@@ -12,10 +13,7 @@ export type CreateStudentInput = {
 };
 
 export async function createStudentAction(data: CreateStudentInput) {
-  const tutor = await prisma.tutor.findFirst();
-  if (!tutor) {
-    throw new Error('No active tutor found in database.');
-  }
+  const tutor = await requireTutor();
 
   const student = await prisma.student.create({
     data: {
@@ -37,9 +35,11 @@ export async function createStudentAction(data: CreateStudentInput) {
 
 export async function deleteStudentAction(studentId: string) {
   // Cascades automatically to enrollments, sessions, segments, and reflections in Supabase
-  await prisma.student.delete({
-    where: { id: studentId },
+  const tutor = await requireTutor();
+  const { count } = await prisma.student.deleteMany({
+    where: { id: studentId, tutorId: tutor.id },
   });
+  if (count === 0) throw new Error('Student not found.');
 
   revalidatePath('/');
   revalidatePath('/schedule');
