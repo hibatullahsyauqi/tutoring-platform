@@ -548,7 +548,7 @@ export default function ScheduleClientView({
                         <div
                           key={s.id}
                           onClick={() => setSelectedSessionModal(s)}
-                          className="glass-card-subtle p-4 flex items-center justify-between gap-3 cursor-pointer transition-all hover:brightness-105 group"
+                          className="glass-card-subtle p-4 flex items-center justify-between gap-3 transition-all hover:brightness-105 group glass-interactive"
                         >
                           <div className="flex items-center gap-4 min-w-0">
                             <div className="text-sm font-bold text-[#0f172a] tabular-nums whitespace-nowrap shrink-0">{sTime}</div>
@@ -565,7 +565,7 @@ export default function ScheduleClientView({
                     <button
                       type="button"
                       onClick={() => handleSlotClick(day.dateStr, day.contractSlot)}
-                      className="glass-inset w-full p-3 text-xs font-semibold text-slate-700 hover:text-[#2d523e] cursor-pointer transition-all"
+                      className="glass-inset w-full p-3 text-xs font-semibold text-slate-700 hover:text-[#2d523e] transition-all glass-interactive"
                     >
                       {daySessions.length === 0
                         ? `+ Book ${day.contractSlot ? '18:30 slot' : 'a slot'}`

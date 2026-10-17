@@ -136,11 +136,11 @@ export default function NewStudentForm({ courses }: { courses: CourseItem[] }) {
                 key={t.val}
                 type="button"
                 onClick={() => setTier(t.val)}
-                className={`glass-inset p-3 text-left transition-all cursor-pointer  ${
+                className={`glass-inset p-3 text-left transition-all  ${
                   tier === t.val
                     ? 'outline outline-2 outline-[#3d6b52] text-[#2d523e] font-semibold'
                     : 'text-slate-700 opacity-90 hover:opacity-100'
-                } `}
+                }  glass-interactive`}
               >
                 <div className="text-xs font-bold">{t.label}</div>
                 <div className="text-[10px] opacity-75 mt-0.5">{t.sub}</div>

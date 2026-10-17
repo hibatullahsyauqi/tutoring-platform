@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Besley, Nunito } from 'next/font/google';
 import './globals.css';
+import GlassPointer from '@/components/GlassPointer';
 
 // 1. Fetch Besley for Headers
 const besley = Besley({
@@ -30,6 +31,7 @@ export default function RootLayout({
     <html lang="en" className={`${nunito.variable} ${besley.variable}`}>
       <body className="antialiased">
         <div className="top-fade" aria-hidden="true" />
+        <GlassPointer />
         {children}
       </body>
     </html>

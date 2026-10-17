@@ -524,11 +524,11 @@ export default function SessionForm({
                         updated[idx].masteryStatus = status.val as MasteryStatus;
                         setSegments(updated);
                       }}
-                      className={`glass-inset p-3 text-left transition-all cursor-pointer  ${
+                      className={`glass-inset p-3 text-left transition-all  ${
                         seg.masteryStatus === status.val
                           ? 'outline outline-2 outline-[#3d6b52] text-[#2d523e] font-semibold'
                           : 'text-slate-700 opacity-90 hover:opacity-100'
-                      } `}
+                      }  glass-interactive`}
                     >
                       <div className="text-xs">{status.label}</div>
                       <div className="text-[10px] opacity-75 mt-0.5">{status.desc}</div>
