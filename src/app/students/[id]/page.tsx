@@ -1,4 +1,5 @@
 import RefreshButton from '@/components/RefreshButton';
+import BackButton from '@/components/BackButton';
 import RevertSessionButton from '@/components/RevertSessionButton';
 import DeleteSessionButton from '@/components/DeleteSessionButton';
 import { prisma } from '@/lib/prisma';
@@ -238,9 +239,6 @@ export default async function StudentDossierPage({ params, searchParams }: Props
         <div className="md:sticky md:top-3 z-30">
           <div className="glass-panel glass-sticky p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="min-w-0">
-                <Link href="/" className="text-xs font-semibold text-[#2d523e] hover:underline mb-2 inline-block">
-                  ← Back to Dashboard
-                </Link>
               <div className="flex items-center gap-2 mb-1">
                 <h1 className="text-2xl font-bold tracking-tight text-[#0f172a]">{student.name}</h1>
                 <span className="glass-pill text-xs font-bold uppercase tracking-wider px-2.5 py-0.5">
@@ -258,6 +256,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
             </div>
 
             <div className="flex flex-wrap md:flex-nowrap items-center gap-2 self-start md:self-auto md:shrink-0">
+              <BackButton />
               <RefreshButton />
               <Link
                 href="/schedule"

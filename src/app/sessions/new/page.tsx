@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { requireTutor } from '@/lib/auth';
 import Link from 'next/link';
+import BackButton from '@/components/BackButton';
 import { endOfDayIn, resolveTimeZone } from '@/lib/time';
 import SessionForm from './SessionForm';
 
@@ -97,9 +98,7 @@ export default async function NewSessionPage({ searchParams }: Props) {
               {sessionId ? 'Complete & Log Scheduled Lesson' : 'Log Session & Evaluate Mastery'}
             </h1>
           </div>
-          <Link href="/" className="glass-btn self-start">
-            ← Dashboard
-          </Link>
+          <BackButton className="self-start" />
         </header>
 
         <SessionForm

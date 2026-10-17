@@ -1,7 +1,7 @@
 import RefreshButton from '@/components/RefreshButton';
+import BackButton from '@/components/BackButton';
 import { prisma } from '@/lib/prisma';
 import { requireTutor } from '@/lib/auth';
-import Link from 'next/link';
 import ScheduleClientView from './ScheduleClientView';
 import { absenceFine } from '@/lib/payroll';
 import { finalRescheduleTarget, weekOffsetFor, type ChainSession } from '@/lib/reschedule-chain';
@@ -177,10 +177,8 @@ export default async function SchedulePage({ searchParams }: Props) {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
+            <BackButton />
             <RefreshButton />
-            <Link href="/" className="glass-btn">
-              ← Dashboard
-            </Link>
           </div>
         </header>
 

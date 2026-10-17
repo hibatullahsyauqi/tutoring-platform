@@ -1,6 +1,6 @@
 import RefreshButton from '@/components/RefreshButton';
+import BackButton from '@/components/BackButton';
 import { prisma } from '@/lib/prisma';
-import Link from 'next/link';
 import LibraryView from './LibraryView';
 import Pagination from '@/components/Pagination';
 import { paginate, parsePage } from '@/lib/pagination';
@@ -139,10 +139,8 @@ export default async function LibraryPage({ searchParams }: Props) {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
+            <BackButton />
             <RefreshButton />
-            <Link href="/" className="glass-btn">
-              ← Dashboard
-            </Link>
           </div>
         </header>
 

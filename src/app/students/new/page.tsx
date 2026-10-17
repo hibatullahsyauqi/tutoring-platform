@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
+import BackButton from '@/components/BackButton';
 import NewStudentForm from './NewStudentForm';
 
 export const dynamic = 'force-dynamic';
@@ -119,9 +120,7 @@ export default async function NewStudentPage() {
               Configure student identity, board curriculum, and fluid examination tiering.
             </p>
           </div>
-          <Link href="/" className="glass-btn self-start">
-            ← Dashboard
-          </Link>
+          <BackButton className="self-start" />
         </header>
 
         <NewStudentForm courses={formattedCourses} />
