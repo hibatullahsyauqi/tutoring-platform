@@ -1,3 +1,4 @@
+import RefreshButton from '@/components/RefreshButton';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import LibraryView from './LibraryView';
@@ -107,9 +108,12 @@ export default async function LibraryPage() {
               <span className="font-bold text-[#0f172a]">{resources.length}</span> assets indexed
             </p>
           </div>
-          <Link href="/" className="glass-btn self-start md:self-auto">
-            ← Dashboard
-          </Link>
+          <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
+            <RefreshButton />
+            <Link href="/" className="glass-btn">
+              ← Dashboard
+            </Link>
+          </div>
         </header>
 
         {/* 3RD-PARTY INSTITUTIONAL LAUNCHER */}

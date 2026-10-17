@@ -1,3 +1,4 @@
+import RefreshButton from '@/components/RefreshButton';
 import { prisma } from '@/lib/prisma';
 import { requireTutor } from '@/lib/auth';
 import { computePayroll, monthBounds, nextDisbursementDate } from '@/lib/payroll';
@@ -144,6 +145,7 @@ export default async function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-2.5 flex-wrap">
+            <RefreshButton />
             <Link
               href="/schedule"
               className="glass-btn inline-flex items-center"

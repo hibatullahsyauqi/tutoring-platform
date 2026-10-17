@@ -1,3 +1,4 @@
+import RefreshButton from '@/components/RefreshButton';
 import RevertSessionButton from '@/components/RevertSessionButton';
 import DeleteSessionButton from '@/components/DeleteSessionButton';
 import { prisma } from '@/lib/prisma';
@@ -227,6 +228,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
             </div>
 
             <div className="flex flex-wrap md:flex-nowrap items-center gap-2 self-start md:self-auto md:shrink-0">
+              <RefreshButton />
               <Link
                 href="/schedule"
                 className="glass-btn"
