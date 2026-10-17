@@ -44,7 +44,7 @@ export default async function DashboardPage() {
   // Smart Next Up Briefing
   const nextUpcomingSession = await prisma.session.findFirst({
     where: {
-      student: { tutorId: activeTutor.id },
+      student: { tutorId: activeTutor.id, archivedAt: null },
       status: 'SCHEDULED',
       sessionDate: { gte: now },
     },
@@ -66,7 +66,7 @@ export default async function DashboardPage() {
 
   const fallbackRecentSession = await prisma.session.findFirst({
     where: {
-      student: { tutorId: activeTutor.id },
+      student: { tutorId: activeTutor.id, archivedAt: null },
       status: 'COMPLETED',
     },
     orderBy: { sessionDate: 'desc' },
@@ -78,7 +78,7 @@ export default async function DashboardPage() {
   });
 
   const students = await prisma.student.findMany({
-    where: { tutorId: activeTutor.id },
+    where: { tutorId: activeTutor.id, archivedAt: null },
     include: {
       enrollments: {
         include: {

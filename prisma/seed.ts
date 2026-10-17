@@ -291,38 +291,7 @@ async function main() {
   }
 
   // -------------------------------------------------------------
-  // 6. DEFAULT STUDENT: MAYA
-  // -------------------------------------------------------------
-  if (igcseMaths) {
-    const maya = await prisma.student.upsert({
-      where: { id: '00000000-0000-0000-0000-000000000001' },
-      update: {},
-      create: {
-        id: '00000000-0000-0000-0000-000000000001',
-        tutorId: tutor.id,
-        name: 'Maya',
-        targetExamDate: new Date('2027-05-01'),
-      },
-    });
-
-    await prisma.enrollment.upsert({
-      where: {
-        studentId_courseId: {
-          studentId: maya.id,
-          courseId: igcseMaths.id,
-        },
-      },
-      update: { tier: 'Extended' } as any,
-      create: {
-        studentId: maya.id,
-        courseId: igcseMaths.id,
-        tier: 'Extended',
-      },
-    });
-  }
-
-  // -------------------------------------------------------------
-  // 7. SEED MODULAR PORTAL VAULT (Clean, Non-misleading & Modular)
+  // 6. SEED MODULAR PORTAL VAULT (Clean, Non-misleading & Modular)
   // -------------------------------------------------------------
   if (igcseMaths) {
     // Wipe previous duplicates before seeding fresh
