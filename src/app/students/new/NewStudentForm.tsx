@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { createStudentAction } from '@/app/actions/student';
+import { describeError, isRedirectError } from '@/lib/errors';
 
 type TierConfig = {
   val: string;
@@ -55,8 +56,9 @@ export default function NewStudentForm({ courses }: { courses: CourseItem[] }) {
         targetExamDate: hasTargetExam && targetExamDate ? targetExamDate : undefined,
       });
     } catch (err) {
+      if (isRedirectError(err)) throw err;
       console.error('Failed to create student:', err);
-      alert('Could not save. Please check the details and try again.');
+      alert(describeError('Could not save. Please check the details and try again.', err));
       setSubmitting(false);
     }
   };

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { createResourceAction } from '@/app/actions/resource';
 import { ResourceType } from '@prisma/client';
+import { describeError, isRedirectError } from '@/lib/errors';
 
 type ResourceItem = {
   id: string;
@@ -76,7 +77,9 @@ export default function LibraryView({
       setLocationDetails('');
       setUrl('');
     } catch (err) {
+      if (isRedirectError(err)) throw err;
       console.error('Failed to create resource:', err);
+      alert(describeError('Could not save. Please check the details and try again.', err));
     } finally {
       setSubmitting(false);
     }

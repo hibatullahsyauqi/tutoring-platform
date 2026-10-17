@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { deleteStudentAction } from '@/app/actions/student';
+import { describeError, isRedirectError } from '@/lib/errors';
 
 export default function DeleteStudentButton({
   studentId,
@@ -22,8 +23,9 @@ export default function DeleteStudentButton({
         try {
           await deleteStudentAction(studentId);
         } catch (err) {
+          if (isRedirectError(err)) throw err;
           console.error('Failed to delete student:', err);
-          alert('Could not archive this student.');
+          alert(describeError('Could not archive this student.', err));
         }
       });
     }
