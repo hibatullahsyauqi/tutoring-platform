@@ -1455,3 +1455,40 @@ main:not(.no-enter) > div > *:nth-child(n + 6) { animation-delay: 0.3s; }
     filter: none;
   }
 }
+
+/* LiquidPresence: forms and panels that open and close with the same melt */
+.liquid-presence {
+  display: grid;
+  grid-template-rows: 1fr;
+}
+.liquid-presence-inner {
+  min-height: 0;
+}
+.liquid-presence.is-closing {
+  pointer-events: none;
+  animation: liquid-collapse 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+.liquid-presence.is-closing > .liquid-presence-inner {
+  overflow: hidden;
+  animation: liquid-out 0.32s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+@keyframes liquid-collapse {
+  to {
+    grid-template-rows: 0fr;
+    margin-block: 0;
+  }
+}
+@keyframes liquid-out {
+  to {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.96, 0.7);
+    filter: blur(6px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .liquid-presence.is-closing,
+  .liquid-presence.is-closing > .liquid-presence-inner {
+    animation: none;
+    display: none;
+  }
+}

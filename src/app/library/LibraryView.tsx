@@ -1,5 +1,6 @@
 'use client';
 
+import LiquidPresence from '@/components/LiquidPresence';
 import GlassSelect from '@/components/GlassSelect';
 import BlobTabs from '@/components/BlobTabs';
 import { useState, useTransition } from 'react';
@@ -178,8 +179,8 @@ export default function LibraryView({
       </div>
 
       {/* INLINE ADD RESOURCE FORM */}
-      {showAddForm && (
-        <form onSubmit={handleAddSubmit} className="liquid-in glass-card-subtle outline outline-2 outline-[#3d6b52]/40 p-5 space-y-4">
+      <LiquidPresence open={showAddForm}>
+        <form onSubmit={handleAddSubmit} className="glass-card-subtle outline outline-2 outline-[#3d6b52]/40 p-5 space-y-4">
           <h2 className="text-xs font-bold uppercase tracking-wider text-[#2d523e]">
             Index New Teaching Material
           </h2>
@@ -276,7 +277,7 @@ export default function LibraryView({
             </button>
           </div>
         </form>
-      )}
+      </LiquidPresence>
 
       {/* RESOURCE LIST */}
       {filtered.length === 0 ? (

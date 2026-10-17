@@ -1,5 +1,6 @@
 'use client';
 
+import LiquidPresence from '@/components/LiquidPresence';
 import GlassDatePicker from '@/components/GlassDatePicker';
 import GlassSelect from '@/components/GlassSelect';
 import { useState, useTransition } from 'react';
@@ -98,8 +99,8 @@ function CancelReasons({
       <button type="button" onClick={() => setRescheduling(!rescheduling)} className={option}>
         Rescheduled / Prior Notice (Pasal 7: No fine)
       </button>
-      {rescheduling && (
-        <div className="liquid-in basis-full p-3 glass-inset space-y-2">
+      <LiquidPresence open={rescheduling} className="basis-full">
+        <div className="basis-full p-3 glass-inset space-y-2">
           <label className="block text-[10px] font-bold text-[#0f172a]">New date & time ({zone.label})</label>
           <GlassDatePicker
             mode="datetime"
@@ -132,7 +133,7 @@ function CancelReasons({
             </button>
           </div>
         </div>
-      )}
+      </LiquidPresence>
       <button type="button" onClick={() => onPick('CANCELLED_BY_STUDENT')} className={option}>
         Student Cancelled (No fine)
       </button>
@@ -387,8 +388,8 @@ export default function ScheduleClientView({
         </div>
 
       {/* SCHEDULE FORM MODAL */}
-      {showScheduleForm && (
-        <form onSubmit={handleScheduleSubmit} className="liquid-in glass-card-subtle outline outline-2 outline-[#3d6b52]/40 p-5 space-y-4">
+      <LiquidPresence open={showScheduleForm}>
+        <form onSubmit={handleScheduleSubmit} className="glass-card-subtle outline outline-2 outline-[#3d6b52]/40 p-5 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xs font-bold uppercase tracking-wider text-[#2d523e]">
               Book Teaching Slot
@@ -477,7 +478,7 @@ export default function ScheduleClientView({
             </button>
           </div>
         </form>
-      )}
+      </LiquidPresence>
 
       {/* VIEW 1: WEEKLY TIMETABLE */}
       {viewMode === 'CALENDAR' && (
@@ -722,8 +723,8 @@ export default function ScheduleClientView({
                     </div>
                   </div>
 
-                  {cancellingId === s.id && (
-                    <div className="liquid-in glass-inset p-3 space-y-2 text-xs" onClick={(e) => e.stopPropagation()}>
+                  <LiquidPresence open={cancellingId === s.id}>
+                    <div className="glass-inset p-3 space-y-2 text-xs" onClick={(e) => e.stopPropagation()}>
                       <span className="font-bold text-[#a3462f] block">Select Cancellation Reason:</span>
                       <CancelReasons
                         session={s}
@@ -732,7 +733,7 @@ export default function ScheduleClientView({
                         onReschedule={(date) => handleReschedule(s.id, date)}
                       />
                     </div>
-                  )}
+                  </LiquidPresence>
 
                   {(s.nextFocusTopic || s.assignedHomework || s.topicsSummary) && (
                     <div className="p-3 text-xs space-y-1 glass-inset">
@@ -934,8 +935,8 @@ export default function ScheduleClientView({
                   </button>
                 </div>
 
-                {cancellingId === selectedSessionModal.id && (
-                  <div className="liquid-in mt-2 glass-inset p-3 space-y-1.5 text-left text-xs">
+                <LiquidPresence open={cancellingId === selectedSessionModal.id}>
+                  <div className="mt-2 glass-inset p-3 space-y-1.5 text-left text-xs">
                     <span className="font-bold text-[#a3462f] text-[10px] block">Select Reason:</span>
                     <CancelReasons
                       compact
@@ -945,7 +946,7 @@ export default function ScheduleClientView({
                       onReschedule={(date) => handleReschedule(selectedSessionModal.id, date)}
                     />
                   </div>
-                )}
+                </LiquidPresence>
               </div>
             )}
 

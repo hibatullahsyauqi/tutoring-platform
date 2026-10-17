@@ -1,5 +1,6 @@
 'use client';
 
+import LiquidPresence from '@/components/LiquidPresence';
 import GlassDatePicker from '@/components/GlassDatePicker';
 import GlassSelect from '@/components/GlassSelect';
 import { useState } from 'react';
@@ -173,7 +174,7 @@ export default function NewStudentForm({ courses }: { courses: CourseItem[] }) {
           </button>
         </div>
 
-        {hasTargetExam && (
+        <LiquidPresence open={hasTargetExam}>
           <div className="pt-1">
             <GlassDatePicker
               value={targetExamDate}
@@ -186,7 +187,7 @@ export default function NewStudentForm({ courses }: { courses: CourseItem[] }) {
               Exam month/year will calculate syllabus coverage velocity against remaining weeks.
             </span>
           </div>
-        )}
+        </LiquidPresence>
       </div>
 
       {/* ACTIONS */}
