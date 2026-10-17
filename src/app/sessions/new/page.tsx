@@ -31,6 +31,13 @@ export default async function NewSessionPage({ searchParams }: Props) {
     orderBy: { name: 'asc' },
   });
 
+  // When completing a scheduled lesson, prefill the form from it instead of "now".
+  const scheduled = sessionId
+    ? await prisma.session.findFirst({
+        where: { id: sessionId, status: 'SCHEDULED', student: { tutorId: tutor.id, archivedAt: null } },
+      })
+    : null;
+
   const tools = await prisma.tool.findMany({
     orderBy: { name: 'asc' },
   });
@@ -72,8 +79,21 @@ export default async function NewSessionPage({ searchParams }: Props) {
         <SessionForm
           students={formattedStudents}
           tools={tools}
-          preselectedStudentId={studentId}
-          existingSessionId={sessionId}
+          preselectedStudentId={scheduled?.studentId ?? studentId}
+          existingSessionId={scheduled ? sessionId : undefined}
+          initialSession={
+            scheduled
+              ? {
+                  studentId: scheduled.studentId,
+                  sessionDate: scheduled.sessionDate.toISOString(),
+                  durationMinutes: scheduled.durationMinutes,
+                  sessionType: scheduled.sessionType,
+                  meetingUrl: scheduled.meetingUrl ?? '',
+                  assignedHomework: scheduled.assignedHomework ?? '',
+                  nextFocusTopic: scheduled.nextFocusTopic ?? '',
+                }
+              : undefined
+          }
         />
       </div>
     </main>

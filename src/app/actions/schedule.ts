@@ -2,7 +2,6 @@
 
 import { prisma } from '../../lib/prisma';
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
 import { SessionStatus, SessionType } from '@prisma/client';
 import { assertEnrolled, assertOwnsStudent, requireTutor } from '../../lib/auth';
 import { cancelSessionSchema, parseInput, scheduleSessionSchema } from '../../lib/validation';
@@ -41,7 +40,7 @@ export async function scheduleSessionAction(input: ScheduleSessionInput) {
 
   revalidatePath('/schedule');
   revalidatePath('/');
-  redirect('/schedule');
+  return { ok: true as const };
 }
 
 export async function cancelSessionAction(sessionId: string, newStatus: SessionStatus) {

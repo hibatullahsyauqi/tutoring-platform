@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { createSessionAction, type MasteryStatus } from '@/app/actions/session';
 import { ActivityType, SessionType } from '@prisma/client';
+import { describeError, isRedirectError } from '@/lib/errors';
 
 type StudentItem = {
   id: string;
@@ -20,10 +21,20 @@ type ToolItem = {
 };
 
 // Formats true local time string (YYYY-MM-DDTHH:mm)
-const getNowLocalISO = () => {
-  const now = new Date();
-  const offset = now.getTimezoneOffset() * 60000;
-  return new Date(now.getTime() - offset).toISOString().slice(0, 16);
+const toLocalInput = (date: Date) => {
+  const offset = date.getTimezoneOffset() * 60000;
+  return new Date(date.getTime() - offset).toISOString().slice(0, 16);
+};
+const getNowLocalISO = () => toLocalInput(new Date());
+
+type InitialSession = {
+  studentId: string;
+  sessionDate: string; // ISO instant
+  durationMinutes: number;
+  sessionType: SessionType;
+  meetingUrl: string;
+  assignedHomework: string;
+  nextFocusTopic: string;
 };
 
 export default function SessionForm({
@@ -31,11 +42,13 @@ export default function SessionForm({
   tools,
   preselectedStudentId,
   existingSessionId,
+  initialSession,
 }: {
   students: StudentItem[];
   tools: ToolItem[];
   preselectedStudentId?: string;
   existingSessionId?: string;
+  initialSession?: InitialSession;
 }) {
   const [isPending, startTransition] = useTransition();
 
@@ -45,12 +58,17 @@ export default function SessionForm({
       : students[0]?.id || '';
 
   const [selectedStudentId, setSelectedStudentId] = useState(initialStudentId);
-  const [sessionDate, setSessionDate] = useState(getNowLocalISO());
+  // A scheduled lesson keeps its own slot (never later than now); a fresh log starts at now.
+  const [sessionDate, setSessionDate] = useState(() => {
+    if (!initialSession) return getNowLocalISO();
+    const scheduledAt = new Date(initialSession.sessionDate);
+    return scheduledAt > new Date() ? getNowLocalISO() : toLocalInput(scheduledAt);
+  });
   const [dateWarning, setDateWarning] = useState<string | null>(null);
 
-  const [durationMinutes, setDurationMinutes] = useState(90);
-  const [sessionType, setSessionType] = useState<SessionType>('REGULAR_LESSON');
-  const [meetingUrl, setMeetingUrl] = useState('');
+  const [durationMinutes, setDurationMinutes] = useState(initialSession?.durationMinutes ?? 90);
+  const [sessionType, setSessionType] = useState<SessionType>(initialSession?.sessionType ?? 'REGULAR_LESSON');
+  const [meetingUrl, setMeetingUrl] = useState(initialSession?.meetingUrl ?? '');
   const [recordingUrl, setRecordingUrl] = useState('');
   const [latenessMinutes, setLatenessMinutes] = useState(0);
 
@@ -95,8 +113,8 @@ export default function SessionForm({
   const [struggle, setStruggle] = useState('');
   const [workedWell, setWorkedWell] = useState('');
   const [adjustNext, setAdjustNext] = useState('');
-  const [assignedHomework, setAssignedHomework] = useState('');
-  const [nextFocusTopic, setNextFocusTopic] = useState('');
+  const [assignedHomework, setAssignedHomework] = useState(initialSession?.assignedHomework ?? '');
+  const [nextFocusTopic, setNextFocusTopic] = useState(initialSession?.nextFocusTopic ?? '');
 
   const handleStudentChange = (newStudentId: string) => {
     setSelectedStudentId(newStudentId);
@@ -193,7 +211,8 @@ export default function SessionForm({
           existingSessionId,
           studentId: activeStudent.id,
           courseId: activeStudent.courseId,
-          sessionDate,
+          // Absolute instant, so the server's timezone can't shift the logged time.
+          sessionDate: new Date(sessionDate).toISOString(),
           durationMinutes,
           sessionType,
           meetingUrl,
@@ -201,18 +220,22 @@ export default function SessionForm({
           latenessMinutes,
           assignedHomework,
           nextFocusTopic,
-          segments: segments.map((seg) => ({
-            topicId: seg.topicId || (activeStudent.topics[0]?.id ?? '00000000-0000-0000-0000-000000000000'),
-            toolId: seg.toolId || undefined,
-            durationMinutes: seg.durationMinutes,
-            activityType: seg.activityType,
-            masteryStatus: seg.masteryStatus,
-          })),
+          // Blocks need a real syllabus topic; courses with no seeded topics save without segments.
+          segments: segments
+            .filter((seg) => seg.topicId)
+            .map((seg) => ({
+              topicId: seg.topicId,
+              toolId: seg.toolId || undefined,
+              durationMinutes: seg.durationMinutes,
+              activityType: seg.activityType,
+              masteryStatus: seg.masteryStatus,
+            })),
           reflection: { struggle, workedWell, adjustNext },
         });
       } catch (err) {
+        if (isRedirectError(err)) throw err;
         console.error('Failed to save session:', err);
-        alert('Could not save. Please check the details and try again.');
+        alert(describeError('Could not save. Please check the details and try again.', err));
       }
     });
   };
@@ -346,6 +369,13 @@ export default function SessionForm({
             + Add Topic Block
           </button>
         </div>
+
+        {activeStudent && activeStudent.topics.length === 0 && (
+          <p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+            No syllabus topics are loaded for this course yet, so topic blocks can&apos;t be saved. The session,
+            homework and reflection will still be recorded.
+          </p>
+        )}
 
         <div className="space-y-4">
           {segments.map((seg, idx) => (

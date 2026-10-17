@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { scheduleSessionAction, cancelSessionAction } from '@/app/actions/schedule';
 import { SessionStatus, SessionType } from '@prisma/client';
+import { describeError, isRedirectError } from '@/lib/errors';
 
 type StudentSummary = {
   id: string;
@@ -45,6 +46,12 @@ export default function ScheduleClientView({
   const [showScheduleForm, setShowScheduleForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ text: string; tone: 'ok' | 'info' } | null>(null);
+
+  const showToast = (text: string, tone: 'ok' | 'info' = 'ok') => {
+    setToast({ text, tone });
+    setTimeout(() => setToast(null), 4000);
+  };
 
   const [selectedSessionModal, setSelectedSessionModal] = useState<SessionItem | null>(null);
 
@@ -90,7 +97,8 @@ export default function ScheduleClientView({
       await scheduleSessionAction({
         studentId: activeStudent.id,
         courseId: activeStudent.courseId,
-        sessionDate,
+        // Send an absolute instant so the server's timezone can't shift the slot.
+        sessionDate: new Date(sessionDate).toISOString(),
         durationMinutes,
         sessionType,
         meetingUrl,
@@ -98,9 +106,19 @@ export default function ScheduleClientView({
         nextFocusTopic: activeStudent.lastNextFocus || undefined,
       });
       setShowScheduleForm(false);
+      showToast(
+        `Scheduled ${activeStudent.name} for ${new Date(sessionDate).toLocaleString('en-US', {
+          weekday: 'short',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        })}`
+      );
     } catch (err) {
+      if (isRedirectError(err)) throw err;
       console.error('Failed to schedule session:', err);
-      alert('Could not save. Please check the details and try again.');
+      alert(describeError('Could not save. Please check the details and try again.', err));
     } finally {
       setSubmitting(false);
     }
@@ -111,9 +129,10 @@ export default function ScheduleClientView({
       await cancelSessionAction(sessionId, status);
       setCancellingId(null);
       setSelectedSessionModal(null);
+      showToast('Session updated', 'info');
     } catch (err) {
       console.error('Failed to cancel session:', err);
-      alert('Could not update that session. It may no longer be scheduled.');
+      alert(describeError('Could not update that session. It may no longer be scheduled.', err));
     }
   };
 
@@ -162,7 +181,20 @@ export default function ScheduleClientView({
 
   return (
     <div className="space-y-6">
-      
+      {toast && (
+        <div
+          role="status"
+          className={`fixed bottom-6 right-6 z-50 max-w-sm rounded-xl border px-4 py-3 text-sm font-semibold shadow-lg ${
+            toast.tone === 'ok'
+              ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+              : 'bg-white border-[#ddd8cd] text-[#2b2b28]'
+          }`}
+        >
+          {toast.tone === 'ok' ? '✓ ' : ''}
+          {toast.text}
+        </div>
+      )}
+
       {/* TIMETABLE CONTROLS */}
       <div className="bg-white border border-[#ddd8cd] rounded-xl p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2">
