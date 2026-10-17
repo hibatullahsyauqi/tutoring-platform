@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import RevertSessionButton from '@/components/RevertSessionButton';
+import DeleteSessionButton from '@/components/DeleteSessionButton';
 import { scheduleSessionAction, cancelSessionAction } from '@/app/actions/schedule';
 import { SessionStatus, SessionType } from '@prisma/client';
 import { describeError, isRedirectError } from '@/lib/errors';
@@ -549,6 +551,12 @@ export default function ScheduleClientView({
                           Cancel / Reschedule ▾
                         </button>
                       )}
+
+                      <DeleteSessionButton
+                        sessionId={s.id}
+                        completed={state === 'COMPLETED'}
+                        onDeleted={() => showToast('Session deleted', 'info')}
+                      />
                     </div>
                   </div>
 
@@ -802,6 +810,33 @@ export default function ScheduleClientView({
                 )}
               </div>
             )}
+
+            {getSessionState(selectedSessionModal) === 'COMPLETED' && (
+              <div className="pt-2 border-t border-[#ddd8cd]/40">
+                <RevertSessionButton
+                  sessionId={selectedSessionModal.id}
+                  label="Revert to scheduled"
+                  className="text-[11px] text-[#6f6b62] hover:underline font-medium block mx-auto disabled:opacity-50"
+                  onReverted={() => {
+                    setSelectedSessionModal(null);
+                    showToast('Lesson reverted to scheduled', 'info');
+                  }}
+                />
+              </div>
+            )}
+
+            <div className="pt-2 border-t border-[#ddd8cd]/40">
+              <DeleteSessionButton
+                sessionId={selectedSessionModal.id}
+                completed={getSessionState(selectedSessionModal) === 'COMPLETED'}
+                label="Delete this session"
+                className="text-[11px] text-[#a3462f] hover:underline font-medium block mx-auto disabled:opacity-50"
+                onDeleted={() => {
+                  setSelectedSessionModal(null);
+                  showToast('Session deleted', 'info');
+                }}
+              />
+            </div>
           </div>
         </div>
       )}

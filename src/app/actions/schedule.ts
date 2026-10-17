@@ -4,7 +4,7 @@ import { prisma } from '../../lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { SessionStatus, SessionType } from '@prisma/client';
 import { assertEnrolled, assertOwnsStudent, requireTutor } from '../../lib/auth';
-import { cancelSessionSchema, parseInput, scheduleSessionSchema } from '../../lib/validation';
+import { cancelSessionSchema, deleteSessionSchema, parseInput, scheduleSessionSchema } from '../../lib/validation';
 import { absenceFine } from '../../lib/payroll';
 
 export type ScheduleSessionInput = {
@@ -66,4 +66,49 @@ export async function cancelSessionAction(sessionId: string, newStatus: SessionS
 
   revalidatePath('/schedule');
   revalidatePath('/');
+}
+
+export async function deleteSessionAction(sessionId: string) {
+  const { sessionId: id } = parseInput(deleteSessionSchema, { sessionId });
+  const tutor = await requireTutor();
+
+  // Segments, ratings, reflections and resource links cascade with the session.
+  const { count } = await prisma.session.deleteMany({
+    where: { id, student: { tutorId: tutor.id } },
+  });
+  if (count === 0) throw new Error('Session not found.');
+
+  revalidatePath('/schedule');
+  revalidatePath('/');
+  revalidatePath('/students/[id]', 'page');
+  return { ok: true as const };
+}
+
+export async function revertSessionToScheduledAction(sessionId: string) {
+  const { sessionId: id } = parseInput(deleteSessionSchema, { sessionId });
+  const tutor = await requireTutor();
+
+  await prisma.$transaction(async (tx) => {
+    // Status-guarded: only a logged lesson can be reverted, and only the owner's.
+    const { count } = await tx.session.updateMany({
+      where: { id, status: 'COMPLETED', student: { tutorId: tutor.id } },
+      data: {
+        status: 'SCHEDULED',
+        latenessMinutes: 0,
+        fineAmount: 0,
+        recordingUrl: null,
+      },
+    });
+    if (count === 0) throw new Error('Only a logged session can be reverted to scheduled.');
+
+    await tx.sessionSegment.deleteMany({ where: { sessionId: id } });
+    await tx.sessionReflection.deleteMany({ where: { sessionId: id } });
+    await tx.sessionRating.deleteMany({ where: { sessionId: id } });
+    await tx.sessionChecklist.deleteMany({ where: { sessionId: id } });
+  });
+
+  revalidatePath('/schedule');
+  revalidatePath('/');
+  revalidatePath('/students/[id]', 'page');
+  return { ok: true as const };
 }

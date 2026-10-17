@@ -45,6 +45,8 @@ export const cancelSessionSchema = z.object({
   }),
 });
 
+export const deleteSessionSchema = z.object({ sessionId: uuid });
+
 export const createSessionSchema = z.object({
   existingSessionId: uuid.optional(),
   studentId: uuid,

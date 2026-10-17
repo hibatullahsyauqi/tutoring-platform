@@ -1,3 +1,5 @@
+import RevertSessionButton from '@/components/RevertSessionButton';
+import DeleteSessionButton from '@/components/DeleteSessionButton';
 import { prisma } from '@/lib/prisma';
 import { requireTutor } from '@/lib/auth';
 import Link from 'next/link';
@@ -287,6 +289,12 @@ export default async function StudentDossierPage({ params }: Props) {
                         )}
 
                         <CopyPresenceButton payload={presencePayload} />
+                        {session.status === 'COMPLETED' && <RevertSessionButton sessionId={session.id} />}
+                        <DeleteSessionButton
+                          sessionId={session.id}
+                          completed={session.status === 'COMPLETED'}
+                          className="text-xs text-[#a3462f] hover:underline font-medium disabled:opacity-50"
+                        />
                       </div>
                     </div>
 

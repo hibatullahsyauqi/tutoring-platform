@@ -38,6 +38,24 @@ export default async function NewSessionPage({ searchParams }: Props) {
       })
     : null;
 
+  // Logging from a dossier with no lesson picked: surface any unlogged slot due today or earlier,
+  // so a scheduled class isn't logged twice. The tutor can still log a brand-new session.
+  const endOfToday = new Date();
+  endOfToday.setHours(23, 59, 59, 999);
+  const pendingSessions =
+    !scheduled && studentId
+      ? await prisma.session.findMany({
+          where: {
+            studentId,
+            status: 'SCHEDULED',
+            sessionDate: { lte: endOfToday },
+            student: { tutorId: tutor.id, archivedAt: null },
+          },
+          orderBy: { sessionDate: 'desc' },
+          take: 5,
+        })
+      : [];
+
   const tools = await prisma.tool.findMany({
     orderBy: { name: 'asc' },
   });
@@ -75,6 +93,32 @@ export default async function NewSessionPage({ searchParams }: Props) {
             Standard: 90 Mins
           </span>
         </div>
+
+        {pendingSessions.length > 0 && (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-2 text-xs">
+            <p className="font-bold text-amber-900">
+              This student already has a scheduled lesson waiting to be logged. Log that one instead of creating a duplicate?
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {pendingSessions.map((p) => (
+                <Link
+                  key={p.id}
+                  href={`/sessions/new?studentId=${p.studentId}&sessionId=${p.id}`}
+                  className="bg-white border border-amber-300 hover:bg-amber-100 text-amber-900 font-semibold px-3 py-1.5 rounded-lg"
+                >
+                  Log {p.sessionDate.toLocaleString('en-US', {
+                    weekday: 'short',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })} →
+                </Link>
+              ))}
+            </div>
+            <p className="text-amber-800">Or fill in the form below to log a separate, new session.</p>
+          </div>
+        )}
 
         <SessionForm
           students={formattedStudents}
