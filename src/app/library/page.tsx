@@ -114,7 +114,7 @@ export default async function LibraryPage() {
 
         {/* 3RD-PARTY INSTITUTIONAL LAUNCHER */}
         <section className="glass-panel p-6 space-y-4">
-          <div className="flex items-center justify-between gap-3 border-b border-black/5 pb-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-black/5 pb-3">
             <h2 className="text-base font-bold text-[#0f172a]">Institutional 3rd-Party Materials</h2>
             <span className="glass-pill text-xs font-bold px-2.5 py-0.5">Active Subscriptions</span>
           </div>

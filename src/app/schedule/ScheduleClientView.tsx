@@ -345,7 +345,7 @@ export default function ScheduleClientView({
       <section className="glass-panel p-6 space-y-5">
         {/* SECTION HEADER */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-black/5 pb-3">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <h2 className="text-base font-bold text-[#0f172a]">
               {viewMode === 'CALENDAR' ? 'Weekly Timetable' : 'All Sessions'}
             </h2>
@@ -447,7 +447,7 @@ export default function ScheduleClientView({
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="flex flex-wrap justify-end gap-2 pt-2">
             <button
               type="button"
               onClick={() => setShowScheduleForm(false)}
@@ -470,7 +470,7 @@ export default function ScheduleClientView({
       {viewMode === 'CALENDAR' && (
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 onClick={() => setWeekOffset(weekOffset - 1)}
@@ -513,7 +513,7 @@ export default function ScheduleClientView({
               return (
                 <div key={day.dateStr} className="py-4 first:pt-0 last:pb-0 grid grid-cols-1 sm:grid-cols-[132px_1fr] gap-3">
                   <div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span className="text-base font-bold text-[#0f172a]">{day.name}</span>
                       {day.isToday && (
                         <span className="glass-badge bg-emerald-50 text-emerald-700 border-emerald-200">Today</span>
@@ -551,7 +551,7 @@ export default function ScheduleClientView({
                           className="glass-card-subtle p-4 flex items-center justify-between gap-3 cursor-pointer transition-all hover:brightness-105 group"
                         >
                           <div className="flex items-center gap-4 min-w-0">
-                            <div className="text-sm font-bold text-[#0f172a] tabular-nums">{sTime}</div>
+                            <div className="text-sm font-bold text-[#0f172a] tabular-nums whitespace-nowrap shrink-0">{sTime}</div>
                             <div className="min-w-0">
                               <div className="text-sm font-bold text-[#0f172a] group-hover:underline truncate">{s.studentName}</div>
                               <div className="text-xs text-slate-700 truncate">{s.courseTitle}</div>
@@ -854,7 +854,7 @@ export default function ScheduleClientView({
                 View Student Dossier →
               </Link>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 {/* State 1: UPCOMING (Future) */}
                 {getSessionState(selectedSessionModal) === 'UPCOMING' && (
                   <span className="text-[11px] text-slate-600 italic">

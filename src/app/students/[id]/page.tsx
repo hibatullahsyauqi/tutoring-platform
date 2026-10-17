@@ -226,7 +226,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
               )}
             </div>
 
-            <div className="flex items-center gap-2 self-start md:self-auto">
+            <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
               <Link
                 href="/schedule"
                 className="glass-btn glass-btn-sm"
@@ -380,7 +380,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         {session.recordingUrl && (
                           <a
                             href={session.recordingUrl}

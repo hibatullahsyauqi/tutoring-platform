@@ -96,8 +96,8 @@ export default function LibraryView({
   return (
     <section className="glass-panel p-6 space-y-5">
       {/* SECTION HEADER */}
-      <div className="flex items-center justify-between gap-3 border-b border-black/5 pb-3">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-black/5 pb-3">
+        <div className="flex flex-wrap items-center gap-2">
           <h2 className="text-base font-bold text-[#0f172a]">Teaching Assets</h2>
           <span className="glass-pill text-xs font-bold px-2.5 py-0.5">
             {filtered.length} Asset{filtered.length !== 1 ? 's' : ''}
@@ -138,7 +138,7 @@ export default function LibraryView({
           ))}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <input
             type="text"
             value={searchQuery}
@@ -233,7 +233,7 @@ export default function LibraryView({
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="flex flex-wrap justify-end gap-2 pt-2">
             <button
               type="button"
               onClick={() => setShowAddForm(false)}

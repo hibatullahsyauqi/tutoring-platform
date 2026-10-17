@@ -87,7 +87,7 @@ export default async function NewSessionPage({ searchParams }: Props) {
   return (
     <main className="min-h-screen text-[#0f172a] p-6 md:p-10 font-sans">
       <div className="max-w-3xl mx-auto space-y-6">
-        <header className="glass-panel p-6 flex items-start justify-between gap-4">
+        <header className="glass-panel p-6 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div>
             <span className="glass-pill text-[11px] font-bold uppercase tracking-wider px-3 py-1 inline-block">
               Standard: 90 Mins
@@ -96,7 +96,7 @@ export default async function NewSessionPage({ searchParams }: Props) {
               {sessionId ? 'Complete & Log Scheduled Lesson' : 'Log Session & Evaluate Mastery'}
             </h1>
           </div>
-          <Link href="/" className="glass-btn">
+          <Link href="/" className="glass-btn self-start">
             ← Dashboard
           </Link>
         </header>

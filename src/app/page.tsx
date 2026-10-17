@@ -130,7 +130,7 @@ export default async function DashboardPage() {
         {/* FROSTED TOPBAR */}
         <header className="glass-panel p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 transition-all">
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="glass-pill text-[11px] font-bold uppercase tracking-wider text-[#0f172a] px-3 py-1 rounded-full inline-block">
                 Pedagogical Dashboard
               </span>
@@ -297,7 +297,7 @@ export default async function DashboardPage() {
           {/* ACTIVE STUDENTS ROSTER */}
           <section className="md:col-span-2 glass-panel p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-black/5 pb-3">
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <h2 className="text-base font-bold text-[#0f172a]">
                   Active Students
                 </h2>

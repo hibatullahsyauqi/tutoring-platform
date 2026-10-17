@@ -73,7 +73,7 @@ export default function FinancialGlassCard({
         </div>
 
         {/* LIQUID CURRENCY SELECTOR */}
-        <div className="flex items-center gap-2 self-start sm:self-auto">
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
           {getExchangeQuote() && (
             <span className="text-[10px] font-mono text-slate-500 bg-black/5 px-2 py-1 rounded-md hidden md:inline-block">
               {getExchangeQuote()}

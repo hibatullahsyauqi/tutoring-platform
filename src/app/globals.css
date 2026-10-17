@@ -214,3 +214,18 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
   white-space: nowrap;
 }
+
+/* Controls and tags keep their label on one line and never get squeezed by a neighbour */
+.glass-btn,
+.glass-badge,
+.glass-chip,
+.glass-pill {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+/* Long names inside flex rows wrap or cut inside their own column instead of pushing siblings */
+.glass-panel,
+.glass-card-subtle,
+.glass-inset {
+  overflow-wrap: break-word;
+}

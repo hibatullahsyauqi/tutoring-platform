@@ -474,7 +474,7 @@ export default function SessionForm({
                 <label className="block text-xs font-bold text-[#0f172a] mb-1.5">
                   Student Mastery for this Topic
                 </label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   {[
                     { val: 'STRUGGLING', label: '🔴 Struggling', desc: "Concept hasn't clicked yet" },
                     { val: 'NEEDS_PRACTICE', label: '🟡 Developing', desc: 'Understands logic, prone to slip-ups' },
@@ -577,7 +577,7 @@ export default function SessionForm({
       </section>
 
       {/* ACTIONS */}
-      <div className="flex justify-end gap-3 pt-2">
+      <div className="flex flex-wrap justify-end gap-3 pt-2">
         <Link
           href="/"
           className="glass-btn"

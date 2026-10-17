@@ -152,7 +152,7 @@ export default function NewStudentForm({ courses }: { courses: CourseItem[] }) {
 
       {/* TRUE OPTIONAL TARGET EXAM DATE */}
       <div className="pt-2 border-t border-black/10 space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <label className="text-xs font-bold text-[#0f172a] uppercase tracking-wider block">
               Target Exam Series
@@ -192,7 +192,7 @@ export default function NewStudentForm({ courses }: { courses: CourseItem[] }) {
       </div>
 
       {/* ACTIONS */}
-      <div className="flex items-center justify-end gap-3 pt-4 border-t border-black/10">
+      <div className="flex flex-wrap items-center justify-end gap-3 pt-4 border-t border-black/10">
         <Link
           href="/"
           className="glass-btn"
