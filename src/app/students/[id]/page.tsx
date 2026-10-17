@@ -206,7 +206,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
         {/* HEADER WITH DELETE BUTTON */}
         <div>
           <div className="glass-panel p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
+            <div className="min-w-0">
                 <Link href="/" className="text-xs font-semibold text-[#2d523e] hover:underline mb-2 inline-block">
                   ← Back to Dashboard
                 </Link>
@@ -226,10 +226,10 @@ export default async function StudentDossierPage({ params, searchParams }: Props
               )}
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
+            <div className="flex flex-wrap md:flex-nowrap items-center gap-2 self-start md:self-auto md:shrink-0">
               <Link
                 href="/schedule"
-                className="glass-btn glass-btn-sm"
+                className="glass-btn"
               >
                 📅 Open Timetable
               </Link>
