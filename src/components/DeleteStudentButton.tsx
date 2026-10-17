@@ -1,5 +1,6 @@
 'use client';
 
+import { useLeavingRow } from '@/components/LeavingRow';
 import { useDialog } from '@/components/DialogProvider';
 import { useState, useTransition } from 'react';
 import { deleteStudentAction } from '@/app/actions/student';
@@ -14,6 +15,7 @@ export default function DeleteStudentButton({
 }) {
   const [isPending, startTransition] = useTransition();
   const dialog = useDialog();
+  const row = useLeavingRow();
 
   const handleDelete = async () => {
     const confirmed = await dialog.confirm({
@@ -24,12 +26,14 @@ export default function DeleteStudentButton({
     });
 
     if (confirmed) {
+      row?.setLeaving(true);
       startTransition(async () => {
         try {
           await deleteStudentAction(studentId);
         } catch (err) {
           if (isRedirectError(err)) throw err;
           console.error('Failed to delete student:', err);
+          row?.setLeaving(false);
           void dialog.notify({ message: describeError('Could not archive this student.', err) });
         }
       });

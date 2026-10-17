@@ -13,6 +13,8 @@ import { getLiveExchangeRates } from '@/lib/currency';
 import FinancialGlassCard from '@/components/FinancialGlassCard';
 import DeleteStudentButton from '@/components/DeleteStudentButton';
 import RestoreStudentButton from '@/components/RestoreStudentButton';
+import LeavingRow from '@/components/LeavingRow';
+import LiquidText from '@/components/LiquidText';
 
 export const dynamic = 'force-dynamic';
 
@@ -286,7 +288,7 @@ export default async function DashboardPage({ searchParams }: Props) {
                   Active Students
                 </h2>
                 <span className="glass-pill text-xs font-bold px-2.5 py-0.5 rounded-full">
-                  {studentTotal} Student{studentTotal !== 1 ? 's' : ''}
+                  <LiquidText text={`${studentTotal} Student${studentTotal !== 1 ? 's' : ''}`} />
                 </span>
               </div>
 
@@ -304,10 +306,10 @@ export default async function DashboardPage({ searchParams }: Props) {
               </div>
             ) : (
               <div className="divide-y divide-black/5">
-                {students.map((student) => {
+                {students.map((student, rowIndex) => {
                   const enrollment = student.enrollments[0];
                   return (
-                    <div key={student.id} className="py-4 first:pt-0 last:pb-0 flex items-center justify-between gap-4">
+                    <LeavingRow key={student.id} index={rowIndex} className="py-4 first:pt-0 last:pb-0 flex items-center justify-between gap-4">
                       <div>
                         <h3 className="text-base font-bold text-[#0f172a]">{student.name}</h3>
                         <p className="text-xs text-slate-600 mt-0.5 font-medium">
@@ -338,7 +340,7 @@ export default async function DashboardPage({ searchParams }: Props) {
                         </Link>
                         <DeleteStudentButton studentId={student.id} studentName={student.name} />
                       </div>
-                    </div>
+                    </LeavingRow>
                   );
                 })}
               </div>
@@ -354,19 +356,19 @@ export default async function DashboardPage({ searchParams }: Props) {
           </section>
 
           {archivedTotal > 0 && (
-            <section className="md:col-span-3 glass-panel p-6 space-y-4">
+            <section className="row-entering md:col-span-3 glass-panel p-6 space-y-4" style={{ ['--i' as string]: 3 }}>
               <div className="flex items-center gap-2 border-b border-black/5 pb-3">
                 <h2 className="text-base font-bold text-[#0f172a]">Archived Students</h2>
                 <span className="glass-pill text-xs font-bold px-2.5 py-0.5 rounded-full">
-                  {archivedTotal}
+                  <LiquidText text={String(archivedTotal)} />
                 </span>
                 <span className="text-xs text-slate-500 ml-1">Hidden from the dashboard and schedule. Payroll history is kept.</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {archivedStudents.map((s) => {
+                {archivedStudents.map((s, cardIndex) => {
                   const course = s.enrollments[0]?.course;
                   return (
-                    <div key={s.id} className="glass-card-subtle border border-black/10 p-4 flex items-center justify-between gap-3">
+                    <LeavingRow key={s.id} index={cardIndex} className="glass-card-subtle p-4 flex items-center justify-between gap-3">
                       <div className="min-w-0">
                         <h3 className="text-sm font-bold text-[#0f172a] truncate">{s.name}</h3>
                         <p className="text-xs text-slate-600 truncate">
@@ -379,7 +381,7 @@ export default async function DashboardPage({ searchParams }: Props) {
                         )}
                       </div>
                       <RestoreStudentButton studentId={s.id} />
-                    </div>
+                    </LeavingRow>
                   );
                 })}
               </div>
