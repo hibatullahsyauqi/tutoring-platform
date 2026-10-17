@@ -59,12 +59,15 @@ function CancelReasons({
   compact?: boolean;
 }) {
   const [rescheduling, setRescheduling] = useState(false);
+  const toLocalInput = (d: Date) =>
+    new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
   // Default to the same slot one week later.
   const [newDate, setNewDate] = useState(() => {
     const d = new Date(session.sessionDate);
     d.setDate(d.getDate() + 7);
-    return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    return toLocalInput(d);
   });
+  const isPast = !newDate || new Date(newDate) <= new Date();
 
   const option = compact
     ? 'text-left bg-white border border-[#ddd8cd] hover:bg-gray-50 px-2.5 py-1.5 rounded text-[11px] font-semibold text-[#2b2b28]'
@@ -84,13 +87,19 @@ function CancelReasons({
           <input
             type="datetime-local"
             value={newDate}
+            min={toLocalInput(new Date())}
             onChange={(e) => setNewDate(e.target.value)}
             className="w-full bg-[#faf9f6] border border-[#ddd8cd] rounded p-1.5 text-[11px] focus:outline-none focus:border-[#3d6b52]"
           />
+          {isPast && (
+            <p className="text-[10px] font-semibold text-[#a3462f]">
+              Pick a time in the future. A lesson that already passed can&apos;t be moved to the past.
+            </p>
+          )}
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
-              disabled={!newDate}
+              disabled={isPast}
               onClick={() => onReschedule(new Date(newDate).toISOString())}
               className="bg-[#3d6b52] text-white px-3 py-1.5 rounded text-[11px] font-bold hover:bg-[#2d523e] disabled:opacity-50"
             >
