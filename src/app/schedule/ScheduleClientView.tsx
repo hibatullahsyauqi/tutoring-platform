@@ -342,47 +342,41 @@ export default function ScheduleClientView({
         </div>
       )}
 
-      {/* TIMETABLE CONTROLS */}
-      <div className="glass-panel p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setViewMode('CALENDAR')}
-            className={`glass-btn glass-btn-sm  ${
-              viewMode === 'CALENDAR'
-                ? 'glass-btn-primary'
-                : ''
-            } `}
-          >
-            📅 Weekly Calendar
-          </button>
-          <button
-            type="button"
-            onClick={() => setViewMode('AGENDA')}
-            className={`glass-btn glass-btn-sm  ${
-              viewMode === 'AGENDA'
-                ? 'glass-btn-primary'
-                : ''
-            } `}
-          >
-            📋 All Sessions List ({sessions.length})
-          </button>
-        </div>
+      <section className="glass-panel p-6 space-y-5">
+        {/* SECTION HEADER */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-black/5 pb-3">
+          <div className="flex items-center gap-2">
+            <h2 className="text-base font-bold text-[#0f172a]">
+              {viewMode === 'CALENDAR' ? 'Weekly Timetable' : 'All Sessions'}
+            </h2>
+            <span className="glass-pill text-xs font-bold px-2.5 py-0.5">
+              {sessions.length} Session{sessions.length !== 1 ? 's' : ''}
+            </span>
+          </div>
 
-        <button
-          type="button"
-          onClick={() => setShowScheduleForm(!showScheduleForm)}
-          className="glass-btn glass-btn-primary self-start sm:self-auto"
-        >
-          {showScheduleForm ? '✕ Close Form' : '+ Book / Schedule Session'}
-        </button>
-      </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              type="button"
+              onClick={() => setViewMode(viewMode === 'CALENDAR' ? 'AGENDA' : 'CALENDAR')}
+              className="glass-btn"
+            >
+              {viewMode === 'CALENDAR' ? '📋 List View' : '📅 Week View'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowScheduleForm(!showScheduleForm)}
+              className="glass-btn glass-btn-primary"
+            >
+              {showScheduleForm ? '✕ Close Form' : '+ Book Session'}
+            </button>
+          </div>
+        </div>
 
       {/* SCHEDULE FORM MODAL */}
       {showScheduleForm && (
-        <form onSubmit={handleScheduleSubmit} className="glass-panel outline outline-2 outline-[#3d6b52]/30 p-6 space-y-4">
+        <form onSubmit={handleScheduleSubmit} className="glass-card-subtle outline outline-2 outline-[#3d6b52]/40 p-5 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-[#3d6b52]">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-[#2d523e]">
               Book Teaching Slot
             </h2>
             <span className="text-[11px] text-slate-600">
@@ -472,10 +466,10 @@ export default function ScheduleClientView({
         </form>
       )}
 
-      {/* VIEW 1: WEEKLY CALENDAR GRID */}
+      {/* VIEW 1: WEEKLY TIMETABLE */}
       {viewMode === 'CALENDAR' && (
-        <div className="space-y-3">
-          <div className="glass-panel text-xs font-semibold text-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-4">
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <button
                 type="button"
@@ -488,11 +482,7 @@ export default function ScheduleClientView({
               <button
                 type="button"
                 onClick={() => setWeekOffset(0)}
-                className={`glass-btn glass-btn-sm  ${
-                  weekOffset === 0
-                    ? 'glass-btn-primary'
-                    : ''
-                } `}
+                className={`glass-btn glass-btn-sm ${weekOffset === 0 ? 'glass-btn-primary' : ''}`}
               >
                 Today
               </button>
@@ -504,108 +494,83 @@ export default function ScheduleClientView({
               >
                 →
               </button>
-              <span className="font-bold text-[#0f172a] ml-1">
+              <span className="text-sm font-bold text-[#0f172a] ml-1">
                 {weekStartLabel} – {weekEndLabel}, {currentYear}
               </span>
             </div>
 
-            <div className="flex items-center gap-3 text-[11px]">
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-500"></span> Upcoming</span>
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500"></span> Needs Log</span>
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500"></span> Logged</span>
+            <div className="flex items-center gap-3 text-xs font-medium text-slate-700">
+              <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500"></span> Upcoming</span>
+              <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-red-500"></span> Needs log</span>
+              <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500"></span> Logged</span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-7 gap-2">
+          <div className="divide-y divide-black/5">
             {weekDays.map((day) => {
               const daySessions = sessions.filter((s) => s.sessionDate.startsWith(day.dateStr));
 
               return (
-                <div
-                  key={day.dateStr}
-                  className={`glass-card-subtle p-3 flex flex-col justify-between min-h-[175px] transition-all  ${
-                    day.isToday
-                      ? 'outline outline-2 outline-[#3d6b52]'
-                      : day.contractSlot
-                        ? 'outline outline-1 outline-[#3d6b52]/40'
-                        : ''
-                  } `}
-                >
-                  <div className="border-b border-black/10 pb-1.5 mb-2 flex items-center justify-between">
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-bold text-xs text-[#0f172a]">{day.name}</span>
-                        <span className="text-[11px] text-slate-600">{day.label}</span>
-                      </div>
-                      {day.contractSlot && (
-                        <span className="text-[9px] font-bold text-[#3d6b52] uppercase block tracking-tighter mt-0.5">
-                          {day.contractSlot}
-                        </span>
+                <div key={day.dateStr} className="py-4 first:pt-0 last:pb-0 grid grid-cols-1 sm:grid-cols-[132px_1fr] gap-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-base font-bold text-[#0f172a]">{day.name}</span>
+                      {day.isToday && (
+                        <span className="glass-badge bg-emerald-50 text-emerald-700 border-emerald-200">Today</span>
                       )}
                     </div>
-
-                    {daySessions.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => handleSlotClick(day.dateStr, day.contractSlot)}
-                        className="glass-btn glass-btn-icon"
-                        title="Book another session on this day"
-                      >
-                        +
-                      </button>
+                    <div className="text-xs font-medium text-slate-700">{day.label}</div>
+                    {day.contractSlot && (
+                      <div className="text-[11px] font-bold text-[#2d523e] mt-0.5">{day.contractSlot}</div>
                     )}
                   </div>
 
-                  <div className="space-y-1.5 flex-1 flex flex-col justify-center">
-                    {daySessions.length === 0 ? (
-                      <button
-                        type="button"
-                        onClick={() => handleSlotClick(day.dateStr, day.contractSlot)}
-                        className="h-full w-full flex flex-col items-center justify-center text-[10px] text-slate-600 hover:text-[#2d523e] glass-inset py-5 transition-all cursor-pointer group"
-                      >
-                        <span className="text-sm font-bold text-[#3d6b52] group-hover:scale-125 transition-transform">+</span>
-                        <span className="font-semibold mt-0.5">
-                          {day.contractSlot ? 'Book 18:30' : 'Book Slot'}
-                        </span>
-                      </button>
-                    ) : (
-                      daySessions.map((s) => {
-                        const state = getSessionState(s);
-                        const sTime = new Date(s.sessionDate).toLocaleTimeString('en-US', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          hour12: false,
-                        });
+                  <div className="space-y-2">
+                    {daySessions.map((s) => {
+                      const state = getSessionState(s);
+                      const sTime = new Date(s.sessionDate).toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false,
+                      });
 
-                        const stateConfig = {
-                          UPCOMING: { badge: 'bg-blue-50 text-blue-700 border-blue-200', text: 'Upcoming' },
-                          NEEDS_LOG: { badge: 'bg-red-50 text-red-700 border-red-300 font-bold animate-pulse', text: '⚠️ Needs Log' },
-                          COMPLETED: { badge: 'bg-emerald-50 text-emerald-700 border-emerald-200', text: '✓ Done' },
-                          CANCELLED: { badge: 'bg-gray-100 text-gray-500 border-gray-300 line-through', text: 'Cancelled' },
-                        }[state];
+                      const stateConfig = {
+                        UPCOMING: { badge: 'bg-blue-50 text-blue-700 border-blue-200', text: 'Upcoming' },
+                        NEEDS_LOG: { badge: 'bg-red-50 text-red-700 border-red-300', text: '⚠️ Needs log' },
+                        COMPLETED: { badge: 'bg-emerald-50 text-emerald-700 border-emerald-200', text: '✓ Done' },
+                        CANCELLED: {
+                          badge: 'bg-gray-100 text-gray-600 border-gray-300',
+                          text: s.status === 'RESCHEDULED' ? 'Rescheduled' : s.status === 'ABSENT_UNNOTIFIED' ? 'Absent' : 'Cancelled',
+                        },
+                      }[state];
 
-                        return (
-                          <div
-                            key={s.id}
-                            onClick={() => setSelectedSessionModal(s)}
-                            className="p-4 glass-card-subtle space-y-1 text-left cursor-pointer transition-all hover:shadow-md group"
-                          >
-                            <div className="flex items-center justify-between">
-                              <span className="text-[10px] font-bold text-[#0f172a]">{sTime}</span>
-                              <span className={`glass-badge ${stateConfig.badge}`}>
-                                {stateConfig.text}
-                              </span>
+                      return (
+                        <div
+                          key={s.id}
+                          onClick={() => setSelectedSessionModal(s)}
+                          className="glass-card-subtle p-4 flex items-center justify-between gap-3 cursor-pointer transition-all hover:brightness-105 group"
+                        >
+                          <div className="flex items-center gap-4 min-w-0">
+                            <div className="text-sm font-bold text-[#0f172a] tabular-nums">{sTime}</div>
+                            <div className="min-w-0">
+                              <div className="text-sm font-bold text-[#0f172a] group-hover:underline truncate">{s.studentName}</div>
+                              <div className="text-xs text-slate-700 truncate">{s.courseTitle}</div>
                             </div>
-                            <div className="text-[11px] font-bold text-[#3d6b52] group-hover:underline truncate">
-                              {s.studentName}
-                            </div>
-                            <p className="text-[9px] text-slate-600 truncate">
-                              {s.courseTitle}
-                            </p>
                           </div>
-                        );
-                      })
-                    )}
+                          <span className={`glass-badge ${stateConfig.badge}`}>{stateConfig.text}</span>
+                        </div>
+                      );
+                    })}
+
+                    <button
+                      type="button"
+                      onClick={() => handleSlotClick(day.dateStr, day.contractSlot)}
+                      className="glass-inset w-full p-3 text-xs font-semibold text-slate-700 hover:text-[#2d523e] cursor-pointer transition-all"
+                    >
+                      {daySessions.length === 0
+                        ? `+ Book ${day.contractSlot ? '18:30 slot' : 'a slot'}`
+                        : '+ Add another session'}
+                    </button>
                   </div>
                 </div>
               );
@@ -616,9 +581,9 @@ export default function ScheduleClientView({
 
       {/* VIEW 2: AGENDA / ALL SESSIONS LIST */}
       {viewMode === 'AGENDA' && (
-        <div className="space-y-4">
+        <div className="divide-y divide-black/5">
           {sessions.length === 0 ? (
-            <div className="glass-panel p-8 text-center text-xs text-slate-600">
+            <div className="glass-inset p-8 text-center text-xs text-slate-700">
               No sessions scheduled yet.
             </div>
           ) : (
@@ -637,7 +602,7 @@ export default function ScheduleClientView({
                 <article
                   key={s.id}
                   onClick={() => setSelectedSessionModal(s)}
-                  className="glass-panel p-6 space-y-4 cursor-pointer transition-all hover:shadow-md"
+                  className="py-4 first:pt-0 last:pb-0 space-y-3 cursor-pointer transition-all"
                 >
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-black/10 pb-3">
                     <div>
@@ -745,7 +710,7 @@ export default function ScheduleClientView({
                       )}
                       {s.nextFocusTopic && (
                         <p className="text-[#0f172a]">
-                          <strong className="text-[#3d6b52]">🎯 Target:</strong> {s.nextFocusTopic}
+                          <strong className="text-[#2d523e]">🎯 Target:</strong> {s.nextFocusTopic}
                         </p>
                       )}
                       {s.assignedHomework && (
@@ -761,6 +726,7 @@ export default function ScheduleClientView({
           )}
         </div>
       )}
+      </section>
 
       {/* RATIONAL INSPECTOR MODAL */}
       {selectedSessionModal && (
@@ -823,7 +789,7 @@ export default function ScheduleClientView({
             {/* Modal Body */}
             {getSessionState(selectedSessionModal) === 'COMPLETED' ? (
               <div className="space-y-3 text-xs">
-                <span className="font-bold uppercase tracking-wider text-[#3d6b52] text-[10px] block">
+                <span className="font-bold uppercase tracking-wider text-[#2d523e] text-[10px] block">
                   Completed Session Ledger
                 </span>
                 {selectedSessionModal.topicsSummary && (
@@ -834,7 +800,7 @@ export default function ScheduleClientView({
                 )}
                 {selectedSessionModal.assignedHomework && (
                   <div className="p-3 glass-inset">
-                    <strong className="text-[#3d6b52] block mb-0.5">Assigned Homework:</strong>
+                    <strong className="text-[#2d523e] block mb-0.5">Assigned Homework:</strong>
                     <p className="text-[#0f172a]">{selectedSessionModal.assignedHomework}</p>
                   </div>
                 )}
@@ -847,7 +813,7 @@ export default function ScheduleClientView({
 
                 {selectedSessionModal.nextFocusTopic ? (
                   <div className="p-3 glass-inset text-[#0f172a]">
-                    <strong className="text-[#3d6b52] block mb-0.5">🎯 Planned Target:</strong>
+                    <strong className="text-[#2d523e] block mb-0.5">🎯 Planned Target:</strong>
                     {selectedSessionModal.nextFocusTopic}
                   </div>
                 ) : (
@@ -883,7 +849,7 @@ export default function ScheduleClientView({
             <div className="pt-3 border-t border-black/10 flex items-center justify-between gap-2">
               <Link
                 href={`/students/${selectedSessionModal.studentId}`}
-                className="text-xs text-[#3d6b52] hover:underline font-semibold"
+                className="text-xs text-[#2d523e] hover:underline font-semibold"
               >
                 View Student Dossier →
               </Link>
@@ -955,7 +921,7 @@ export default function ScheduleClientView({
             {getSessionState(selectedSessionModal) === 'CANCELLED' && (
               <div className="pt-2 border-t border-black/10 space-y-1 text-center">
                 {selectedSessionModal.status === 'RESCHEDULED' && (
-                  <p className="text-[11px] text-[#3d6b52] font-semibold">
+                  <p className="text-[11px] text-[#2d523e] font-semibold">
                     {selectedSessionModal.movedTo ? (
                       <>
                         Rescheduled to{' '}

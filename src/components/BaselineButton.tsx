@@ -9,7 +9,7 @@ export default function BaselineButton({
   topicIds,
   covered,
   label,
-  className = 'text-[11px] font-semibold text-[#3d6b52] hover:underline disabled:opacity-50',
+  className = 'text-[11px] font-semibold text-[#2d523e] hover:underline disabled:opacity-50',
 }: {
   studentId: string;
   topicIds: string[];

@@ -87,19 +87,19 @@ export default async function NewSessionPage({ searchParams }: Props) {
   return (
     <main className="min-h-screen text-[#0f172a] p-6 md:p-10 font-sans">
       <div className="max-w-3xl mx-auto space-y-6">
-        <div className="flex items-center justify-between glass-panel p-6">
+        <header className="glass-panel p-6 flex items-start justify-between gap-4">
           <div>
-            <Link href="/" className="text-xs font-semibold text-[#3d6b52] hover:underline mb-1 inline-block">
-              ← Back to Dashboard
-            </Link>
-            <h1 className="text-2xl font-bold">
+            <span className="glass-pill text-[11px] font-bold uppercase tracking-wider px-3 py-1 inline-block">
+              Standard: 90 Mins
+            </span>
+            <h1 className="text-2xl font-bold tracking-tight text-[#0f172a] mt-2">
               {sessionId ? 'Complete & Log Scheduled Lesson' : 'Log Session & Evaluate Mastery'}
             </h1>
           </div>
-          <span className="glass-pill text-xs font-semibold px-3 py-1">
-            Standard: 90 Mins
-          </span>
-        </div>
+          <Link href="/" className="glass-btn">
+            ← Dashboard
+          </Link>
+        </header>
 
         {pendingSessions.length > 0 && (
           <div className="glass-inset p-4 space-y-2 text-xs">

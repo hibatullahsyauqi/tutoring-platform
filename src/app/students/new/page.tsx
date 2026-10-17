@@ -109,15 +109,20 @@ export default async function NewStudentPage() {
   return (
     <main className="min-h-screen text-[#0f172a] p-6 md:p-10 font-sans">
       <div className="max-w-xl mx-auto space-y-6">
-        <div className="glass-panel p-6">
-          <Link href="/" className="text-xs font-semibold text-[#3d6b52] hover:underline mb-2 inline-block">
-            ← Back to Dashboard
+        <header className="glass-panel p-6 flex items-start justify-between gap-4">
+          <div>
+            <span className="glass-pill text-[11px] font-bold uppercase tracking-wider px-3 py-1 inline-block">
+              New Student
+            </span>
+            <h1 className="text-2xl font-bold tracking-tight text-[#0f172a] mt-2">Onboard New Student</h1>
+            <p className="text-xs font-medium text-slate-700 mt-0.5">
+              Configure student identity, board curriculum, and fluid examination tiering.
+            </p>
+          </div>
+          <Link href="/" className="glass-btn">
+            ← Dashboard
           </Link>
-          <h1 className="text-2xl font-bold tracking-tight text-[#0f172a]">Onboard New Student</h1>
-          <p className="text-xs text-slate-600 mt-1">
-            Configure student identity, board curriculum, and fluid examination tiering.
-          </p>
-        </div>
+        </header>
 
         <NewStudentForm courses={formattedCourses} />
       </div>

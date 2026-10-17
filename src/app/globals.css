@@ -1,6 +1,10 @@
 @import "tailwindcss";
 
 @theme {
+  /* Darker secondary text on glass: slate-500/600 become the old slate-600/700 */
+  --color-slate-500: #475569;
+  --color-slate-600: #334155;
+  --color-slate-700: #1e293b;
   --font-sans: var(--font-nunito), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-serif: var(--font-besley), Georgia, serif;
 }
@@ -44,8 +48,8 @@ h1, h2, h3, h4, h5, h6 {
 /* Page-level surface: frosted, light enough to let the mosaic bleed through */
 .glass-panel {
   background:
-    radial-gradient(120% 90% at 0% 0%, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 55%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.46)) !important;
+    radial-gradient(120% 90% at 0% 0%, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 55%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.68)) !important;
   backdrop-filter: blur(30px) saturate(190%) brightness(1.06) !important;
   -webkit-backdrop-filter: blur(30px) saturate(190%) brightness(1.06) !important;
   border: 1px solid rgba(255, 255, 255, 0.55) !important;
@@ -62,7 +66,7 @@ h1, h2, h3, h4, h5, h6 {
 .glass-card-subtle {
   background:
     radial-gradient(120% 90% at 0% 0%, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 60%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.34)) !important;
+    linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.58)) !important;
   backdrop-filter: blur(18px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(18px) saturate(180%) !important;
   border: 1px solid rgba(255, 255, 255, 0.6) !important;
@@ -75,8 +79,8 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Recessed well: tiles, stat boxes, list rows */
 .glass-inset {
-  background: rgba(255, 255, 255, 0.34) !important;
-  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  background: rgba(255, 255, 255, 0.55) !important;
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
   border-radius: 14px !important;
   box-shadow:
     inset 0 1px 2px rgba(15, 23, 42, 0.08),
@@ -179,8 +183,8 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Text field */
 .glass-input {
-  background: rgba(255, 255, 255, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.8);
   border-radius: 14px;
   box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.1), inset 0 -1px 0 rgba(255, 255, 255, 0.5);
   color: var(--ink);

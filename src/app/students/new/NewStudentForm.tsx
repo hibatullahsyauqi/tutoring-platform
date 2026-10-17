@@ -122,7 +122,7 @@ export default function NewStudentForm({ courses }: { courses: CourseItem[] }) {
             <label className="block text-xs font-bold text-[#0f172a] uppercase tracking-wider">
               Tier / Track for {selectedCourse.boardCode}
             </label>
-            <span className="text-[11px] text-[#3d6b52] font-semibold">
+            <span className="text-[11px] text-[#2d523e] font-semibold">
               {selectedCourse.level}
             </span>
           </div>

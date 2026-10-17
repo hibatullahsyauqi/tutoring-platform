@@ -94,11 +94,27 @@ export default function LibraryView({
   };
 
   return (
-    <div className="space-y-6">
-      
+    <section className="glass-panel p-6 space-y-5">
+      {/* SECTION HEADER */}
+      <div className="flex items-center justify-between gap-3 border-b border-black/5 pb-3">
+        <div className="flex items-center gap-2">
+          <h2 className="text-base font-bold text-[#0f172a]">Teaching Assets</h2>
+          <span className="glass-pill text-xs font-bold px-2.5 py-0.5">
+            {filtered.length} Asset{filtered.length !== 1 ? 's' : ''}
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={() => setShowAddForm(!showAddForm)}
+          className="glass-btn glass-btn-primary"
+        >
+          {showAddForm ? '✕ Close Form' : '+ Add Asset'}
+        </button>
+      </div>
+
       {/* FILTER & SEARCH BAR */}
-      <div className="glass-panel p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div className="flex items-center gap-2 flex-wrap">
           {[
             { val: 'ALL', label: 'All Resources' },
             { val: 'PAST_PAPER', label: 'Past Papers' },
@@ -128,22 +144,15 @@ export default function LibraryView({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search title, author, or chapter..."
-            className="w-full md:w-64 text-xs glass-input p-2.5"
+            className="w-full md:w-72 text-xs glass-input p-2.5"
           />
-          <button
-            type="button"
-            onClick={() => setShowAddForm(!showAddForm)}
-            className="glass-btn glass-btn-primary whitespace-nowrap glass-btn-sm"
-          >
-            {showAddForm ? '✕ Close Form' : '+ Add Asset'}
-          </button>
         </div>
       </div>
 
       {/* INLINE ADD RESOURCE FORM */}
       {showAddForm && (
-        <form onSubmit={handleAddSubmit} className="glass-panel outline outline-2 outline-[#3d6b52]/30 p-6 space-y-4">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-[#3d6b52]">
+        <form onSubmit={handleAddSubmit} className="glass-card-subtle outline outline-2 outline-[#3d6b52]/40 p-5 space-y-4">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-[#2d523e]">
             Index New Teaching Material
           </h2>
 
@@ -243,63 +252,55 @@ export default function LibraryView({
         </form>
       )}
 
-      {/* RESOURCE CARDS GRID */}
+      {/* RESOURCE LIST */}
       {filtered.length === 0 ? (
-        <div className="glass-panel p-8 text-center text-xs text-slate-600">
+        <div className="glass-inset p-8 text-center text-xs text-slate-700">
           No teaching materials match this filter or search query.
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="divide-y divide-black/5">
           {filtered.map((item) => {
             const badge = TYPE_BADGES[item.resourceType];
             return (
               <article
                 key={item.id}
-                className="glass-panel p-6 space-y-3 flex flex-col justify-between"
+                className="py-4 first:pt-0 last:pb-0 flex flex-col md:flex-row md:items-center justify-between gap-3"
               >
-                <div className="space-y-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <span className={`glass-badge ${badge.color}`}>
-                      {badge.label}
-                    </span>
-                    <span className="text-[11px] font-semibold text-slate-600">
-                      {item.boardCode}
-                    </span>
+                <div className="min-w-0 space-y-1.5">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className={`glass-badge ${badge.color}`}>{badge.label}</span>
+                    <span className="text-xs font-bold text-slate-700">{item.boardCode}</span>
                   </div>
-
-                  <h3 className="text-sm font-bold text-[#0f172a] leading-snug">{item.title}</h3>
-                  <p className="text-xs text-slate-600">{item.authorOrPublisher}</p>
-
+                  <h3 className="text-base font-bold text-[#0f172a] leading-snug">{item.title}</h3>
+                  <p className="text-xs font-medium text-slate-700">
+                    {item.authorOrPublisher} · {item.courseTitle}
+                  </p>
                   {item.locationDetails && (
-                    <div className="p-3 text-xs font-mono text-[#0f172a] glass-inset">
+                    <div className="glass-inset inline-block px-3 py-2 text-xs font-mono text-[#0f172a]">
                       📍 {item.locationDetails}
                     </div>
                   )}
                 </div>
 
-                <div className="pt-2 border-t border-black/10 flex items-center justify-between text-xs">
-                  <span className="text-[11px] text-slate-600 truncate max-w-[240px]">
-                    {item.courseTitle}
+                {item.url ? (
+                  <a
+                    href={item.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="glass-btn self-start md:self-auto"
+                  >
+                    Open Link ↗
+                  </a>
+                ) : (
+                  <span className="glass-chip px-3 py-1 text-xs font-semibold self-start md:self-auto">
+                    Hardcopy / Drive
                   </span>
-                  {item.url ? (
-                    <a
-                      href={item.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="font-bold text-[#3d6b52] hover:underline inline-flex items-center gap-1"
-                    >
-                      Open Link ↗
-                    </a>
-                  ) : (
-                    <span className="text-[10px] font-medium text-slate-600">Hardcopy/Drive</span>
-                  )}
-                </div>
+                )}
               </article>
             );
           })}
         </div>
       )}
-
-    </div>
+    </section>
   );
 }

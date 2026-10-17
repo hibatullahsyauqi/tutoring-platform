@@ -114,19 +114,22 @@ export default async function SchedulePage({ searchParams }: Props) {
       <div className="max-w-5xl mx-auto space-y-6">
         
         {/* HEADER */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-panel p-6">
+        <header className="glass-panel p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <Link href="/" className="text-xs font-semibold text-[#3d6b52] hover:underline mb-2 inline-block">
-              ← Back to Dashboard
-            </Link>
-            <h1 className="text-2xl font-bold tracking-tight text-[#0f172a]">
+            <span className="glass-pill text-[11px] font-bold uppercase tracking-wider px-3 py-1 inline-block">
+              Timetable
+            </span>
+            <h1 className="text-2xl font-bold tracking-tight text-[#0f172a] mt-2">
               Weekly Timetable & Session Schedule
             </h1>
-            <p className="text-xs text-slate-600 mt-1">
-              Tutoring Window: <span className="font-semibold text-[#0f172a]">Wed, Thu, Fri (18:30 WIB) & Sat</span>
+            <p className="text-xs font-medium text-slate-700 mt-0.5">
+              Tutoring window: <span className="font-bold text-[#0f172a]">Wed, Thu, Fri (18:30 WIB) & Sat</span>
             </p>
           </div>
-        </div>
+          <Link href="/" className="glass-btn self-start md:self-auto">
+            ← Dashboard
+          </Link>
+        </header>
 
         {/* CLIENT CALENDAR VIEW */}
         <ScheduleClientView

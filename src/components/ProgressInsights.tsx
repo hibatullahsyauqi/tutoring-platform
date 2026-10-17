@@ -41,7 +41,7 @@ export default function ProgressInsights({
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {/* EXAM COUNTDOWN */}
       <section className="glass-panel p-6 space-y-3">
-        <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600">Exam Countdown</h2>
+        <h2 className="text-xs font-bold uppercase tracking-wider text-[#0f172a]">Exam Countdown</h2>
         {pace.kind === 'none' && (
           <p className="text-xs text-slate-600">
             No exam date is set for this student, so there is no countdown or pace to show.
@@ -89,7 +89,7 @@ export default function ProgressInsights({
       {/* MOMENTUM */}
       <section className="glass-panel p-6 space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600">Momentum</h2>
+          <h2 className="text-xs font-bold uppercase tracking-wider text-[#0f172a]">Momentum</h2>
           <div className="flex gap-3 text-[11px] text-slate-600">
             <span className="inline-flex items-center gap-1">
               <span className="w-2 h-2 rounded-sm bg-[#3d6b52]/40" /> New topics

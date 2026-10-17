@@ -54,7 +54,7 @@ export default function SyllabusMap({
     <div className="space-y-4">
       {/* SUGGESTED NEXT */}
       <section className="glass-panel p-6 space-y-3">
-        <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600">Suggested Next</h2>
+        <h2 className="text-xs font-bold uppercase tracking-wider text-[#0f172a]">Suggested Next</h2>
         {suggestions.length === 0 ? (
           <p className="text-xs text-slate-600">
             Nothing pressing. Everything covered is fresh, and no new topics are left to introduce.
@@ -84,7 +84,7 @@ export default function SyllabusMap({
       {/* SYLLABUS MAP */}
       <section className="glass-panel p-6 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600">Syllabus Map</h2>
+          <h2 className="text-xs font-bold uppercase tracking-wider text-[#0f172a]">Syllabus Map</h2>
           <div className="flex flex-wrap gap-x-3 gap-y-1">
             {counts.map(({ state, n }) => (
               <span key={state} className="inline-flex items-center gap-1 text-[11px] text-slate-600">
@@ -156,7 +156,7 @@ export default function SyllabusMap({
                           topicIds={[t.id]}
                           covered={t.state === 'UNTOUCHED'}
                           label={t.state === 'UNTOUCHED' ? 'Known' : 'Undo'}
-                          className="text-[10px] font-semibold text-slate-600 hover:text-[#3d6b52] hover:underline disabled:opacity-50"
+                          className="text-[10px] font-semibold text-slate-600 hover:text-[#2d523e] hover:underline disabled:opacity-50"
                         />
                       )}
                       <span

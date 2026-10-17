@@ -183,9 +183,9 @@ export default function SessionForm({
     },
     MASTERED: {
       badge: '🟢 Acceleration & Stretch Challenge Mode',
-      badgeColor: 'bg-[#3d6b52]/10 text-[#3d6b52] border-[#3d6b52]/20',
+      badgeColor: 'bg-[#3d6b52]/10 text-[#2d523e] border-[#3d6b52]/20',
       box1Label: '🚀 Stretch Challenge & Advanced Exam Twist',
-      box1Color: 'text-[#3d6b52]',
+      box1Color: 'text-[#2d523e]',
       box1Border: 'focus:border-[#3d6b52]',
       box1Placeholder: 'e.g. Completely autonomous. Ready for past paper structured questions or Olympiad stretch.',
       box2Label: '💡 Key Autonomy & Student Insights',
@@ -245,7 +245,7 @@ export default function SessionForm({
       {/* SECTION 1: CORE SESSION METADATA */}
       <section className="glass-panel p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600">1. Session Details</h2>
+          <h2 className="text-xs font-bold uppercase tracking-wider text-[#0f172a]">1. Session Details</h2>
           {existingSessionId && (
             <span className="glass-badge bg-blue-50 text-blue-700 border-blue-200">
               Updating Scheduled Booking
@@ -358,7 +358,7 @@ export default function SessionForm({
       <section className="glass-panel p-6 space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600">2. Topics Covered & Mastery</h2>
+            <h2 className="text-xs font-bold uppercase tracking-wider text-[#0f172a]">2. Topics Covered & Mastery</h2>
             <p className="text-xs text-slate-600">Track how deeply the student grasps each concept</p>
           </div>
           <button
@@ -381,7 +381,7 @@ export default function SessionForm({
           {segments.map((seg, idx) => (
             <div key={idx} className="p-3 space-y-3 glass-inset">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#3d6b52]">Block #{idx + 1}</span>
+                <span className="text-xs font-bold text-[#2d523e]">Block #{idx + 1}</span>
                 {segments.length > 1 && (
                   <button
                     type="button"
@@ -509,7 +509,7 @@ export default function SessionForm({
       <section className="glass-panel p-6 space-y-4 transition-all">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-black/10 pb-3">
           <div>
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-[#0f172a]">
               3. Next Session Continuity Bridge
             </h2>
             <p className="text-xs text-slate-600">
@@ -535,7 +535,7 @@ export default function SessionForm({
           </div>
 
           <div>
-            <label className="block text-xs font-bold mb-1 text-[#3d6b52]">
+            <label className="block text-xs font-bold mb-1 text-[#2d523e]">
               {continuityConfig.box2Label}
             </label>
             <textarea

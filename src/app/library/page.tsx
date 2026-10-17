@@ -4,6 +4,37 @@ import LibraryView from './LibraryView';
 
 export const dynamic = 'force-dynamic';
 
+const PARTNERS = [
+  {
+    name: 'Save My Exams',
+    tag: 'IGCSE / A-Level / IB',
+    blurb: 'Topic revision notes, model answers & mark schemes.',
+    account: 'hisensei.k12@gmail.com',
+    url: 'https://www.savemyexams.com/igcse/',
+  },
+  {
+    name: 'PMT (Physics & Maths)',
+    tag: 'Free Vault',
+    blurb: 'Topical past paper packs & flashcards for CAIE/Edexcel.',
+    account: 'Open Access',
+    url: 'https://www.physicsandmathstutor.com/past-papers/gcse-maths/cie-paper-4/',
+  },
+  {
+    name: 'Twinkl Primary',
+    tag: 'Primary / Checkpoint',
+    blurb: 'Curriculum worksheets & visual aids for young learners.',
+    account: 'Institutional',
+    url: 'https://www.twinkl.co.id/',
+  },
+  {
+    name: 'IXL Learning',
+    tag: 'Diagnostic ELA/Math',
+    blurb: 'Adaptive skill drills and baseline diagnostics.',
+    account: 'k12dev',
+    url: 'https://www.ixl.com/',
+  },
+];
+
 export default async function LibraryPage() {
   const resourcesQuery = prisma.resource.findMany({
     include: {
@@ -63,121 +94,55 @@ export default async function LibraryPage() {
       <div className="max-w-5xl mx-auto space-y-8">
         
         {/* HEADER */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-panel p-6">
+        <header className="glass-panel p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <Link href="/" className="text-xs font-semibold text-[#3d6b52] hover:underline mb-2 inline-block">
-              ← Back to Dashboard
-            </Link>
-            <h1 className="text-2xl font-bold tracking-tight text-[#0f172a]">
+            <span className="glass-pill text-[11px] font-bold uppercase tracking-wider px-3 py-1 inline-block">
+              Teaching Vault
+            </span>
+            <h1 className="text-2xl font-bold tracking-tight text-[#0f172a] mt-2">
               Curated Teaching Vault & Bibliography
             </h1>
-            <p className="text-xs text-slate-600 mt-1">
-              Curate verified past papers, textbooks, and intuitive media for Cambridge, Edexcel, and IB.
+            <p className="text-xs font-medium text-slate-700 mt-0.5">
+              Verified past papers, textbooks and intuitive media for Cambridge, Edexcel and IB ·{' '}
+              <span className="font-bold text-[#0f172a]">{resources.length}</span> assets indexed
             </p>
           </div>
+          <Link href="/" className="glass-btn self-start md:self-auto">
+            ← Dashboard
+          </Link>
+        </header>
 
-          <span className="glass-pill text-xs font-bold uppercase tracking-wider px-3 py-1.5 self-start md:self-auto">
-            {resources.length} Teaching Assets Indexed
-          </span>
-        </div>
-
-        {/* 3RD-PARTY INSTITUTIONAL LAUNCHER (From Support Kit) */}
-        <section className="glass-panel p-6 space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600">
-              Institutional 3rd-Party Materials
-            </h2>
-            <span className="text-[11px] text-[#3d6b52] font-semibold">Active Subscriptions</span>
+        {/* 3RD-PARTY INSTITUTIONAL LAUNCHER */}
+        <section className="glass-panel p-6 space-y-4">
+          <div className="flex items-center justify-between gap-3 border-b border-black/5 pb-3">
+            <h2 className="text-base font-bold text-[#0f172a]">Institutional 3rd-Party Materials</h2>
+            <span className="glass-pill text-xs font-bold px-2.5 py-0.5">Active Subscriptions</span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
-            {/* Save My Exams */}
-            <div className="p-3 space-y-1.5 glass-inset">
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-[#0f172a]">Save My Exams</span>
-                <span className="glass-chip text-[10px] text-[#2d523e] font-bold px-2 py-0.5">
-                  IGCSE / A-Level / IB
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-600">Topic revision notes, model answers & mark schemes.</p>
-              <div className="pt-1 flex items-center justify-between border-t border-black/10">
-                <span className="text-[10px] font-mono text-slate-600">hisensei.k12@gmail.com</span>
+          <div className="divide-y divide-black/5">
+            {PARTNERS.map((p) => (
+              <div
+                key={p.name}
+                className="py-4 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+              >
+                <div className="min-w-0 space-y-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="text-base font-bold text-[#0f172a]">{p.name}</h3>
+                    <span className="glass-chip px-2 py-0.5 text-[11px] font-bold text-[#2d523e]">{p.tag}</span>
+                  </div>
+                  <p className="text-xs font-medium text-slate-700">{p.blurb}</p>
+                  <p className="text-[11px] font-mono text-slate-600">{p.account}</p>
+                </div>
                 <a
-                  href="https://www.savemyexams.com/igcse/"
+                  href={p.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-xs font-bold text-[#3d6b52] hover:underline"
+                  className="glass-btn self-start sm:self-auto"
                 >
                   Launch ↗
                 </a>
               </div>
-            </div>
-
-            {/* Physics & Maths Tutor */}
-            <div className="p-3 space-y-1.5 glass-inset">
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-[#0f172a]">PMT (Physics & Maths)</span>
-                <span className="glass-chip text-[10px] text-[#2d523e] font-bold px-2 py-0.5">
-                  Free Vault
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-600">Topical past paper packs & flashcards for CAIE/Edexcel.</p>
-              <div className="pt-1 flex items-center justify-between border-t border-black/10">
-                <span className="text-[10px] font-mono text-slate-600">Open Access</span>
-                <a
-                  href="https://www.physicsandmathstutor.com/past-papers/gcse-maths/cie-paper-4/"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-xs font-bold text-[#3d6b52] hover:underline"
-                >
-                  Launch ↗
-                </a>
-              </div>
-            </div>
-
-            {/* Twinkl */}
-            <div className="p-3 space-y-1.5 glass-inset">
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-[#0f172a]">Twinkl Primary</span>
-                <span className="glass-badge bg-amber-50 text-amber-700 border-amber-200">
-                  Primary / Checkpoint
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-600">Curriculum worksheets & visual aids for young learners.</p>
-              <div className="pt-1 flex items-center justify-between border-t border-black/10">
-                <span className="text-[10px] font-mono text-slate-600">Institutional</span>
-                <a
-                  href="https://www.twinkl.co.id/"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-xs font-bold text-[#3d6b52] hover:underline"
-                >
-                  Launch ↗
-                </a>
-              </div>
-            </div>
-
-            {/* IXL Learning */}
-            <div className="p-3 space-y-1.5 glass-inset">
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-[#0f172a]">IXL Learning</span>
-                <span className="glass-badge bg-amber-50 text-amber-700 border-amber-200">
-                  Diagnostic ELA/Math
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-600">Adaptive skill drills and baseline diagnostics.</p>
-              <div className="pt-1 flex items-center justify-between border-t border-black/10">
-                <span className="text-[10px] font-mono text-slate-600">k12dev</span>
-                <a
-                  href="https://www.ixl.com/"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-xs font-bold text-[#3d6b52] hover:underline"
-                >
-                  Launch ↗
-                </a>
-              </div>
-            </div>
+            ))}
           </div>
         </section>
 

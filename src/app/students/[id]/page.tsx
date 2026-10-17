@@ -207,7 +207,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
         <div>
           <div className="glass-panel p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-                <Link href="/" className="text-xs font-semibold text-[#3d6b52] hover:underline mb-2 inline-block">
+                <Link href="/" className="text-xs font-semibold text-[#2d523e] hover:underline mb-2 inline-block">
                   ← Back to Dashboard
                 </Link>
               <div className="flex items-center gap-2 mb-1">
@@ -220,7 +220,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                 <span className="font-semibold text-[#0f172a]">{course?.title} ({course?.subjectCode})</span> · {course?.board.name}
               </p>
               {student.targetExamDate && (
-                <p className="text-[11px] text-[#3d6b52] font-semibold mt-2">
+                <p className="text-[11px] text-[#2d523e] font-semibold mt-2">
                   🎯 Target Exam Series: {new Date(student.targetExamDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                 </p>
               )}
@@ -248,12 +248,12 @@ export default async function StudentDossierPage({ params, searchParams }: Props
         <section className="glass-panel p-6 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-[#0f172a]">
                 {course?.title} Syllabus Coverage
               </h2>
               <p className="text-xs text-slate-600">Progress across official syllabus points</p>
             </div>
-            <span className="text-sm font-bold text-[#3d6b52]">{coveragePercent}% Covered</span>
+            <span className="text-sm font-bold text-[#2d523e]">{coveragePercent}% Covered</span>
           </div>
 
           <div className="w-full bg-white/40 shadow-inner h-3 rounded-full overflow-hidden">
@@ -269,8 +269,8 @@ export default async function StudentDossierPage({ params, searchParams }: Props
               <div className="text-base font-bold text-[#0f172a] mt-0.5">{coveredCount} / {totalTopicsCount}</div>
             </div>
             <div className="p-3 glass-inset">
-              <div className="text-[11px] text-[#3d6b52]">Mastered Autonomously</div>
-              <div className="text-base font-bold text-[#3d6b52] mt-0.5">{masteredTopicIds.size}</div>
+              <div className="text-[11px] text-[#2d523e]">Mastered Autonomously</div>
+              <div className="text-base font-bold text-[#2d523e] mt-0.5">{masteredTopicIds.size}</div>
             </div>
             <div className="p-3 glass-inset">
               <div className="text-[11px] text-[#a3462f]">Active Struggle Points</div>
@@ -291,7 +291,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
         {/* CHRONOLOGICAL SESSION TIMELINE */}
         <section className="space-y-4">
           <div className="glass-panel flex items-center justify-between p-4">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-[#0f172a]">
               Learning Journey & Session Timeline
             </h2>
             <span className="text-xs text-slate-600">
@@ -386,7 +386,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                             href={session.recordingUrl}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-xs text-[#3d6b52] hover:underline inline-flex items-center gap-1 font-medium"
+                            className="text-xs text-[#2d523e] hover:underline inline-flex items-center gap-1 font-medium"
                           >
                             📹 Recording
                           </a>
@@ -451,7 +451,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                             <span className="font-bold text-slate-600">Rescheduled to </span>
                             <Link
                               href={`/schedule?session=${session.movedTo.id}`}
-                              className="font-semibold text-[#3d6b52] hover:underline"
+                              className="font-semibold text-[#2d523e] hover:underline"
                             >
                               {session.movedTo.sessionDate.toLocaleString('en-GB', {
                                 weekday: 'short',
@@ -483,7 +483,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                               href={session.meetingUrl}
                               target="_blank"
                               rel="noreferrer"
-                              className="text-[#3d6b52] font-semibold hover:underline break-all"
+                              className="text-[#2d523e] font-semibold hover:underline break-all"
                             >
                               Join call ↗
                             </a>
@@ -524,7 +524,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                                 {seg.tool && (
                                   <>
                                     <span>·</span>
-                                    <span className="font-medium text-[#3d6b52]">Tool: {seg.tool.name}</span>
+                                    <span className="font-medium text-[#2d523e]">Tool: {seg.tool.name}</span>
                                   </>
                                 )}
                               </div>
@@ -548,7 +548,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
 
                         {session.reflection.workedWell && (
                           <div className="glass-inset p-3">
-                            <span className="font-bold text-[#3d6b52] block mb-1">
+                            <span className="font-bold text-[#2d523e] block mb-1">
                               💡 Breakthrough / What Worked:
                             </span>
                             <p className="text-[#0f172a] leading-relaxed">{session.reflection.workedWell}</p>
@@ -567,7 +567,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                         )}
                         {session.nextFocusTopic && (
                           <div>
-                            <span className="font-bold text-[#3d6b52] block mb-0.5">🎯 Next Session Objective:</span>
+                            <span className="font-bold text-[#2d523e] block mb-0.5">🎯 Next Session Objective:</span>
                             <p className="text-[#0f172a] font-medium">{session.nextFocusTopic}</p>
                           </div>
                         )}
