@@ -40,3 +40,15 @@ export function weekOffsetFor(target: Date, now: Date): number {
   const weekMs = 7 * 24 * 60 * 60 * 1000;
   return Math.round((mondayOf(target).getTime() - mondayOf(now).getTime()) / weekMs);
 }
+
+/** Confirmation text for reopening a cancelled, absent or rescheduled lesson. */
+export function reopenMessage(opts: { fineAmount: number; movedToLabel?: string | null }): string {
+  const parts = ['Put this lesson back on the schedule?'];
+  if (opts.movedToLabel) {
+    parts.push(`The new lesson on ${opts.movedToLabel} will be removed.`);
+  }
+  if (opts.fineAmount > 0) {
+    parts.push(`The Rp ${opts.fineAmount.toLocaleString('id-ID')} fine is removed from payroll.`);
+  }
+  return parts.join(' ');
+}

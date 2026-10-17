@@ -5,7 +5,7 @@ import { requireTutor } from '@/lib/auth';
 import Link from 'next/link';
 import SyllabusMap from '@/components/SyllabusMap';
 import ProgressInsights from '@/components/ProgressInsights';
-import { finalRescheduleTarget } from '@/lib/reschedule-chain';
+import { finalRescheduleTarget, reopenMessage } from '@/lib/reschedule-chain';
 import { computeExamPace } from '@/lib/exam-pace';
 import { monthlyMomentum } from '@/lib/momentum';
 import { matchesView, parseTimelineView, TIMELINE_PAGE_SIZE, TIMELINE_VIEWS } from '@/lib/timeline';
@@ -422,11 +422,19 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                           <RevertSessionButton
                             sessionId={session.id}
                             label="Reopen"
-                            message={
-                              session.fineAmount > 0
-                                ? `Put this lesson back on the schedule? The Rp ${session.fineAmount.toLocaleString('id-ID')} fine is removed from payroll.`
-                                : 'Put this lesson back on the schedule?'
-                            }
+                            message={reopenMessage({
+                              fineAmount: session.fineAmount,
+                              movedToLabel: session.movedTo
+                                ? session.movedTo.sessionDate.toLocaleString('en-GB', {
+                                    weekday: 'short',
+                                    day: 'numeric',
+                                    month: 'short',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    timeZone: 'Asia/Jakarta',
+                                  }) + ' WIB'
+                                : null,
+                            })}
                           />
                         )}
                         <DeleteSessionButton

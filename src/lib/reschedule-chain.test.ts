@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { finalRescheduleTarget, weekOffsetFor, type ChainSession } from './reschedule-chain';
+import { finalRescheduleTarget, reopenMessage, weekOffsetFor, type ChainSession } from './reschedule-chain';
 
 const s = (id: string, day: number, status: string, from: string | null = null): ChainSession => ({
   id,
@@ -46,5 +46,17 @@ describe('weekOffsetFor', () => {
     expect(weekOffsetFor(new Date(2026, 9, 19), now)).toBe(1);
     expect(weekOffsetFor(new Date(2026, 9, 11), now)).toBe(-1);
     expect(weekOffsetFor(new Date(2026, 10, 14), now)).toBe(4);
+  });
+});
+
+describe('reopenMessage', () => {
+  test('plain reopen', () => {
+    expect(reopenMessage({ fineAmount: 0 })).toBe('Put this lesson back on the schedule?');
+  });
+
+  test('mentions the replacement and the fine', () => {
+    const m = reopenMessage({ fineAmount: 100_000, movedToLabel: 'Mon, Oct 19' });
+    expect(m).toContain('The new lesson on Mon, Oct 19 will be removed.');
+    expect(m).toContain('Rp 100.000 fine');
   });
 });

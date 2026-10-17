@@ -151,12 +151,27 @@ const REOPENABLE_STATUSES: SessionStatus[] = [
   'ABSENT_UNNOTIFIED',
 ];
 
-/** Puts a logged or cancelled lesson back on the schedule, clearing any fine it carried. */
+/**
+ * Puts a logged or cancelled lesson back on the schedule, clearing any fine it carried. Reopening
+ * a rescheduled lesson removes the replacement it was moved to, as long as that replacement is
+ * still just a scheduled slot.
+ */
 export async function revertSessionToScheduledAction(sessionId: string) {
   const { sessionId: id } = parseInput(deleteSessionSchema, { sessionId });
   const tutor = await requireTutor();
 
   await prisma.$transaction(async (tx) => {
+    const replacement = await tx.session.findFirst({
+      where: { rescheduledFromId: id, student: { tutorId: tutor.id } },
+      select: { id: true, status: true },
+    });
+    if (replacement && replacement.status !== 'SCHEDULED') {
+      throw new Error(
+        'The lesson it was moved to has already been taught or changed. Reopen or delete that one first.'
+      );
+    }
+    if (replacement) await tx.session.delete({ where: { id: replacement.id } });
+
     // Status-guarded: only a logged lesson can be reverted, and only the owner's.
     const { count } = await tx.session.updateMany({
       where: { id, status: { in: REOPENABLE_STATUSES }, student: { tutorId: tutor.id } },

@@ -7,6 +7,7 @@ import DeleteSessionButton from '@/components/DeleteSessionButton';
 import { scheduleSessionAction, cancelSessionAction, rescheduleSessionAction } from '@/app/actions/schedule';
 import { SessionStatus, SessionType } from '@prisma/client';
 import { describeError, isRedirectError } from '@/lib/errors';
+import { reopenMessage } from '@/lib/reschedule-chain';
 
 type StudentSummary = {
   id: string;
@@ -694,11 +695,10 @@ export default function ScheduleClientView({
                         <RevertSessionButton
                           sessionId={s.id}
                           label="Reopen"
-                          message={
-                            s.fineAmount > 0
-                              ? `Put this lesson back on the schedule? The ${formatIDR(s.fineAmount)} fine is removed from payroll.`
-                              : 'Put this lesson back on the schedule?'
-                          }
+                          message={reopenMessage({
+                            fineAmount: s.fineAmount,
+                            movedToLabel: s.movedTo ? formatMoved(s.movedTo.sessionDate) : null,
+                          })}
                           className="text-xs text-[#3d6b52] border border-[#3d6b52]/30 hover:bg-[#e8efe9] px-3 py-2 rounded-lg font-semibold transition-colors disabled:opacity-50"
                           onReverted={() => showToast('Lesson put back on the schedule', 'info')}
                         />
@@ -979,11 +979,12 @@ export default function ScheduleClientView({
                 <RevertSessionButton
                   sessionId={selectedSessionModal.id}
                   label="Reopen this lesson"
-                  message={
-                    selectedSessionModal.fineAmount > 0
-                      ? `Put this lesson back on the schedule? The ${formatIDR(selectedSessionModal.fineAmount)} fine is removed from payroll.`
-                      : 'Put this lesson back on the schedule?'
-                  }
+                  message={reopenMessage({
+                    fineAmount: selectedSessionModal.fineAmount,
+                    movedToLabel: selectedSessionModal.movedTo
+                      ? formatMoved(selectedSessionModal.movedTo.sessionDate)
+                      : null,
+                  })}
                   className="text-[11px] text-[#3d6b52] hover:underline font-medium disabled:opacity-50"
                   onReverted={() => {
                     setSelectedSessionModal(null);
