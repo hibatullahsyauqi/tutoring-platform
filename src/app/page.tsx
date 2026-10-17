@@ -1,4 +1,7 @@
 import RefreshButton from '@/components/RefreshButton';
+import NextLessonBriefing from '@/components/NextLessonBriefing';
+import { computeTopicProgress, shortTitle, suggestNext } from '@/lib/syllabus-progress';
+import { SESSION_HISTORY_CAP } from '@/lib/timeline';
 import Pagination from '@/components/Pagination';
 import { paginate, parsePage, type PageWindow } from '@/lib/pagination';
 import { prisma } from '@/lib/prisma';
@@ -56,7 +59,8 @@ export default async function DashboardPage({ searchParams }: Props) {
     where: {
       student: { tutorId: activeTutor.id, archivedAt: null },
       status: 'SCHEDULED',
-      sessionDate: { gte: now },
+      // A lesson that started up to 3 hours ago and is still unlogged stays the "next" one.
+      sessionDate: { gte: new Date(now.getTime() - 3 * 60 * 60 * 1000) },
     },
     orderBy: { sessionDate: 'asc' },
     include: {
@@ -143,10 +147,62 @@ export default async function DashboardPage({ searchParams }: Props) {
 
   const studentWindow = paginate(parsePage(sp.page), studentTotal, STUDENT_PAGE_SIZE);
   const archivedWindow = paginate(parsePage(sp.apage), archivedTotal, ARCHIVED_PAGE_SIZE);
-  const [students, archivedStudents] = await Promise.all([
+  // The lesson the briefing is about, with that student's syllabus picture for "suggested focus".
+  const focusSession = nextUpcomingSession ?? fallbackRecentSession;
+  const [students, archivedStudents, briefingTopics, briefingHistory, briefingBaselines] = await Promise.all([
     studentsQuery(studentWindow),
     archivedQuery(archivedWindow),
+    focusSession
+      ? prisma.syllabusTopic.findMany({ where: { courseId: focusSession.courseId }, orderBy: { code: 'asc' }, take: 500 })
+      : Promise.resolve([]),
+    focusSession
+      ? prisma.session.findMany({
+          where: { studentId: focusSession.studentId },
+          orderBy: { sessionDate: 'asc' },
+          take: SESSION_HISTORY_CAP,
+          select: { sessionDate: true, status: true, segments: { select: { topicId: true, masteryStatus: true } } },
+        })
+      : Promise.resolve([]),
+    focusSession
+      ? prisma.studentTopicBaseline.findMany({ where: { studentId: focusSession.studentId }, select: { topicId: true }, take: 1000 })
+      : Promise.resolve([]),
   ]);
+
+  const briefingSuggestions = focusSession
+    ? suggestNext(
+        computeTopicProgress(
+          briefingTopics,
+          briefingHistory,
+          new Date(),
+          new Set(briefingBaselines.map((b) => b.topicId))
+        )
+      )
+        .slice(0, 3)
+        .map((x) => ({ code: x.topic.code, title: shortTitle(x.topic.title), reason: x.reason, kind: x.kind }))
+    : [];
+
+  const briefingLesson = focusSession
+    ? {
+        sessionId: focusSession.id,
+        status: focusSession.status,
+        studentId: focusSession.studentId,
+        studentName: focusSession.student.name,
+        courseTitle: focusSession.course.title,
+        startIso: focusSession.sessionDate.toISOString(),
+        durationMinutes: focusSession.durationMinutes,
+        meetingUrl: focusSession.meetingUrl,
+      }
+    : null;
+
+  // Notes come from the last logged lesson (for an upcoming one) or from the latest lesson itself.
+  const notesSource = nextUpcomingSession ? nextUpcomingSession.student.sessions[0] : fallbackRecentSession;
+  const briefingNotes = notesSource
+    ? {
+        struggle: notesSource.reflection?.struggle ?? null,
+        homework: notesSource.assignedHomework ?? null,
+        nextFocus: notesSource.nextFocusTopic ?? null,
+      }
+    : null;
 
   const { grossSalary, pphTax, totalFines, totalDeductions, netSalary } = computePayroll(payrollSessions);
 
@@ -212,107 +268,13 @@ export default async function DashboardPage({ searchParams }: Props) {
         {/* METRICS & SMART BRIEFING */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           
-          {/* SMART PRE-SESSION CONTINUITY BRIEFING */}
-          <section className="glass-panel p-6 space-y-4">
-            <div>
-              <div className="flex items-center justify-between">
-                <h2 className="text-base font-bold text-[#0f172a]">
-                  ⚡ Pre-Session Briefing
-                </h2>
-                {nextUpcomingSession ? (
-                  <span className="glass-pill text-[10px] font-bold px-2.5 py-0.5 rounded-full">
-                    Next Up
-                  </span>
-                ) : (
-                  <span className="text-[10px] font-medium text-slate-500">
-                    Latest Class
-                  </span>
-                )}
-              </div>
-
-              {nextUpcomingSession ? (
-                <p className="text-xs font-bold text-[#0f172a] mt-1.5">
-                  {nextUpcomingSession.student.name} ·{' '}
-                  <span className="text-slate-600 font-medium">
-                    {new Date(nextUpcomingSession.sessionDate).toLocaleDateString('en-US', {
-                      weekday: 'short',
-                      month: 'short',
-                      day: 'numeric',
-                    })}{' '}
-                    at{' '}
-                    {new Date(nextUpcomingSession.sessionDate).toLocaleTimeString('en-US', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      hour12: false,
-                    })}{' '}
-                    WIB
-                  </span>
-                </p>
-              ) : fallbackRecentSession ? (
-                <p className="text-xs font-bold text-[#0f172a] mt-1.5">
-                  {fallbackRecentSession.student.name} · Most recent class
-                </p>
-              ) : (
-                <p className="text-xs text-slate-500 mt-1.5">No upcoming or recent sessions.</p>
-              )}
-            </div>
-
-            {(() => {
-              const sessionContext = nextUpcomingSession
-                ? nextUpcomingSession.student.sessions[0]
-                : fallbackRecentSession;
-
-              if (!sessionContext) {
-                return (
-                  <div className="p-4 glass-card-subtle text-xs text-slate-600 text-center">
-                    No continuity notes recorded yet.
-                  </div>
-                );
-              }
-
-              const struggle = sessionContext.reflection?.struggle;
-              const homework = sessionContext.assignedHomework;
-              const nextFocus = sessionContext.nextFocusTopic;
-
-              return (
-                <div className="space-y-3 text-xs">
-                  {struggle && (
-                    <div className="p-4 glass-card-subtle border-l-4 border-l-rose-500">
-                      <span className="font-bold text-rose-700 block mb-0.5">⚠️ Struggle to Revisit (2m Warm-up):</span>
-                      <p className="text-[#0f172a] leading-relaxed font-medium">{struggle}</p>
-                    </div>
-                  )}
-
-                  {homework && (
-                    <div className="p-4 glass-card-subtle border-l-4 border-l-[#0f172a]">
-                      <span className="font-bold text-[#0f172a] block mb-0.5">📝 Homework to Audit:</span>
-                      <p className="text-slate-700 leading-relaxed font-medium">{homework}</p>
-                    </div>
-                  )}
-
-                  {nextFocus && (
-                    <div className="p-4 glass-card-subtle bg-white/85!">
-                      <span className="font-bold text-[#0f172a] block mb-0.5">🎯 Planned Target:</span>
-                      <p className="text-[#0f172a] font-bold">{nextFocus}</p>
-                    </div>
-                  )}
-
-                  {nextUpcomingSession?.meetingUrl && (
-                    <div className="pt-1">
-                      <a
-                        href={nextUpcomingSession.meetingUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="glass-btn glass-btn-primary w-full"
-                      >
-                        Launch Meeting ↗
-                      </a>
-                    </div>
-                  )}
-                </div>
-              );
-            })()}
-          </section>
+          {/* NEXT LESSON BRIEFING */}
+          <NextLessonBriefing
+            mode={nextUpcomingSession ? 'next' : fallbackRecentSession ? 'latest' : 'empty'}
+            lesson={briefingLesson}
+            notes={briefingNotes}
+            suggestions={briefingSuggestions}
+          />
 
           {/* ACTIVE STUDENTS ROSTER */}
           <section className="md:col-span-2 glass-panel p-6 space-y-4">
