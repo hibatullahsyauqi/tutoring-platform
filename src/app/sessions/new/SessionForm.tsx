@@ -251,7 +251,7 @@ export default function SessionForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {pendingForStudent.length > 0 && (
-        <div className="glass-card-subtle p-4 space-y-2 text-xs border-l-4 border-l-amber-500">
+        <div className="glass-card-subtle p-4 space-y-2 text-xs accent-amber">
           <p className="font-bold text-[#0f172a]">
             {activeStudent?.name} already has a scheduled lesson waiting to be logged. Log that one instead of creating a duplicate?
           </p>

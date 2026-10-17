@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import { Besley, Nunito } from 'next/font/google';
 import './globals.css';
 import GlassPointer from '@/components/GlassPointer';
-import SignOutCorner from '@/components/SignOutCorner';
+import CornerControls from '@/components/CornerControls';
+import { themeBootstrapScript } from '@/lib/theme';
 
 // 1. Fetch Besley for Headers
 const besley = Besley({
@@ -29,11 +30,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${nunito.variable} ${besley.variable}`}>
+    <html lang="en" className={`${nunito.variable} ${besley.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
+      </head>
       <body className="antialiased">
         <div className="top-fade" aria-hidden="true" />
         <GlassPointer />
-        <SignOutCorner />
+        <CornerControls />
         {children}
       </body>
     </html>

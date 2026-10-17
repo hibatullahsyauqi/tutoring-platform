@@ -414,14 +414,18 @@ main:not(.no-enter) > div > *:nth-child(n + 6) { animation-delay: 0.3s; }
 }
 
 /* Sign out: pinned top-right, in the page gutter. Icon-only until there is room for the label. */
-.signout-corner {
+.corner-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
   position: fixed;
   top: 1.5rem; /* matches the page padding; SignOutCorner tracks scroll from here */
   right: 0.5rem;
   z-index: 40;
 }
 @media (min-width: 768px) {
-  .signout-corner {
+  .corner-rail {
     top: 2.5rem;
   }
 }
@@ -434,7 +438,7 @@ main:not(.no-enter) > div > *:nth-child(n + 6) { animation-delay: 0.3s; }
   display: none;
 }
 @media (min-width: 1280px) {
-  .signout-corner {
+  .corner-rail {
     right: 0.75rem;
   }
   .signout-btn {
@@ -446,3 +450,204 @@ main:not(.no-enter) > div > *:nth-child(n + 6) { animation-delay: 0.3s; }
     display: inline;
   }
 }
+
+.rail-icon {
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+}
+
+/* ------------------------------------------------------------------
+   Dark theme. <html data-theme="dark"> is set before first paint (see lib/theme.ts); the
+   rules below re-colour the same glass system, so every screen follows without changes.
+   ------------------------------------------------------------------ */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --ink: #f1f5f9;
+  --ink-soft: #cbd5e1;
+  --color-slate-500: #94a3b8;
+  --color-slate-600: #cbd5e1;
+  --color-slate-700: #e2e8f0;
+}
+[data-theme='dark'] body {
+  color: #f1f5f9;
+  background:
+    linear-gradient(rgba(2, 6, 23, 0.62), rgba(2, 6, 23, 0.8)),
+    url('/science-mosaic.jpg') center / cover no-repeat fixed;
+}
+[data-theme='dark'] .top-fade {
+  background:
+    linear-gradient(rgba(2, 6, 23, 0.62), rgba(2, 6, 23, 0.8)),
+    url('/science-mosaic.jpg') center / cover no-repeat fixed;
+}
+
+[data-theme='dark'] .glass-panel {
+  background:
+    radial-gradient(120% 90% at 0% 0%, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 55%),
+    linear-gradient(180deg, rgba(15, 23, 42, 0.74), rgba(15, 23, 42, 0.6)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 1px 0 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.04),
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    0 22px 45px -14px rgba(0, 0, 0, 0.75) !important;
+}
+[data-theme='dark'] .glass-sticky {
+  background:
+    radial-gradient(120% 90% at 0% 0%, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 55%),
+    linear-gradient(180deg, rgba(15, 23, 42, 0.93), rgba(15, 23, 42, 0.88)) !important;
+}
+[data-theme='dark'] .glass-card-subtle {
+  background:
+    radial-gradient(120% 90% at 0% 0%, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0) 60%),
+    linear-gradient(180deg, rgba(30, 41, 59, 0.66), rgba(30, 41, 59, 0.5)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.03),
+    0 8px 22px -8px rgba(0, 0, 0, 0.6) !important;
+}
+[data-theme='dark'] .glass-inset {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.35),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+[data-theme='dark'] .glass-pill {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.1)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+  color: #f1f5f9 !important;
+}
+[data-theme='dark'] .glass-chip {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+}
+
+[data-theme='dark'] .glass-btn {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+  border-color: rgba(255, 255, 255, 0.24);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 1px 2px rgba(0, 0, 0, 0.5),
+    0 6px 14px -6px rgba(0, 0, 0, 0.7);
+  color: #f1f5f9;
+}
+[data-theme='dark'] .glass-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.16));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 1px 2px rgba(0, 0, 0, 0.5),
+    0 10px 20px -6px rgba(0, 0, 0, 0.8);
+}
+[data-theme='dark'] .glass-btn-primary {
+  background: linear-gradient(180deg, rgba(74, 128, 98, 0.95), rgba(36, 70, 52, 0.95));
+  border-color: rgba(255, 255, 255, 0.28);
+  color: #fff;
+}
+[data-theme='dark'] .glass-btn-primary:hover:not(:disabled) {
+  background: linear-gradient(180deg, rgba(90, 148, 114, 1), rgba(48, 88, 66, 1));
+}
+[data-theme='dark'] .glass-btn-danger {
+  color: #fca5a5;
+  border-color: rgba(248, 113, 113, 0.45);
+}
+[data-theme='dark'] .glass-btn-danger-solid {
+  color: #fff;
+}
+[data-theme='dark'] .glass-btn::before,
+[data-theme='dark'] .glass-interactive::before {
+  background: radial-gradient(
+    140px circle at var(--mx, 50%) var(--my, 0%),
+    rgba(255, 255, 255, 0.22),
+    rgba(255, 255, 255, 0) 70%
+  );
+}
+
+[data-theme='dark'] .glass-input {
+  background: rgba(2, 6, 23, 0.45);
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.45);
+  color: #f1f5f9;
+}
+[data-theme='dark'] .glass-input::placeholder {
+  color: #94a3b8;
+}
+[data-theme='dark'] .glass-input:focus {
+  background: rgba(2, 6, 23, 0.65);
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.4),
+    0 0 0 3px rgba(110, 231, 183, 0.35),
+    0 0 18px rgba(110, 231, 183, 0.25);
+}
+[data-theme='dark'] .glass-card-subtle.glass-interactive:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 0 0 1px rgba(110, 231, 183, 0.35),
+    0 0 22px rgba(110, 231, 183, 0.18),
+    0 14px 28px -10px rgba(0, 0, 0, 0.8) !important;
+}
+[data-theme='dark'] .glass-inset.glass-interactive:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(110, 231, 183, 0.35),
+    0 0 16px rgba(110, 231, 183, 0.16) !important;
+}
+
+/* Hard-coded text colours used across the pages */
+[data-theme='dark'] .text-\[\#0f172a\],
+[data-theme='dark'] .text-\[\#2b2b28\] {
+  color: #f1f5f9;
+}
+[data-theme='dark'] .text-\[\#2d523e\],
+[data-theme='dark'] .text-\[\#3d6b52\] {
+  color: #86efac;
+}
+[data-theme='dark'] .text-\[\#a3462f\],
+[data-theme='dark'] .text-red-700,
+[data-theme='dark'] .text-rose-700,
+[data-theme='dark'] .text-rose-600 {
+  color: #fca5a5;
+}
+[data-theme='dark'] .text-emerald-700,
+[data-theme='dark'] .text-emerald-800,
+[data-theme='dark'] .text-emerald-900 {
+  color: #6ee7b7;
+}
+[data-theme='dark'] .text-amber-700,
+[data-theme='dark'] .text-amber-800,
+[data-theme='dark'] .text-amber-900 {
+  color: #fcd34d;
+}
+[data-theme='dark'] .text-blue-700 {
+  color: #93c5fd;
+}
+[data-theme='dark'] .text-gray-500,
+[data-theme='dark'] .text-gray-600 {
+  color: #cbd5e1;
+}
+/* Status badges keep their hue but sit on dark glass instead of pastel fills */
+[data-theme='dark'] .glass-badge {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+[data-theme='dark'] .glass-badge.bg-red-50 { background-color: rgba(248, 113, 113, 0.14) !important; border-color: rgba(248, 113, 113, 0.4) !important; }
+[data-theme='dark'] .glass-badge.bg-emerald-50 { background-color: rgba(52, 211, 153, 0.14) !important; border-color: rgba(52, 211, 153, 0.4) !important; }
+[data-theme='dark'] .glass-badge.bg-blue-50 { background-color: rgba(96, 165, 250, 0.14) !important; border-color: rgba(96, 165, 250, 0.4) !important; }
+[data-theme='dark'] .glass-badge.bg-amber-50 { background-color: rgba(251, 191, 36, 0.14) !important; border-color: rgba(251, 191, 36, 0.4) !important; }
+[data-theme='dark'] .glass-badge.bg-purple-50 { background-color: rgba(192, 132, 252, 0.14) !important; border-color: rgba(192, 132, 252, 0.4) !important; }
+[data-theme='dark'] .glass-badge.text-purple-700 { color: #d8b4fe; }
+[data-theme='dark'] .bg-white\/40 {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Coloured left edge on a card (the glass border is forced, so plain border utilities lose) */
+.glass-card-subtle.accent-rose { border-left: 4px solid #f43f5e !important; }
+.glass-card-subtle.accent-amber { border-left: 4px solid #f59e0b !important; }
+.glass-card-subtle.accent-ink { border-left: 4px solid #0f172a !important; }
+[data-theme='dark'] .glass-card-subtle.accent-ink { border-left-color: #f1f5f9 !important; }

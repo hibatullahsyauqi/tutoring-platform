@@ -149,13 +149,13 @@ export default function NextLessonBriefing({
       {notes && (notes.struggle || notes.homework || notes.nextFocus) ? (
         <div className="space-y-3 text-xs">
           {notes.struggle && (
-            <div className="p-4 glass-card-subtle border-l-4 border-l-rose-500">
+            <div className="p-4 glass-card-subtle accent-rose">
               <span className="font-bold text-rose-700 block mb-0.5">⚠️ Struggle to revisit (2m warm-up)</span>
               <p className="text-[#0f172a] leading-relaxed font-medium">{notes.struggle}</p>
             </div>
           )}
           {notes.homework && (
-            <div className="p-4 glass-card-subtle border-l-4 border-l-[#0f172a]">
+            <div className="p-4 glass-card-subtle accent-ink">
               <span className="font-bold text-[#0f172a] block mb-0.5">📝 Homework to audit</span>
               <p className="text-slate-700 leading-relaxed font-medium">{notes.homework}</p>
             </div>
