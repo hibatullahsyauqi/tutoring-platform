@@ -416,9 +416,14 @@ main:not(.no-enter) > div > *:nth-child(n + 6) { animation-delay: 0.3s; }
 /* Sign out: pinned top-right, in the page gutter. Icon-only until there is room for the label. */
 .signout-corner {
   position: fixed;
-  top: 0.5rem;
+  top: 1.5rem; /* matches the page padding; SignOutCorner tracks scroll from here */
   right: 0.5rem;
   z-index: 40;
+}
+@media (min-width: 768px) {
+  .signout-corner {
+    top: 2.5rem;
+  }
 }
 .signout-btn {
   width: 2rem;
@@ -430,7 +435,6 @@ main:not(.no-enter) > div > *:nth-child(n + 6) { animation-delay: 0.3s; }
 }
 @media (min-width: 1280px) {
   .signout-corner {
-    top: 0.75rem;
     right: 0.75rem;
   }
   .signout-btn {
