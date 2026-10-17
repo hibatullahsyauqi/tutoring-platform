@@ -36,7 +36,7 @@ export default function DeleteStudentButton({
       type="button"
       onClick={handleDelete}
       disabled={isPending}
-      className="glass-btn glass-btn-danger glass-btn-sm"
+      className="glass-btn glass-btn-danger"
     >
       {isPending ? 'Archiving...' : 'Archive Profile'}
     </button>
