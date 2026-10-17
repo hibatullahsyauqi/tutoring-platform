@@ -279,6 +279,16 @@ export default async function StudentDossierPage({ params }: Props) {
                             year: 'numeric',
                           })}
                         </span>
+                        <span className="text-xs font-semibold text-[#6f6b62]">
+                          {sDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' })}
+                          {'–'}
+                          {new Date(sDate.getTime() + session.durationMinutes * 60000).toLocaleTimeString('en-GB', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            timeZone: 'Asia/Jakarta',
+                          })}{' '}
+                          WIB
+                        </span>
                         <span className="text-[11px] bg-[#faf9f6] border border-[#ddd8cd] px-2 py-0.5 rounded text-[#6f6b62]">
                           {session.durationMinutes} mins
                         </span>
@@ -320,6 +330,30 @@ export default async function StudentDossierPage({ params }: Props) {
                         />
                       </div>
                     </div>
+
+                    {session.status === 'SCHEDULED' && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+                        <div className="p-3 bg-[#faf9f6] border border-[#ddd8cd] rounded-lg space-y-0.5">
+                          <span className="font-bold text-[#6f6b62] block">Course</span>
+                          <span className="text-[#2b2b28]">{course?.title ?? 'General Course'}</span>
+                        </div>
+                        <div className="p-3 bg-[#faf9f6] border border-[#ddd8cd] rounded-lg space-y-0.5">
+                          <span className="font-bold text-[#6f6b62] block">Meeting Link</span>
+                          {session.meetingUrl ? (
+                            <a
+                              href={session.meetingUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-[#3d6b52] font-semibold hover:underline break-all"
+                            >
+                              Join call ↗
+                            </a>
+                          ) : (
+                            <span className="text-[#6f6b62]">Not set</span>
+                          )}
+                        </div>
+                      </div>
+                    )}
 
                     {session.status === 'COMPLETED' && (
                     <div className="space-y-2">
