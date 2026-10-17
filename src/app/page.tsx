@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { signOutAction } from '@/app/actions/auth';
 import { getLiveExchangeRates } from '@/lib/currency';
 import FinancialGlassCard from '@/components/FinancialGlassCard';
+import DeleteStudentButton from '@/components/DeleteStudentButton';
 import RestoreStudentButton from '@/components/RestoreStudentButton';
 
 export const dynamic = 'force-dynamic';
@@ -96,7 +97,12 @@ export default async function DashboardPage() {
 
   const archivedStudents = await prisma.student.findMany({
     where: { tutorId: activeTutor.id, archivedAt: { not: null } },
-    select: { id: true, name: true },
+    select: {
+      id: true,
+      name: true,
+      archivedAt: true,
+      enrollments: { select: { course: { select: { title: true, subjectCode: true } } }, take: 1 },
+    },
     orderBy: { name: 'asc' },
   });
 
@@ -322,12 +328,15 @@ export default async function DashboardPage() {
                         )}
                       </div>
 
-                      <Link
-                        href={`/students/${student.id}`}
-                        className="glass-card-subtle hover:bg-white text-[#0f172a] text-xs font-bold px-4 py-2 rounded-2xl transition-all border border-black/10 hover:shadow-sm active:scale-95 whitespace-nowrap"
-                      >
-                        View Dossier →
-                      </Link>
+                      <div className="flex flex-col items-stretch gap-2">
+                        <Link
+                          href={`/students/${student.id}`}
+                          className="glass-card-subtle hover:bg-white text-[#0f172a] text-xs font-bold px-4 py-2 rounded-2xl transition-all border border-black/10 hover:shadow-sm active:scale-95 whitespace-nowrap text-center"
+                        >
+                          View Dossier →
+                        </Link>
+                        <DeleteStudentButton studentId={student.id} studentName={student.name} />
+                      </div>
                     </div>
                   );
                 })}
@@ -336,15 +345,34 @@ export default async function DashboardPage() {
           </section>
 
           {archivedStudents.length > 0 && (
-            <section className="md:col-span-3 glass-panel rounded-3xl p-6 space-y-3">
-              <h2 className="text-base font-bold text-[#0f172a]">Archived Students</h2>
-              <div className="divide-y divide-black/5">
-                {archivedStudents.map((s) => (
-                  <div key={s.id} className="py-3 first:pt-0 last:pb-0 flex items-center justify-between gap-4">
-                    <span className="text-sm font-semibold text-slate-600">{s.name}</span>
-                    <RestoreStudentButton studentId={s.id} />
-                  </div>
-                ))}
+            <section className="md:col-span-3 glass-panel rounded-3xl p-6 space-y-4">
+              <div className="flex items-center gap-2 border-b border-black/5 pb-3">
+                <h2 className="text-base font-bold text-[#0f172a]">Archived Students</h2>
+                <span className="glass-pill text-xs font-bold px-2.5 py-0.5 rounded-full">
+                  {archivedStudents.length}
+                </span>
+                <span className="text-xs text-slate-500 ml-1">Hidden from the dashboard and schedule. Payroll history is kept.</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {archivedStudents.map((s) => {
+                  const course = s.enrollments[0]?.course;
+                  return (
+                    <div key={s.id} className="glass-card-subtle rounded-2xl border border-black/10 p-4 flex items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <h3 className="text-sm font-bold text-[#0f172a] truncate">{s.name}</h3>
+                        <p className="text-xs text-slate-600 truncate">
+                          {course ? `${course.title} (${course.subjectCode})` : 'No enrollment'}
+                        </p>
+                        {s.archivedAt && (
+                          <p className="text-[11px] text-slate-500 mt-0.5">
+                            Archived {s.archivedAt.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </p>
+                        )}
+                      </div>
+                      <RestoreStudentButton studentId={s.id} />
+                    </div>
+                  );
+                })}
               </div>
             </section>
           )}
