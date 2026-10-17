@@ -3,6 +3,8 @@ import DeleteSessionButton from '@/components/DeleteSessionButton';
 import { prisma } from '@/lib/prisma';
 import { requireTutor } from '@/lib/auth';
 import Link from 'next/link';
+import SyllabusMap from '@/components/SyllabusMap';
+import { computeTopicProgress, suggestNext } from '@/lib/syllabus-progress';
 import { notFound } from 'next/navigation';
 import CopyPresenceButton from '@/components/CopyPresenceButton';
 import DeleteStudentButton from '@/components/DeleteStudentButton';
@@ -127,6 +129,20 @@ export default async function StudentDossierPage({ params }: Props) {
     });
   });
 
+  const topicProgress = computeTopicProgress(
+    allTopics,
+    student.sessions.map((s) => ({
+      sessionDate: s.sessionDate,
+      status: s.status,
+      segments: s.segments.map((seg) => ({
+        topicId: seg.topicId,
+        masteryStatus: seg.masteryStatus,
+      })),
+    })),
+    new Date()
+  );
+  const suggestions = suggestNext(topicProgress);
+
   const totalTopicsCount = allTopics.length;
   const coveredCount = coveredTopicIds.size;
   const coveragePercent = totalTopicsCount > 0 ? Math.round((coveredCount / totalTopicsCount) * 100) : 0;
@@ -222,6 +238,12 @@ export default async function StudentDossierPage({ params }: Props) {
             </div>
           </div>
         </section>
+
+        <SyllabusMap
+          courseTitle={course?.title ?? 'this course'}
+          progress={topicProgress}
+          suggestions={suggestions}
+        />
 
         {/* CHRONOLOGICAL SESSION TIMELINE */}
         <section className="space-y-4">
