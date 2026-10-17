@@ -264,6 +264,7 @@ export default function GlassSelect({
                   className={`glass-select-option ${row.index === active ? 'is-active' : ''} ${
                     row.option.value === value ? 'is-selected' : ''
                   }`}
+                  style={{ ['--i' as string]: Math.min(row.index, 12) }}
                   onPointerMove={() => row.index !== active && setActive(row.index)}
                   onClick={() => choose(row.index)}
                 >
