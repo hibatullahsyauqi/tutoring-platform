@@ -19,6 +19,8 @@ export default function FinancialGlassCard({
   totalDeductionsIDR,
   netSalaryIDR,
   rates,
+  ratesUpdated,
+  ratesAreLive,
 }: {
   activeMonthName: string;
   endOfMonthDay: number;
@@ -30,6 +32,8 @@ export default function FinancialGlassCard({
   totalDeductionsIDR: number;
   netSalaryIDR: number;
   rates: ExchangeRates;
+  ratesUpdated: string;
+  ratesAreLive: boolean;
 }) {
   const [selectedCurrency, setSelectedCurrency] = useState<CurrencyCode>('IDR');
 
@@ -73,6 +77,14 @@ export default function FinancialGlassCard({
           {getExchangeQuote() && (
             <span className="text-[10px] font-mono text-slate-500 bg-black/5 px-2 py-1 rounded-md hidden md:inline-block">
               {getExchangeQuote()}
+            </span>
+          )}
+          {selectedCurrency !== 'IDR' && (
+            <span
+              className={`text-[10px] hidden lg:inline-block ${ratesAreLive ? 'text-slate-500' : 'text-rose-600 font-semibold'}`}
+              title={ratesAreLive ? 'Daily mid-market rates, refreshed hourly' : 'Live rates unavailable, using an old fixed baseline'}
+            >
+              {ratesAreLive ? `Rates: ${ratesUpdated.replace(/ \+0000$/, ' UTC')}` : 'Offline baseline rates'}
             </span>
           )}
 

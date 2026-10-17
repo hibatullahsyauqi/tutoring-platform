@@ -14,7 +14,7 @@ export default async function DashboardPage() {
   const now = new Date();
 
   // Fetch live exchange rates (Cached & updated hourly via Next.js)
-  const { rates } = await getLiveExchangeRates();
+  const { rates, lastUpdated, isLive } = await getLiveExchangeRates();
 
   // Monthly Payroll Calculations
   const { start: startOfMonth, end: endOfMonth } = monthBounds(now);
@@ -155,6 +155,8 @@ export default async function DashboardPage() {
           totalDeductionsIDR={totalDeductions}
           netSalaryIDR={netSalary}
           rates={rates}
+          ratesUpdated={lastUpdated}
+          ratesAreLive={isLive}
         />
 
         {/* METRICS & SMART BRIEFING */}
