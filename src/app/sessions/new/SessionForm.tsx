@@ -2,6 +2,7 @@
 
 import GlassDatePicker from '@/components/GlassDatePicker';
 import GlassSelect from '@/components/GlassSelect';
+import LiquidPresence from '@/components/LiquidPresence';
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { createSessionAction, type MasteryStatus } from '@/app/actions/session';
@@ -250,15 +251,27 @@ export default function SessionForm({
     });
   };
 
+  // The warning keeps its words while it fades out.
+  const [lastWarning, setLastWarning] = useState<string | null>(null);
+  if (dateWarning && dateWarning !== lastWarning) setLastWarning(dateWarning);
+
+  // The note keeps showing the last student's lessons while it fades out for one who has none.
+  const noteKey = `${activeStudent?.name ?? ''}|${pendingForStudent.map((p) => p.id).join(',')}`;
+  const [note, setNote] = useState<{ key: string; name: string; items: typeof pendingForStudent } | null>(null);
+  if (pendingForStudent.length > 0 && note?.key !== noteKey) {
+    setNote({ key: noteKey, name: activeStudent?.name ?? '', items: pendingForStudent });
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {pendingForStudent.length > 0 && (
-        <div className="liquid-in glass-card-subtle p-4 space-y-2 text-xs accent-amber">
+      <LiquidPresence open={pendingForStudent.length > 0}>
+        {note && (
+        <div className="glass-card-subtle p-4 space-y-2 text-xs accent-amber">
           <p className="font-bold text-[#0f172a]">
-            {activeStudent?.name} already has a scheduled lesson waiting to be logged. Log that one instead of creating a duplicate?
+            {note.name} already has a scheduled lesson waiting to be logged. Log that one instead of creating a duplicate?
           </p>
           <div className="flex flex-wrap gap-2">
-            {pendingForStudent.map((p) => (
+            {note.items.map((p) => (
               <Link
                 key={p.id}
                 href={`/sessions/new?studentId=${p.studentId}&sessionId=${p.id}`}
@@ -278,7 +291,8 @@ export default function SessionForm({
           </div>
           <p className="font-medium text-slate-700">Or fill in the form below to log a separate, new session.</p>
         </div>
-      )}
+        )}
+      </LiquidPresence>
 
       {/* SECTION 1: CORE SESSION METADATA */}
       <section className="glass-panel p-6 space-y-4">
@@ -335,11 +349,9 @@ export default function SessionForm({
               ariaLabel="Date and time concluded"
               className={`p-2.5 text-sm ${dateWarning ? 'outline outline-2 outline-[#a3462f]' : ''}`}
             />
-            {dateWarning && (
-              <p className="text-[11px] text-[#a3462f] font-semibold mt-1 animate-in fade-in duration-150">
-                {dateWarning}
-              </p>
-            )}
+            <LiquidPresence open={!!dateWarning}>
+              <p className="text-[11px] text-[#a3462f] font-semibold mt-1">{lastWarning}</p>
+            </LiquidPresence>
           </div>
 
           <div>
@@ -405,12 +417,12 @@ export default function SessionForm({
           </button>
         </div>
 
-        {activeStudent && activeStudent.topics.length === 0 && (
+        <LiquidPresence open={activeStudent && activeStudent.topics.length === 0}>
           <p className="glass-inset p-3 text-[11px] text-amber-800">
             No syllabus topics are loaded for this course yet, so topic blocks can&apos;t be saved. The session,
             homework and reflection will still be recorded.
           </p>
-        )}
+        </LiquidPresence>
 
         <div className="space-y-4">
           {segments.map((seg, idx) => (

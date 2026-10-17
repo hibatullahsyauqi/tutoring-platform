@@ -110,11 +110,11 @@ function CancelReasons({
             ariaLabel="New date and time"
             className="p-2.5 text-[11px]"
           />
-          {isPast && (
+          <LiquidPresence open={isPast}>
             <p className="text-[10px] font-semibold text-[#a3462f]">
               Pick a time in the future. A lesson that already passed can&apos;t be moved to the past.
             </p>
-          )}
+          </LiquidPresence>
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
