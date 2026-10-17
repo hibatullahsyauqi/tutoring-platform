@@ -8,7 +8,7 @@ export default function RevertSessionButton({
   sessionId,
   label = 'Revert to scheduled',
   message = 'Revert this lesson to scheduled? Its topics, notes and ratings are cleared and it stops counting toward payroll until you log it again. The date, homework and next focus are kept.',
-  className = 'glass-btn text-xs px-3 py-1.5 font-semibold',
+  className = 'glass-btn glass-btn-sm',
   onReverted,
 }: {
   sessionId: string;

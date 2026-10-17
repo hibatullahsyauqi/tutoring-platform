@@ -114,7 +114,7 @@ export default async function SchedulePage({ searchParams }: Props) {
       <div className="max-w-5xl mx-auto space-y-6">
         
         {/* HEADER */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-panel rounded-3xl p-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-panel p-6">
           <div>
             <Link href="/" className="text-xs font-semibold text-[#3d6b52] hover:underline mb-2 inline-block">
               ← Back to Dashboard

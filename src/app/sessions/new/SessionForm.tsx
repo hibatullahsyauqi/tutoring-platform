@@ -243,11 +243,11 @@ export default function SessionForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* SECTION 1: CORE SESSION METADATA */}
-      <section className="glass-panel rounded-2xl p-5 space-y-4 shadow-sm">
+      <section className="glass-panel p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600">1. Session Details</h2>
           {existingSessionId && (
-            <span className="text-[10px] bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded border border-blue-200">
+            <span className="glass-badge bg-blue-50 text-blue-700 border-blue-200">
               Updating Scheduled Booking
             </span>
           )}
@@ -296,9 +296,9 @@ export default function SessionForm({
               value={sessionDate}
               max={getNowLocalISO()}
               onChange={(e) => handleDateChange(e.target.value)}
-              className={`w-full glass-input p-2 text-sm ${
+              className={`w-full glass-input p-2.5 text-sm  ${
                 dateWarning ? 'outline outline-2 outline-[#a3462f]' : ''
-              }`}
+              } `}
             />
             {dateWarning && (
               <p className="text-[11px] text-[#a3462f] font-semibold mt-1 animate-in fade-in duration-150">
@@ -313,7 +313,7 @@ export default function SessionForm({
               type="number"
               value={durationMinutes}
               onChange={(e) => setDurationMinutes(Number(e.target.value))}
-              className="w-full p-2 text-sm glass-input"
+              className="w-full p-2.5 text-sm glass-input"
             />
           </div>
         </div>
@@ -327,7 +327,7 @@ export default function SessionForm({
               value={latenessMinutes}
               onChange={(e) => setLatenessMinutes(Number(e.target.value))}
               placeholder="0"
-              className="w-full p-2 text-sm glass-input"
+              className="w-full p-2.5 text-sm glass-input"
             />
             <span className="text-[11px] text-[#a3462f]">≥15m unexcused triggers fine</span>
           </div>
@@ -338,7 +338,7 @@ export default function SessionForm({
               value={meetingUrl}
               onChange={(e) => setMeetingUrl(e.target.value)}
               placeholder="https://meet..."
-              className="w-full p-2 text-sm glass-input"
+              className="w-full p-2.5 text-sm glass-input"
             />
           </div>
           <div>
@@ -348,14 +348,14 @@ export default function SessionForm({
               value={recordingUrl}
               onChange={(e) => setRecordingUrl(e.target.value)}
               placeholder="https://drive..."
-              className="w-full p-2 text-sm glass-input"
+              className="w-full p-2.5 text-sm glass-input"
             />
           </div>
         </div>
       </section>
 
       {/* SECTION 2: TOPICS COVERED & MASTERY */}
-      <section className="glass-panel rounded-2xl p-5 space-y-4 shadow-sm">
+      <section className="glass-panel p-6 space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600">2. Topics Covered & Mastery</h2>
@@ -364,14 +364,14 @@ export default function SessionForm({
           <button
             type="button"
             onClick={addSegment}
-            className="glass-btn text-xs font-semibold px-3 py-1.5"
+            className="glass-btn glass-btn-sm"
           >
             + Add Topic Block
           </button>
         </div>
 
         {activeStudent && activeStudent.topics.length === 0 && (
-          <p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+          <p className="glass-inset p-3 text-[11px] text-amber-800">
             No syllabus topics are loaded for this course yet, so topic blocks can&apos;t be saved. The session,
             homework and reflection will still be recorded.
           </p>
@@ -379,14 +379,14 @@ export default function SessionForm({
 
         <div className="space-y-4">
           {segments.map((seg, idx) => (
-            <div key={idx} className="p-4 space-y-3 glass-inset">
+            <div key={idx} className="p-3 space-y-3 glass-inset">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-[#3d6b52]">Block #{idx + 1}</span>
                 {segments.length > 1 && (
                   <button
                     type="button"
                     onClick={() => removeSegment(idx)}
-                    className="text-xs text-[#a3462f] hover:underline"
+                    className="glass-btn glass-btn-sm glass-btn-danger"
                   >
                     Remove
                   </button>
@@ -406,7 +406,7 @@ export default function SessionForm({
                         updated[idx].topicId = e.target.value;
                         setSegments(updated);
                       }}
-                      className="w-full p-2 text-xs font-medium glass-input"
+                      className="w-full p-2.5 text-xs font-medium glass-input"
                     >
                       {activeStudent.topics.map((t) => (
                         <option key={t.id} value={t.id}>
@@ -424,7 +424,7 @@ export default function SessionForm({
                         setSegments(updated);
                       }}
                       placeholder="e.g. Kinematics & Projectile Motion"
-                      className="w-full p-2 text-xs font-medium glass-input"
+                      className="w-full p-2.5 text-xs font-medium glass-input"
                     />
                   )}
                 </div>
@@ -438,7 +438,7 @@ export default function SessionForm({
                       updated[idx].toolId = e.target.value;
                       setSegments(updated);
                     }}
-                    className="w-full p-2 text-xs glass-input"
+                    className="w-full p-2.5 text-xs glass-input"
                   >
                     <option value="">No Special Tool</option>
                     {tools.map((tl) => (
@@ -458,7 +458,7 @@ export default function SessionForm({
                       updated[idx].activityType = e.target.value as ActivityType;
                       setSegments(updated);
                     }}
-                    className="w-full p-2 text-xs glass-input"
+                    className="w-full p-2.5 text-xs glass-input"
                   >
                     <option value="DIRECT_EXPLANATION">Concept Explanation (Socratic)</option>
                     <option value="TOOL_EXPLORATION">Interactive Simulation / Dragging Sliders</option>
@@ -488,11 +488,11 @@ export default function SessionForm({
                         updated[idx].masteryStatus = status.val as MasteryStatus;
                         setSegments(updated);
                       }}
-                      className={`glass-inset p-2 text-left transition-all cursor-pointer ${
+                      className={`glass-inset p-3 text-left transition-all cursor-pointer  ${
                         seg.masteryStatus === status.val
                           ? 'outline outline-2 outline-[#3d6b52] text-[#2d523e] font-semibold'
                           : 'text-slate-700 opacity-90 hover:opacity-100'
-                      }`}
+                      } `}
                     >
                       <div className="text-xs">{status.label}</div>
                       <div className="text-[10px] opacity-75 mt-0.5">{status.desc}</div>
@@ -506,7 +506,7 @@ export default function SessionForm({
       </section>
 
       {/* SECTION 3: CONTINUITY BRIDGE */}
-      <section className="glass-panel rounded-2xl p-5 space-y-4 shadow-sm transition-all">
+      <section className="glass-panel p-6 space-y-4 transition-all">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-black/10 pb-3">
           <div>
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600">
@@ -516,7 +516,7 @@ export default function SessionForm({
               Dynamically tuned based on the mastery level you observed above
             </p>
           </div>
-          <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border ${continuityConfig.badgeColor}`}>
+          <span className={`glass-badge ${continuityConfig.badgeColor}`}>
             {continuityConfig.badge}
           </span>
         </div>
@@ -530,7 +530,7 @@ export default function SessionForm({
               value={struggle}
               onChange={(e) => setStruggle(e.target.value)}
               placeholder={continuityConfig.box1Placeholder}
-              className={`w-full glass-input p-2.5 text-xs h-24 ${continuityConfig.box1Border}`}
+              className={`w-full glass-input p-2.5 text-xs h-24  ${continuityConfig.box1Border} `}
             />
           </div>
 
@@ -557,7 +557,7 @@ export default function SessionForm({
               value={assignedHomework}
               onChange={(e) => setAssignedHomework(e.target.value)}
               placeholder={continuityConfig.homeworkPlaceholder}
-              className="w-full p-2 text-xs glass-input"
+              className="w-full p-2.5 text-xs glass-input"
             />
           </div>
 
@@ -570,7 +570,7 @@ export default function SessionForm({
               value={nextFocusTopic}
               onChange={(e) => setNextFocusTopic(e.target.value)}
               placeholder={continuityConfig.targetPlaceholder}
-              className="w-full p-2 text-xs glass-input"
+              className="w-full p-2.5 text-xs glass-input"
             />
           </div>
         </div>
@@ -580,14 +580,14 @@ export default function SessionForm({
       <div className="flex justify-end gap-3 pt-2">
         <Link
           href="/"
-          className="glass-btn px-5 py-2.5 text-xs font-bold"
+          className="glass-btn"
         >
           Cancel
         </Link>
         <button
           type="submit"
           disabled={isPending}
-          className="glass-btn glass-btn-primary px-6 py-2.5 text-xs font-bold"
+          className="glass-btn glass-btn-primary"
         >
           {isPending ? 'Saving...' : existingSessionId ? 'Complete & Log Scheduled Lesson' : 'Save Session & Bridge Next Lesson'}
         </button>

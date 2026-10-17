@@ -40,7 +40,7 @@ export default function ProgressInsights({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {/* EXAM COUNTDOWN */}
-      <section className="glass-panel rounded-2xl p-5 shadow-sm space-y-3">
+      <section className="glass-panel p-6 space-y-3">
         <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600">Exam Countdown</h2>
         {pace.kind === 'none' && (
           <p className="text-xs text-slate-600">
@@ -62,21 +62,21 @@ export default function ProgressInsights({
                 <div className="text-[11px] text-slate-600">About {fmt(pace.weeksLeft)} weeks</div>
               </div>
               <span
-                className={`text-[11px] font-bold px-2 py-0.5 rounded border ${STATUS_STYLE[pace.status].chip}`}
+                className={`glass-badge ${STATUS_STYLE[pace.status].chip}`}
               >
                 {STATUS_STYLE[pace.status].label}
               </span>
             </div>
             <div className="grid grid-cols-3 gap-2 text-center text-xs">
-              <div className="p-2 glass-inset">
+              <div className="p-3 glass-inset">
                 <div className="text-[10px] text-slate-600">To cover</div>
                 <div className="font-bold text-[#0f172a]">{pace.toCover}</div>
               </div>
-              <div className="p-2 glass-inset">
+              <div className="p-3 glass-inset">
                 <div className="text-[10px] text-slate-600">To firm up</div>
                 <div className="font-bold text-[#0f172a]">{pace.toFirmUp}</div>
               </div>
-              <div className="p-2 glass-inset">
+              <div className="p-3 glass-inset">
                 <div className="text-[10px] text-slate-600">Needed / week</div>
                 <div className="font-bold text-[#0f172a]">{fmt(pace.requiredPerWeek)}</div>
               </div>
@@ -87,7 +87,7 @@ export default function ProgressInsights({
       </section>
 
       {/* MOMENTUM */}
-      <section className="glass-panel rounded-2xl p-5 shadow-sm space-y-3">
+      <section className="glass-panel p-6 space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600">Momentum</h2>
           <div className="flex gap-3 text-[11px] text-slate-600">

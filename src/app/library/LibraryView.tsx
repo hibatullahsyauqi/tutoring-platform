@@ -97,7 +97,7 @@ export default function LibraryView({
     <div className="space-y-6">
       
       {/* FILTER & SEARCH BAR */}
-      <div className="glass-panel rounded-2xl p-4 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div className="glass-panel p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
           {[
             { val: 'ALL', label: 'All Resources' },
@@ -111,11 +111,11 @@ export default function LibraryView({
               key={tab.val}
               type="button"
               onClick={() => setSelectedType(tab.val)}
-              className={`glass-btn text-xs px-3 py-1.5 font-bold whitespace-nowrap ${
+              className={`glass-btn whitespace-nowrap glass-btn-sm  ${
                 selectedType === tab.val
                   ? 'glass-btn-primary'
                   : ''
-              }`}
+              } `}
             >
               {tab.label}
             </button>
@@ -128,12 +128,12 @@ export default function LibraryView({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search title, author, or chapter..."
-            className="w-full md:w-64 px-3 py-1.5 text-xs glass-input"
+            className="w-full md:w-64 text-xs glass-input p-2.5"
           />
           <button
             type="button"
             onClick={() => setShowAddForm(!showAddForm)}
-            className="glass-btn glass-btn-primary px-3.5 py-1.5 text-xs font-bold whitespace-nowrap"
+            className="glass-btn glass-btn-primary whitespace-nowrap glass-btn-sm"
           >
             {showAddForm ? '✕ Close Form' : '+ Add Asset'}
           </button>
@@ -142,7 +142,7 @@ export default function LibraryView({
 
       {/* INLINE ADD RESOURCE FORM */}
       {showAddForm && (
-        <form onSubmit={handleAddSubmit} className="glass-panel outline outline-2 outline-[#3d6b52]/30 rounded-2xl p-6 shadow-sm space-y-4">
+        <form onSubmit={handleAddSubmit} className="glass-panel outline outline-2 outline-[#3d6b52]/30 p-6 space-y-4">
           <h2 className="text-xs font-bold uppercase tracking-wider text-[#3d6b52]">
             Index New Teaching Material
           </h2>
@@ -228,14 +228,14 @@ export default function LibraryView({
             <button
               type="button"
               onClick={() => setShowAddForm(false)}
-              className="glass-btn px-4 py-2 text-xs font-bold"
+              className="glass-btn"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="glass-btn glass-btn-primary px-5 py-2 text-xs font-bold"
+              className="glass-btn glass-btn-primary"
             >
               {submitting ? 'Indexing...' : 'Save to Vault'}
             </button>
@@ -245,7 +245,7 @@ export default function LibraryView({
 
       {/* RESOURCE CARDS GRID */}
       {filtered.length === 0 ? (
-        <div className="glass-panel rounded-2xl p-10 text-center text-xs text-slate-600">
+        <div className="glass-panel p-8 text-center text-xs text-slate-600">
           No teaching materials match this filter or search query.
         </div>
       ) : (
@@ -255,11 +255,11 @@ export default function LibraryView({
             return (
               <article
                 key={item.id}
-                className="glass-panel rounded-2xl p-5 shadow-sm space-y-3 flex flex-col justify-between"
+                className="glass-panel p-6 space-y-3 flex flex-col justify-between"
               >
                 <div className="space-y-2">
                   <div className="flex items-start justify-between gap-2">
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${badge.color}`}>
+                    <span className={`glass-badge ${badge.color}`}>
                       {badge.label}
                     </span>
                     <span className="text-[11px] font-semibold text-slate-600">
@@ -271,7 +271,7 @@ export default function LibraryView({
                   <p className="text-xs text-slate-600">{item.authorOrPublisher}</p>
 
                   {item.locationDetails && (
-                    <div className="p-2.5 text-xs font-mono text-[#0f172a] glass-inset">
+                    <div className="p-3 text-xs font-mono text-[#0f172a] glass-inset">
                       📍 {item.locationDetails}
                     </div>
                   )}

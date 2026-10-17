@@ -8,7 +8,7 @@ export default function DeleteSessionButton({
   sessionId,
   completed,
   label = 'Delete',
-  className = 'glass-btn glass-btn-danger text-xs px-3 py-1.5 font-semibold',
+  className = 'glass-btn glass-btn-sm glass-btn-danger',
   onDeleted,
 }: {
   sessionId: string;

@@ -41,11 +41,11 @@ export default function CopyPresenceButton({ payload }: { payload: PresencePaylo
     <button
       type="button"
       onClick={handleCopy}
-      className={`glass-btn text-xs px-2.5 py-1 font-semibold gap-1 ${
+      className={`glass-btn glass-btn-sm  ${
         copied
           ? 'text-emerald-700 outline outline-1 outline-emerald-400'
           : 'text-[#2d523e]'
-      }`}
+      } `}
       title="Copy tab-separated row to paste into Google Sheets presence"
     >
       {copied ? '✓ Copied for Sheets!' : '📋 Copy Row for Sheets'}

@@ -128,7 +128,7 @@ export default async function DashboardPage() {
       <div className="max-w-4xl mx-auto space-y-8">
         
         {/* FROSTED TOPBAR */}
-        <header className="glass-panel rounded-3xl p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 transition-all">
+        <header className="glass-panel p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 transition-all">
           <div>
             <div className="flex items-center gap-2">
               <span className="glass-pill text-[11px] font-bold uppercase tracking-wider text-[#0f172a] px-3 py-1 rounded-full inline-block">
@@ -146,26 +146,26 @@ export default async function DashboardPage() {
           <div className="flex items-center gap-2.5 flex-wrap">
             <Link
               href="/schedule"
-              className="glass-btn px-3.5 py-2 text-xs font-bold inline-flex items-center gap-1.5"
+              className="glass-btn inline-flex items-center"
             >
               📅 Schedule
             </Link>
             <Link
               href="/library"
-              className="glass-btn px-3.5 py-2 text-xs font-bold inline-flex items-center gap-1.5"
+              className="glass-btn inline-flex items-center"
             >
               📚 Library
             </Link>
             <Link
               href="/sessions/new"
-              className="bg-[#0f172a] hover:bg-[#1e293b] text-white px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-lg shadow-black/20 active:scale-95 inline-flex items-center gap-1.5"
+              className="glass-btn glass-btn-primary"
             >
               <span>+</span> Log Session
             </Link>
             <form action={signOutAction}>
               <button
                 type="submit"
-                className="text-rose-600 hover:bg-rose-50/80 px-3 py-2 rounded-xl text-xs font-bold transition-all active:scale-95"
+                className="glass-btn glass-btn-danger"
               >
                 Sign Out
               </button>
@@ -193,7 +193,7 @@ export default async function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           
           {/* SMART PRE-SESSION CONTINUITY BRIEFING */}
-          <section className="glass-panel rounded-3xl p-6 space-y-4">
+          <section className="glass-panel p-6 space-y-4">
             <div>
               <div className="flex items-center justify-between">
                 <h2 className="text-base font-bold text-[#0f172a]">
@@ -244,7 +244,7 @@ export default async function DashboardPage() {
 
               if (!sessionContext) {
                 return (
-                  <div className="p-4 glass-card-subtle rounded-2xl text-xs text-slate-600 text-center">
+                  <div className="p-4 glass-card-subtle text-xs text-slate-600 text-center">
                     No continuity notes recorded yet.
                   </div>
                 );
@@ -257,21 +257,21 @@ export default async function DashboardPage() {
               return (
                 <div className="space-y-3 text-xs">
                   {struggle && (
-                    <div className="p-3.5 glass-card-subtle border-l-4 border-l-rose-500 rounded-2xl">
+                    <div className="p-4 glass-card-subtle border-l-4 border-l-rose-500">
                       <span className="font-bold text-rose-700 block mb-0.5">⚠️ Struggle to Revisit (2m Warm-up):</span>
                       <p className="text-[#0f172a] leading-relaxed font-medium">{struggle}</p>
                     </div>
                   )}
 
                   {homework && (
-                    <div className="p-3.5 glass-card-subtle border-l-4 border-l-[#0f172a] rounded-2xl">
+                    <div className="p-4 glass-card-subtle border-l-4 border-l-[#0f172a]">
                       <span className="font-bold text-[#0f172a] block mb-0.5">📝 Homework to Audit:</span>
                       <p className="text-slate-700 leading-relaxed font-medium">{homework}</p>
                     </div>
                   )}
 
                   {nextFocus && (
-                    <div className="p-3.5 glass-card-subtle bg-white/85! rounded-2xl">
+                    <div className="p-4 glass-card-subtle bg-white/85!">
                       <span className="font-bold text-[#0f172a] block mb-0.5">🎯 Planned Target:</span>
                       <p className="text-[#0f172a] font-bold">{nextFocus}</p>
                     </div>
@@ -283,7 +283,7 @@ export default async function DashboardPage() {
                         href={nextUpcomingSession.meetingUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="w-full bg-[#0f172a] hover:bg-[#1e293b] text-white py-2.5 px-3 rounded-2xl text-xs font-bold transition-all shadow-md flex items-center justify-center gap-1 active:scale-98"
+                        className="glass-btn glass-btn-primary w-full"
                       >
                         Launch Meeting ↗
                       </a>
@@ -295,7 +295,7 @@ export default async function DashboardPage() {
           </section>
 
           {/* ACTIVE STUDENTS ROSTER */}
-          <section className="md:col-span-2 glass-panel rounded-3xl p-6 space-y-4">
+          <section className="md:col-span-2 glass-panel p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-black/5 pb-3">
               <div className="flex items-center gap-2">
                 <h2 className="text-base font-bold text-[#0f172a]">
@@ -308,7 +308,7 @@ export default async function DashboardPage() {
 
               <Link
                 href="/students/new"
-                className="glass-btn text-xs font-bold px-3 py-1.5 inline-flex items-center gap-1"
+                className="glass-btn inline-flex items-center glass-btn-sm"
               >
                 + Add Student
               </Link>
@@ -348,7 +348,7 @@ export default async function DashboardPage() {
                       <div className="flex flex-col items-stretch gap-2">
                         <Link
                           href={`/students/${student.id}`}
-                          className="glass-btn text-xs font-bold px-4 py-2 whitespace-nowrap text-center"
+                          className="glass-btn whitespace-nowrap text-center"
                         >
                           View Dossier →
                         </Link>
@@ -362,7 +362,7 @@ export default async function DashboardPage() {
           </section>
 
           {archivedStudents.length > 0 && (
-            <section className="md:col-span-3 glass-panel rounded-3xl p-6 space-y-4">
+            <section className="md:col-span-3 glass-panel p-6 space-y-4">
               <div className="flex items-center gap-2 border-b border-black/5 pb-3">
                 <h2 className="text-base font-bold text-[#0f172a]">Archived Students</h2>
                 <span className="glass-pill text-xs font-bold px-2.5 py-0.5 rounded-full">
@@ -374,7 +374,7 @@ export default async function DashboardPage() {
                 {archivedStudents.map((s) => {
                   const course = s.enrollments[0]?.course;
                   return (
-                    <div key={s.id} className="glass-card-subtle rounded-2xl border border-black/10 p-4 flex items-center justify-between gap-3">
+                    <div key={s.id} className="glass-card-subtle border border-black/10 p-4 flex items-center justify-between gap-3">
                       <div className="min-w-0">
                         <h3 className="text-sm font-bold text-[#0f172a] truncate">{s.name}</h3>
                         <p className="text-xs text-slate-600 truncate">

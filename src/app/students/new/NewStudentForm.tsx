@@ -72,7 +72,7 @@ export default function NewStudentForm({ courses }: { courses: CourseItem[] }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="glass-panel rounded-2xl p-6 shadow-sm space-y-5">
+    <form onSubmit={handleSubmit} className="glass-panel p-6 space-y-5">
       
       {/* STUDENT NAME */}
       <div>
@@ -136,11 +136,11 @@ export default function NewStudentForm({ courses }: { courses: CourseItem[] }) {
                 key={t.val}
                 type="button"
                 onClick={() => setTier(t.val)}
-                className={`glass-inset p-3 text-left transition-all cursor-pointer ${
+                className={`glass-inset p-3 text-left transition-all cursor-pointer  ${
                   tier === t.val
                     ? 'outline outline-2 outline-[#3d6b52] text-[#2d523e] font-semibold'
                     : 'text-slate-700 opacity-90 hover:opacity-100'
-                }`}
+                } `}
               >
                 <div className="text-xs font-bold">{t.label}</div>
                 <div className="text-[10px] opacity-75 mt-0.5">{t.sub}</div>
@@ -165,11 +165,11 @@ export default function NewStudentForm({ courses }: { courses: CourseItem[] }) {
           <button
             type="button"
             onClick={() => setHasTargetExam(!hasTargetExam)}
-            className={`glass-btn text-xs px-3 py-1 font-bold ${
+            className={`glass-btn glass-btn-sm  ${
               hasTargetExam
                 ? 'glass-btn-primary'
                 : ''
-            }`}
+            } `}
           >
             {hasTargetExam ? '✓ Date Active' : '+ Set Exam Date'}
           </button>
@@ -195,14 +195,14 @@ export default function NewStudentForm({ courses }: { courses: CourseItem[] }) {
       <div className="flex items-center justify-end gap-3 pt-4 border-t border-black/10">
         <Link
           href="/"
-          className="glass-btn px-4 py-2 text-xs font-bold"
+          className="glass-btn"
         >
           Cancel
         </Link>
         <button
           type="submit"
           disabled={submitting || !name.trim()}
-          className="glass-btn glass-btn-primary px-5 py-2.5 text-xs font-bold"
+          className="glass-btn glass-btn-primary"
         >
           {submitting ? 'Creating Student Dossier...' : 'Create Student & Open Dossier →'}
         </button>

@@ -24,7 +24,7 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen flex items-center justify-center p-6 font-sans">
-      <div className="w-full max-w-sm glass-panel rounded-3xl p-8 shadow-sm space-y-6 text-center">
+      <div className="w-full max-w-sm glass-panel p-8 space-y-6 text-center">
         
         <div>
           <span className="glass-pill text-[11px] font-bold uppercase tracking-wider px-2.5 py-1">
@@ -41,7 +41,7 @@ export default function LoginPage() {
             type="button"
             onClick={handleGoogleLogin}
             disabled={loading}
-            className="glass-btn w-full font-bold text-xs py-3 px-4 flex items-center justify-center gap-3"
+            className="glass-btn w-full flex items-center justify-center gap-3"
           >
             {/* Google G Logo SVG */}
             <svg className="w-4 h-4" viewBox="0 0 24 24">

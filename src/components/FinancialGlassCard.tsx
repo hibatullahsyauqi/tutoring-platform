@@ -60,7 +60,7 @@ export default function FinancialGlassCard({
   };
 
   return (
-    <section className="glass-panel rounded-3xl p-6 transition-all space-y-4">
+    <section className="glass-panel p-6 transition-all space-y-4">
       {/* CARD HEADER & CURRENCY SWITCHER */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-black/5 pb-3">
         <div>
@@ -107,19 +107,19 @@ export default function FinancialGlassCard({
 
       {/* 4 STATS BOXES WITH INSTANT CONVERSION */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
-        <div className="glass-card-subtle p-4 rounded-2xl">
+        <div className="glass-card-subtle p-4">
           <div className="text-[11px] text-slate-600 font-medium">Completed ({activeMonthName})</div>
           <div className="text-xl font-bold text-[#0f172a] mt-1">{completedCount}</div>
         </div>
 
-        <div className="glass-card-subtle p-4 rounded-2xl">
+        <div className="glass-card-subtle p-4">
           <div className="text-[11px] text-slate-600 font-medium">Gross Earnings</div>
           <div className="text-xl font-bold text-[#0f172a] mt-1">
             {formatCurrency(grossSalaryIDR, selectedCurrency, rates)}
           </div>
         </div>
 
-        <div className="glass-card-subtle p-4 rounded-2xl">
+        <div className="glass-card-subtle p-4">
           <div className="text-[11px] text-slate-600 font-medium">Deductions (Tax + Fines)</div>
           <div className="text-xl font-bold text-rose-600 mt-1">
             -{formatCurrency(totalDeductionsIDR, selectedCurrency, rates)}

@@ -87,7 +87,7 @@ export default async function NewSessionPage({ searchParams }: Props) {
   return (
     <main className="min-h-screen text-[#0f172a] p-6 md:p-10 font-sans">
       <div className="max-w-3xl mx-auto space-y-6">
-        <div className="flex items-center justify-between glass-panel rounded-3xl p-6">
+        <div className="flex items-center justify-between glass-panel p-6">
           <div>
             <Link href="/" className="text-xs font-semibold text-[#3d6b52] hover:underline mb-1 inline-block">
               ← Back to Dashboard
@@ -102,7 +102,7 @@ export default async function NewSessionPage({ searchParams }: Props) {
         </div>
 
         {pendingSessions.length > 0 && (
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-2 text-xs">
+          <div className="glass-inset p-4 space-y-2 text-xs">
             <p className="font-bold text-amber-900">
               This student already has a scheduled lesson waiting to be logged. Log that one instead of creating a duplicate?
             </p>
@@ -111,7 +111,7 @@ export default async function NewSessionPage({ searchParams }: Props) {
                 <Link
                   key={p.id}
                   href={`/sessions/new?studentId=${p.studentId}&sessionId=${p.id}`}
-                  className="glass-btn text-xs font-semibold px-3 py-1.5"
+                  className="glass-btn glass-btn-sm"
                 >
                   Log {p.sessionDate.toLocaleString('en-US', {
                     weekday: 'short',

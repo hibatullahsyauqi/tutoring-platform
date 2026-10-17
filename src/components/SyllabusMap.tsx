@@ -38,7 +38,7 @@ export default function SyllabusMap({
 }) {
   if (progress.length === 0) {
     return (
-      <section className="glass-panel rounded-2xl p-5 shadow-sm text-xs text-slate-600">
+      <section className="glass-panel p-6 text-xs text-slate-600">
         No syllabus topics are loaded for {courseTitle} yet, so there is no map to show.
       </section>
     );
@@ -53,7 +53,7 @@ export default function SyllabusMap({
   return (
     <div className="space-y-4">
       {/* SUGGESTED NEXT */}
-      <section className="glass-panel rounded-2xl p-5 shadow-sm space-y-3">
+      <section className="glass-panel p-6 space-y-3">
         <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600">Suggested Next</h2>
         {suggestions.length === 0 ? (
           <p className="text-xs text-slate-600">
@@ -82,7 +82,7 @@ export default function SyllabusMap({
       </section>
 
       {/* SYLLABUS MAP */}
-      <section className="glass-panel rounded-2xl p-5 shadow-sm space-y-4">
+      <section className="glass-panel p-6 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600">Syllabus Map</h2>
           <div className="flex flex-wrap gap-x-3 gap-y-1">
@@ -144,7 +144,7 @@ export default function SyllabusMap({
                   {group.topics.map((t) => (
                     <li
                       key={t.id}
-                      className="flex items-center justify-between gap-2 p-2 text-[11px] glass-inset"
+                      className="flex items-center justify-between gap-2 p-3 text-[11px] glass-inset"
                     >
                       <span className="min-w-0 text-[#0f172a]">
                         <span className="font-semibold">{t.code}</span> {shortTitle(t.title)}
@@ -160,7 +160,7 @@ export default function SyllabusMap({
                         />
                       )}
                       <span
-                        className={`border font-bold px-1.5 py-0.5 rounded ${STATE_STYLE[t.state].chip}`}
+                        className={`glass-badge ${STATE_STYLE[t.state].chip}`}
                         title={
                           t.lastTaught
                             ? `Taught ${t.lessons}×, last ${t.lastTaught.toLocaleDateString('en-GB')}`

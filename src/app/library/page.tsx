@@ -63,7 +63,7 @@ export default async function LibraryPage() {
       <div className="max-w-5xl mx-auto space-y-8">
         
         {/* HEADER */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-panel rounded-3xl p-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-panel p-6">
           <div>
             <Link href="/" className="text-xs font-semibold text-[#3d6b52] hover:underline mb-2 inline-block">
               ← Back to Dashboard
@@ -82,7 +82,7 @@ export default async function LibraryPage() {
         </div>
 
         {/* 3RD-PARTY INSTITUTIONAL LAUNCHER (From Support Kit) */}
-        <section className="glass-panel rounded-2xl p-5 shadow-sm space-y-3">
+        <section className="glass-panel p-6 space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600">
               Institutional 3rd-Party Materials
@@ -92,7 +92,7 @@ export default async function LibraryPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
             {/* Save My Exams */}
-            <div className="p-3.5 space-y-1.5 glass-inset">
+            <div className="p-3 space-y-1.5 glass-inset">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-[#0f172a]">Save My Exams</span>
                 <span className="glass-chip text-[10px] text-[#2d523e] font-bold px-2 py-0.5">
@@ -114,7 +114,7 @@ export default async function LibraryPage() {
             </div>
 
             {/* Physics & Maths Tutor */}
-            <div className="p-3.5 space-y-1.5 glass-inset">
+            <div className="p-3 space-y-1.5 glass-inset">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-[#0f172a]">PMT (Physics & Maths)</span>
                 <span className="glass-chip text-[10px] text-[#2d523e] font-bold px-2 py-0.5">
@@ -136,10 +136,10 @@ export default async function LibraryPage() {
             </div>
 
             {/* Twinkl */}
-            <div className="p-3.5 space-y-1.5 glass-inset">
+            <div className="p-3 space-y-1.5 glass-inset">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-[#0f172a]">Twinkl Primary</span>
-                <span className="text-[10px] bg-amber-50 text-amber-700 font-bold px-1.5 py-0.5 rounded">
+                <span className="glass-badge bg-amber-50 text-amber-700 border-amber-200">
                   Primary / Checkpoint
                 </span>
               </div>
@@ -158,10 +158,10 @@ export default async function LibraryPage() {
             </div>
 
             {/* IXL Learning */}
-            <div className="p-3.5 space-y-1.5 glass-inset">
+            <div className="p-3 space-y-1.5 glass-inset">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-[#0f172a]">IXL Learning</span>
-                <span className="text-[10px] bg-amber-50 text-amber-700 font-bold px-1.5 py-0.5 rounded">
+                <span className="glass-badge bg-amber-50 text-amber-700 border-amber-200">
                   Diagnostic ELA/Math
                 </span>
               </div>

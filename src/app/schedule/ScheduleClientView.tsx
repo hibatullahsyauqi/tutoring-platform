@@ -94,14 +94,14 @@ function CancelReasons({
         Rescheduled / Prior Notice (Pasal 7: No fine)
       </button>
       {rescheduling && (
-        <div className="basis-full p-2.5 glass-inset space-y-2">
+        <div className="basis-full p-3 glass-inset space-y-2">
           <label className="block text-[10px] font-bold text-[#0f172a]">New date & time (WIB)</label>
           <input
             type="datetime-local"
             value={newDate}
             min={toLocalInput(new Date())}
             onChange={(e) => setNewDate(e.target.value)}
-            className="w-full p-1.5 text-[11px] glass-input"
+            className="w-full p-2.5 text-[11px] glass-input"
           />
           {isPast && (
             <p className="text-[10px] font-semibold text-[#a3462f]">
@@ -113,14 +113,14 @@ function CancelReasons({
               type="button"
               disabled={isPast}
               onClick={() => onReschedule(new Date(newDate).toISOString())}
-              className="glass-btn glass-btn-primary px-3 py-1.5 text-[11px] font-bold"
+              className="glass-btn glass-btn-primary glass-btn-sm"
             >
               Reschedule to this time
             </button>
             <button
               type="button"
               onClick={() => onPick('CANCELLED_WITH_NOTICE')}
-              className="glass-btn px-3 py-1.5 text-[11px] font-semibold"
+              className="glass-btn glass-btn-sm"
             >
               Just cancel, pick a time later
             </button>
@@ -331,9 +331,9 @@ export default function ScheduleClientView({
       {toast && (
         <div
           role="status"
-          className={`fixed bottom-6 right-6 z-50 max-w-sm rounded-xl border px-4 py-3 text-sm font-semibold shadow-lg ${
+          className={`fixed bottom-6 right-6 z-50 max-w-sm glass-card-subtle px-4 py-3 text-sm font-semibold ${
             toast.tone === 'ok'
-              ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+              ? 'text-emerald-900 outline outline-1 outline-emerald-500'
               : 'glass-card-subtle text-[#0f172a]'
           }`}
         >
@@ -343,27 +343,27 @@ export default function ScheduleClientView({
       )}
 
       {/* TIMETABLE CONTROLS */}
-      <div className="glass-panel rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="glass-panel p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => setViewMode('CALENDAR')}
-            className={`glass-btn text-xs px-3 py-1.5 font-bold ${
+            className={`glass-btn glass-btn-sm  ${
               viewMode === 'CALENDAR'
                 ? 'glass-btn-primary'
                 : ''
-            }`}
+            } `}
           >
             📅 Weekly Calendar
           </button>
           <button
             type="button"
             onClick={() => setViewMode('AGENDA')}
-            className={`glass-btn text-xs px-3 py-1.5 font-bold ${
+            className={`glass-btn glass-btn-sm  ${
               viewMode === 'AGENDA'
                 ? 'glass-btn-primary'
                 : ''
-            }`}
+            } `}
           >
             📋 All Sessions List ({sessions.length})
           </button>
@@ -372,7 +372,7 @@ export default function ScheduleClientView({
         <button
           type="button"
           onClick={() => setShowScheduleForm(!showScheduleForm)}
-          className="glass-btn glass-btn-primary px-4 py-2 text-xs font-bold self-start sm:self-auto"
+          className="glass-btn glass-btn-primary self-start sm:self-auto"
         >
           {showScheduleForm ? '✕ Close Form' : '+ Book / Schedule Session'}
         </button>
@@ -380,7 +380,7 @@ export default function ScheduleClientView({
 
       {/* SCHEDULE FORM MODAL */}
       {showScheduleForm && (
-        <form onSubmit={handleScheduleSubmit} className="glass-panel outline outline-2 outline-[#3d6b52]/30 rounded-2xl p-6 shadow-sm space-y-4">
+        <form onSubmit={handleScheduleSubmit} className="glass-panel outline outline-2 outline-[#3d6b52]/30 p-6 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xs font-bold uppercase tracking-wider text-[#3d6b52]">
               Book Teaching Slot
@@ -457,14 +457,14 @@ export default function ScheduleClientView({
             <button
               type="button"
               onClick={() => setShowScheduleForm(false)}
-              className="glass-btn px-4 py-2 text-xs font-bold"
+              className="glass-btn"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="glass-btn glass-btn-primary px-5 py-2 text-xs font-bold"
+              className="glass-btn glass-btn-primary"
             >
               {submitting ? 'Booking...' : 'Confirm Schedule'}
             </button>
@@ -475,12 +475,12 @@ export default function ScheduleClientView({
       {/* VIEW 1: WEEKLY CALENDAR GRID */}
       {viewMode === 'CALENDAR' && (
         <div className="space-y-3">
-          <div className="glass-panel px-4 py-3 text-xs font-semibold text-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="glass-panel text-xs font-semibold text-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-4">
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => setWeekOffset(weekOffset - 1)}
-                className="glass-btn px-2.5 py-1 text-xs font-bold"
+                className="glass-btn glass-btn-sm"
                 title="Previous Week"
               >
                 ←
@@ -488,18 +488,18 @@ export default function ScheduleClientView({
               <button
                 type="button"
                 onClick={() => setWeekOffset(0)}
-                className={`glass-btn px-2.5 py-1 text-xs font-bold ${
+                className={`glass-btn glass-btn-sm  ${
                   weekOffset === 0
                     ? 'glass-btn-primary'
                     : ''
-                }`}
+                } `}
               >
                 Today
               </button>
               <button
                 type="button"
                 onClick={() => setWeekOffset(weekOffset + 1)}
-                className="glass-btn px-2.5 py-1 text-xs font-bold"
+                className="glass-btn glass-btn-sm"
                 title="Next Week"
               >
                 →
@@ -523,13 +523,13 @@ export default function ScheduleClientView({
               return (
                 <div
                   key={day.dateStr}
-                  className={`glass-card-subtle rounded-xl p-3 flex flex-col justify-between min-h-[175px] transition-all ${
+                  className={`glass-card-subtle p-3 flex flex-col justify-between min-h-[175px] transition-all  ${
                     day.isToday
                       ? 'outline outline-2 outline-[#3d6b52]'
                       : day.contractSlot
                         ? 'outline outline-1 outline-[#3d6b52]/40'
                         : ''
-                  }`}
+                  } `}
                 >
                   <div className="border-b border-black/10 pb-1.5 mb-2 flex items-center justify-between">
                     <div>
@@ -548,7 +548,7 @@ export default function ScheduleClientView({
                       <button
                         type="button"
                         onClick={() => handleSlotClick(day.dateStr, day.contractSlot)}
-                        className="glass-btn w-6 h-6 text-xs font-bold"
+                        className="glass-btn glass-btn-icon"
                         title="Book another session on this day"
                       >
                         +
@@ -588,11 +588,11 @@ export default function ScheduleClientView({
                           <div
                             key={s.id}
                             onClick={() => setSelectedSessionModal(s)}
-                            className="p-2.5 glass-card-subtle rounded-lg shadow-2xs space-y-1 text-left cursor-pointer transition-all hover:shadow-md group"
+                            className="p-4 glass-card-subtle space-y-1 text-left cursor-pointer transition-all hover:shadow-md group"
                           >
                             <div className="flex items-center justify-between">
                               <span className="text-[10px] font-bold text-[#0f172a]">{sTime}</span>
-                              <span className={`text-[9px] px-1 py-0.2 rounded border ${stateConfig.badge}`}>
+                              <span className={`glass-badge ${stateConfig.badge}`}>
                                 {stateConfig.text}
                               </span>
                             </div>
@@ -618,7 +618,7 @@ export default function ScheduleClientView({
       {viewMode === 'AGENDA' && (
         <div className="space-y-4">
           {sessions.length === 0 ? (
-            <div className="glass-panel rounded-2xl p-10 text-center text-xs text-slate-600">
+            <div className="glass-panel p-8 text-center text-xs text-slate-600">
               No sessions scheduled yet.
             </div>
           ) : (
@@ -637,12 +637,12 @@ export default function ScheduleClientView({
                 <article
                   key={s.id}
                   onClick={() => setSelectedSessionModal(s)}
-                  className="glass-panel rounded-2xl p-5 shadow-sm space-y-4 cursor-pointer transition-all hover:shadow-md"
+                  className="glass-panel p-6 space-y-4 cursor-pointer transition-all hover:shadow-md"
                 >
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-black/10 pb-3">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <span className={`text-xs px-2.5 py-0.5 rounded border ${stateBadge.color}`}>
+                        <span className={`glass-badge ${stateBadge.color}`}>
                           {s.status === 'RESCHEDULED'
                             ? s.movedTo
                               ? `🔁 Rescheduled to ${formatMoved(s.movedTo.sessionDate)}`
@@ -667,7 +667,7 @@ export default function ScheduleClientView({
                       {state === 'NEEDS_LOG' && (
                         <Link
                           href={`/sessions/new?studentId=${s.studentId}&sessionId=${s.id}`}
-                          className="glass-btn glass-btn-danger-solid px-4 py-2 text-xs font-bold"
+                          className="glass-btn glass-btn-danger-solid"
                         >
                           Log Lesson Now →
                         </Link>
@@ -678,7 +678,7 @@ export default function ScheduleClientView({
                           href={s.meetingUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="glass-btn px-3.5 py-2 text-xs font-bold inline-flex items-center gap-1"
+                          className="glass-btn inline-flex items-center"
                         >
                           Join Call ↗
                         </a>
@@ -687,7 +687,7 @@ export default function ScheduleClientView({
                       {state === 'COMPLETED' && (
                         <Link
                           href={`/students/${s.studentId}`}
-                          className="glass-btn px-3.5 py-2 text-xs font-semibold"
+                          className="glass-btn"
                         >
                           View in Dossier →
                         </Link>
@@ -701,7 +701,7 @@ export default function ScheduleClientView({
                             fineAmount: s.fineAmount,
                             movedToLabel: s.movedTo ? formatMoved(s.movedTo.sessionDate) : null,
                           })}
-                          className="glass-btn text-xs px-3 py-2 font-semibold"
+                          className="glass-btn glass-btn-sm"
                           onReverted={() => showToast('Lesson put back on the schedule', 'info')}
                         />
                       )}
@@ -710,7 +710,7 @@ export default function ScheduleClientView({
                         <button
                           type="button"
                           onClick={() => setCancellingId(cancellingId === s.id ? null : s.id)}
-                          className="glass-btn glass-btn-danger text-xs px-3 py-2 font-semibold"
+                          className="glass-btn glass-btn-danger glass-btn-sm"
                         >
                           Cancel / Reschedule ▾
                         </button>
@@ -725,7 +725,7 @@ export default function ScheduleClientView({
                   </div>
 
                   {cancellingId === s.id && (
-                    <div className="p-3.5 bg-red-50/50 border border-red-200 rounded-lg space-y-2 text-xs" onClick={(e) => e.stopPropagation()}>
+                    <div className="glass-inset p-3 space-y-2 text-xs" onClick={(e) => e.stopPropagation()}>
                       <span className="font-bold text-[#a3462f] block">Select Cancellation Reason:</span>
                       <CancelReasons
                         session={s}
@@ -769,7 +769,7 @@ export default function ScheduleClientView({
           onClick={() => setSelectedSessionModal(null)}
         >
           <div
-            className="glass-panel rounded-3xl max-w-md w-full p-6 space-y-4 shadow-xl text-left"
+            className="glass-panel max-w-md w-full p-6 space-y-4 text-left"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
@@ -788,17 +788,17 @@ export default function ScheduleClientView({
                     {selectedSessionModal.durationMinutes} mins
                   </span>
                   {getSessionState(selectedSessionModal) === 'UPCOMING' && (
-                    <span className="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-1.5 py-0.5 rounded">
+                    <span className="glass-badge text-blue-700 bg-blue-50 border-blue-200">
                       🔵 Upcoming
                     </span>
                   )}
                   {getSessionState(selectedSessionModal) === 'NEEDS_LOG' && (
-                    <span className="text-[10px] font-bold text-red-700 bg-red-50 border border-red-300 px-1.5 py-0.5 rounded animate-pulse">
+                    <span className="glass-badge text-red-700 bg-red-50 border-red-300 animate-pulse">
                       🔴 Needs Log
                     </span>
                   )}
                   {getSessionState(selectedSessionModal) === 'COMPLETED' && (
-                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
+                    <span className="glass-badge text-emerald-700 bg-emerald-50 border-emerald-200">
                       🟢 Completed
                     </span>
                   )}
@@ -814,7 +814,7 @@ export default function ScheduleClientView({
               <button
                 type="button"
                 onClick={() => setSelectedSessionModal(null)}
-                className="text-slate-600 hover:text-[#0f172a] glass-btn text-sm font-bold w-7 h-7"
+                className="text-slate-600 hover:text-[#0f172a] glass-btn glass-btn-icon"
               >
                 ✕
               </button>
@@ -872,7 +872,7 @@ export default function ScheduleClientView({
                   href={selectedSessionModal.meetingUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="glass-btn w-full py-2.5 px-4 text-xs font-bold flex items-center justify-center gap-1.5"
+                  className="glass-btn w-full flex items-center justify-center"
                 >
                   <span>Launch Google Meet / Zoom</span> ↗
                 </a>
@@ -900,7 +900,7 @@ export default function ScheduleClientView({
                 {getSessionState(selectedSessionModal) === 'NEEDS_LOG' && (
                   <Link
                     href={`/sessions/new?studentId=${selectedSessionModal.studentId}&sessionId=${selectedSessionModal.id}`}
-                    className="glass-btn glass-btn-danger-solid px-4 py-2 text-xs font-bold"
+                    className="glass-btn glass-btn-danger-solid"
                   >
                     Log Lesson Now →
                   </Link>
@@ -911,7 +911,7 @@ export default function ScheduleClientView({
                   <button
                     type="button"
                     onClick={() => setSelectedSessionModal(null)}
-                    className="glass-btn px-4 py-1.5 text-xs font-bold"
+                    className="glass-btn glass-btn-sm"
                   >
                     Close
                   </button>
@@ -923,20 +923,22 @@ export default function ScheduleClientView({
             {(getSessionState(selectedSessionModal) === 'UPCOMING' ||
               getSessionState(selectedSessionModal) === 'NEEDS_LOG') && (
               <div className="pt-2 border-t border-black/10">
-                <button
-                  type="button"
-                  onClick={() =>
-                    setCancellingId(
-                      cancellingId === selectedSessionModal.id ? null : selectedSessionModal.id
-                    )
-                  }
-                  className="text-[11px] text-[#a3462f] hover:underline font-medium block mx-auto"
-                >
-                  Cancel or Reschedule this Class
-                </button>
+                <div className="flex justify-center">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setCancellingId(
+                        cancellingId === selectedSessionModal.id ? null : selectedSessionModal.id
+                      )
+                    }
+                    className="glass-btn glass-btn-sm glass-btn-danger"
+                  >
+                    Cancel or Reschedule this Class
+                  </button>
+                </div>
 
                 {cancellingId === selectedSessionModal.id && (
-                  <div className="mt-2 p-3 bg-red-50/60 border border-red-200 rounded-lg space-y-1.5 text-left text-xs">
+                  <div className="mt-2 glass-inset p-3 space-y-1.5 text-left text-xs">
                     <span className="font-bold text-[#a3462f] text-[10px] block">Select Reason:</span>
                     <CancelReasons
                       compact
@@ -978,7 +980,8 @@ export default function ScheduleClientView({
                     Unexcused absence: {formatIDR(selectedSessionModal.fineAmount)} fine applied to payroll.
                   </p>
                 )}
-                <RevertSessionButton
+                <div className="flex justify-center">
+<RevertSessionButton
                   sessionId={selectedSessionModal.id}
                   label="Reopen this lesson"
                   message={reopenMessage({
@@ -987,40 +990,42 @@ export default function ScheduleClientView({
                       ? formatMoved(selectedSessionModal.movedTo.sessionDate)
                       : null,
                   })}
-                  className="text-[11px] text-[#3d6b52] hover:underline font-medium disabled:opacity-50"
                   onReverted={() => {
                     setSelectedSessionModal(null);
                     showToast('Lesson put back on the schedule', 'info');
                   }}
                 />
+</div>
               </div>
             )}
 
             {getSessionState(selectedSessionModal) === 'COMPLETED' && (
               <div className="pt-2 border-t border-black/10">
-                <RevertSessionButton
+                <div className="flex justify-center">
+<RevertSessionButton
                   sessionId={selectedSessionModal.id}
                   label="Revert to scheduled"
-                  className="text-[11px] text-slate-600 hover:underline font-medium block mx-auto disabled:opacity-50"
                   onReverted={() => {
                     setSelectedSessionModal(null);
                     showToast('Lesson reverted to scheduled', 'info');
                   }}
                 />
+</div>
               </div>
             )}
 
             <div className="pt-2 border-t border-black/10">
-              <DeleteSessionButton
+              <div className="flex justify-center">
+<DeleteSessionButton
                 sessionId={selectedSessionModal.id}
                 completed={getSessionState(selectedSessionModal) === 'COMPLETED'}
                 label="Delete this session"
-                className="text-[11px] text-[#a3462f] hover:underline font-medium block mx-auto disabled:opacity-50"
                 onDeleted={() => {
                   setSelectedSessionModal(null);
                   showToast('Session deleted', 'info');
                 }}
               />
+</div>
             </div>
           </div>
         </div>
