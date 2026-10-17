@@ -111,10 +111,10 @@ export default function LibraryView({
               key={tab.val}
               type="button"
               onClick={() => setSelectedType(tab.val)}
-              className={`text-xs px-3 py-1.5 rounded-lg font-bold transition-colors whitespace-nowrap ${
+              className={`glass-btn text-xs px-3 py-1.5 font-bold whitespace-nowrap ${
                 selectedType === tab.val
-                  ? 'bg-[#3d6b52] text-white'
-                  : 'bg-white/60 text-[#6f6b62] border border-[#ddd8cd] hover:bg-[#e8efe9]'
+                  ? 'glass-btn-primary'
+                  : ''
               }`}
             >
               {tab.label}
@@ -128,12 +128,12 @@ export default function LibraryView({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search title, author, or chapter..."
-            className="w-full md:w-64 bg-white/60 border border-[#ddd8cd] rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-[#3d6b52]"
+            className="w-full md:w-64 px-3 py-1.5 text-xs glass-input"
           />
           <button
             type="button"
             onClick={() => setShowAddForm(!showAddForm)}
-            className="bg-[#3d6b52] text-white px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap hover:bg-[#2d523e] transition-colors"
+            className="glass-btn glass-btn-primary px-3.5 py-1.5 text-xs font-bold whitespace-nowrap"
           >
             {showAddForm ? '✕ Close Form' : '+ Add Asset'}
           </button>
@@ -142,30 +142,30 @@ export default function LibraryView({
 
       {/* INLINE ADD RESOURCE FORM */}
       {showAddForm && (
-        <form onSubmit={handleAddSubmit} className="glass-panel ring-2 ring-[#3d6b52]/30 rounded-2xl p-6 shadow-sm space-y-4">
+        <form onSubmit={handleAddSubmit} className="glass-panel outline outline-2 outline-[#3d6b52]/30 rounded-2xl p-6 shadow-sm space-y-4">
           <h2 className="text-xs font-bold uppercase tracking-wider text-[#3d6b52]">
             Index New Teaching Material
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
             <div className="md:col-span-2">
-              <label className="block font-bold text-[#2b2b28] mb-1">Title / Identification</label>
+              <label className="block font-bold text-[#0f172a] mb-1">Title / Identification</label>
               <input
                 type="text"
                 required
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. Cambridge IGCSE 0580 Paper 42 (May/June 2023) or Haese Chapter 4"
-                className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2.5 focus:outline-none focus:border-[#3d6b52]"
+                className="w-full p-2.5 glass-input"
               />
             </div>
 
             <div>
-              <label className="block font-bold text-[#2b2b28] mb-1">Curriculum Course</label>
+              <label className="block font-bold text-[#0f172a] mb-1">Curriculum Course</label>
               <select
                 value={selectedCourseId}
                 onChange={(e) => setSelectedCourseId(e.target.value)}
-                className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2.5 font-medium focus:outline-none focus:border-[#3d6b52]"
+                className="w-full p-2.5 font-medium glass-input"
               >
                 {courses.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -176,11 +176,11 @@ export default function LibraryView({
             </div>
 
             <div>
-              <label className="block font-bold text-[#2b2b28] mb-1">Resource Type</label>
+              <label className="block font-bold text-[#0f172a] mb-1">Resource Type</label>
               <select
                 value={resourceType}
                 onChange={(e) => setResourceType(e.target.value as ResourceType)}
-                className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2.5 font-medium focus:outline-none focus:border-[#3d6b52]"
+                className="w-full p-2.5 font-medium glass-input"
               >
                 <option value="PAST_PAPER">Past Exam Paper / Question Set</option>
                 <option value="TEXTBOOK">Textbook Chapter / Core Reading</option>
@@ -191,35 +191,35 @@ export default function LibraryView({
             </div>
 
             <div>
-              <label className="block font-bold text-[#2b2b28] mb-1">Author or Publisher</label>
+              <label className="block font-bold text-[#0f172a] mb-1">Author or Publisher</label>
               <input
                 type="text"
                 value={author}
                 onChange={(e) => setAuthor(e.target.value)}
                 placeholder="e.g. Hodder Education, Save My Exams, David Sang"
-                className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2.5 focus:outline-none focus:border-[#3d6b52]"
+                className="w-full p-2.5 glass-input"
               />
             </div>
 
             <div>
-              <label className="block font-bold text-[#2b2b28] mb-1">Physical Location / Chapter Pointer</label>
+              <label className="block font-bold text-[#0f172a] mb-1">Physical Location / Chapter Pointer</label>
               <input
                 type="text"
                 value={locationDetails}
                 onChange={(e) => setLocationDetails(e.target.value)}
                 placeholder="e.g. Chapter 4, pp. 62–65, Question 5 & 7"
-                className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2.5 focus:outline-none focus:border-[#3d6b52]"
+                className="w-full p-2.5 glass-input"
               />
             </div>
 
             <div className="md:col-span-2">
-              <label className="block font-bold text-[#2b2b28] mb-1">Digital Link / URL (Optional)</label>
+              <label className="block font-bold text-[#0f172a] mb-1">Digital Link / URL (Optional)</label>
               <input
                 type="url"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="https://..."
-                className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2.5 focus:outline-none focus:border-[#3d6b52]"
+                className="w-full p-2.5 glass-input"
               />
             </div>
           </div>
@@ -228,14 +228,14 @@ export default function LibraryView({
             <button
               type="button"
               onClick={() => setShowAddForm(false)}
-              className="px-4 py-2 border border-[#ddd8cd] rounded-lg text-xs font-bold text-[#6f6b62]"
+              className="glass-btn px-4 py-2 text-xs font-bold"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="bg-[#3d6b52] text-white px-5 py-2 rounded-lg text-xs font-bold hover:bg-[#2d523e] transition-colors disabled:opacity-50"
+              className="glass-btn glass-btn-primary px-5 py-2 text-xs font-bold"
             >
               {submitting ? 'Indexing...' : 'Save to Vault'}
             </button>
@@ -245,7 +245,7 @@ export default function LibraryView({
 
       {/* RESOURCE CARDS GRID */}
       {filtered.length === 0 ? (
-        <div className="glass-panel rounded-2xl p-10 text-center text-xs text-[#6f6b62]">
+        <div className="glass-panel rounded-2xl p-10 text-center text-xs text-slate-600">
           No teaching materials match this filter or search query.
         </div>
       ) : (
@@ -262,23 +262,23 @@ export default function LibraryView({
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${badge.color}`}>
                       {badge.label}
                     </span>
-                    <span className="text-[11px] font-semibold text-[#6f6b62]">
+                    <span className="text-[11px] font-semibold text-slate-600">
                       {item.boardCode}
                     </span>
                   </div>
 
-                  <h3 className="text-sm font-bold text-[#2b2b28] leading-snug">{item.title}</h3>
-                  <p className="text-xs text-[#6f6b62]">{item.authorOrPublisher}</p>
+                  <h3 className="text-sm font-bold text-[#0f172a] leading-snug">{item.title}</h3>
+                  <p className="text-xs text-slate-600">{item.authorOrPublisher}</p>
 
                   {item.locationDetails && (
-                    <div className="p-2.5 bg-white/60 border border-[#ddd8cd]/60 rounded-lg text-xs font-mono text-[#2b2b28]">
+                    <div className="p-2.5 text-xs font-mono text-[#0f172a] glass-inset">
                       📍 {item.locationDetails}
                     </div>
                   )}
                 </div>
 
-                <div className="pt-2 border-t border-[#ddd8cd]/50 flex items-center justify-between text-xs">
-                  <span className="text-[11px] text-[#6f6b62] truncate max-w-[240px]">
+                <div className="pt-2 border-t border-black/10 flex items-center justify-between text-xs">
+                  <span className="text-[11px] text-slate-600 truncate max-w-[240px]">
                     {item.courseTitle}
                   </span>
                   {item.url ? (
@@ -291,7 +291,7 @@ export default function LibraryView({
                       Open Link ↗
                     </a>
                   ) : (
-                    <span className="text-[10px] font-medium text-[#6f6b62]">Hardcopy/Drive</span>
+                    <span className="text-[10px] font-medium text-slate-600">Hardcopy/Drive</span>
                   )}
                 </div>
               </article>

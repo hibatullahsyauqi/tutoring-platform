@@ -36,7 +36,7 @@ export default function DeleteStudentButton({
       type="button"
       onClick={handleDelete}
       disabled={isPending}
-      className="text-xs text-[#a3462f] border border-[#a3462f]/30 hover:bg-red-50 px-3 py-2 rounded-lg font-semibold transition-colors disabled:opacity-50"
+      className="glass-btn glass-btn-danger text-xs px-3 py-2 font-semibold"
     >
       {isPending ? 'Archiving...' : 'Archive Profile'}
     </button>

@@ -110,7 +110,7 @@ export default async function SchedulePage({ searchParams }: Props) {
   const initialWeekOffset = focusTarget ? weekOffsetFor(focusTarget, new Date()) : 0;
 
   return (
-    <main className="min-h-screen text-[#2b2b28] p-6 md:p-10 font-sans">
+    <main className="min-h-screen text-[#0f172a] p-6 md:p-10 font-sans">
       <div className="max-w-5xl mx-auto space-y-6">
         
         {/* HEADER */}
@@ -119,11 +119,11 @@ export default async function SchedulePage({ searchParams }: Props) {
             <Link href="/" className="text-xs font-semibold text-[#3d6b52] hover:underline mb-2 inline-block">
               ← Back to Dashboard
             </Link>
-            <h1 className="text-2xl font-bold tracking-tight text-[#2b2b28]">
+            <h1 className="text-2xl font-bold tracking-tight text-[#0f172a]">
               Weekly Timetable & Session Schedule
             </h1>
-            <p className="text-xs text-[#6f6b62] mt-1">
-              Tutoring Window: <span className="font-semibold text-[#2b2b28]">Wed, Thu, Fri (18:30 WIB) & Sat</span>
+            <p className="text-xs text-slate-600 mt-1">
+              Tutoring Window: <span className="font-semibold text-[#0f172a]">Wed, Thu, Fri (18:30 WIB) & Sat</span>
             </p>
           </div>
         </div>

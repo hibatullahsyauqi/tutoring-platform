@@ -85,7 +85,7 @@ export default async function NewSessionPage({ searchParams }: Props) {
   });
 
   return (
-    <main className="min-h-screen text-[#2b2b28] p-6 md:p-10 font-sans">
+    <main className="min-h-screen text-[#0f172a] p-6 md:p-10 font-sans">
       <div className="max-w-3xl mx-auto space-y-6">
         <div className="flex items-center justify-between glass-panel rounded-3xl p-6">
           <div>
@@ -96,7 +96,7 @@ export default async function NewSessionPage({ searchParams }: Props) {
               {sessionId ? 'Complete & Log Scheduled Lesson' : 'Log Session & Evaluate Mastery'}
             </h1>
           </div>
-          <span className="text-xs bg-[#e8efe9] text-[#3d6b52] font-semibold px-3 py-1 rounded-full">
+          <span className="glass-pill text-xs font-semibold px-3 py-1">
             Standard: 90 Mins
           </span>
         </div>
@@ -111,7 +111,7 @@ export default async function NewSessionPage({ searchParams }: Props) {
                 <Link
                   key={p.id}
                   href={`/sessions/new?studentId=${p.studentId}&sessionId=${p.id}`}
-                  className="bg-white border border-amber-300 hover:bg-amber-100 text-amber-900 font-semibold px-3 py-1.5 rounded-lg"
+                  className="glass-btn text-xs font-semibold px-3 py-1.5"
                 >
                   Log {p.sessionDate.toLocaleString('en-US', {
                     weekday: 'short',

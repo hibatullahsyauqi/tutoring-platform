@@ -76,7 +76,7 @@ export default function NewStudentForm({ courses }: { courses: CourseItem[] }) {
       
       {/* STUDENT NAME */}
       <div>
-        <label className="block text-xs font-bold text-[#2b2b28] uppercase tracking-wider mb-1">
+        <label className="block text-xs font-bold text-[#0f172a] uppercase tracking-wider mb-1">
           Student Full Name / Preferred Name
         </label>
         <input
@@ -85,19 +85,19 @@ export default function NewStudentForm({ courses }: { courses: CourseItem[] }) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="e.g. Liam, Sophia, Maya"
-          className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2.5 text-sm focus:border-[#3d6b52] focus:outline-none"
+          className="w-full p-2.5 text-sm glass-input"
         />
       </div>
 
       {/* CURRICULUM DROPDOWN */}
       <div>
-        <label className="block text-xs font-bold text-[#2b2b28] uppercase tracking-wider mb-1">
+        <label className="block text-xs font-bold text-[#0f172a] uppercase tracking-wider mb-1">
           Curriculum & Subject
         </label>
         <select
           value={selectedCourseId}
           onChange={(e) => handleCourseChange(e.target.value)}
-          className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2.5 text-sm font-medium focus:border-[#3d6b52] focus:outline-none"
+          className="w-full p-2.5 text-sm font-medium glass-input"
         >
           {boards.map((bCode) => {
             const group = courses.filter((c) => c.boardCode === bCode);
@@ -119,14 +119,14 @@ export default function NewStudentForm({ courses }: { courses: CourseItem[] }) {
       {selectedCourse && (
         <div>
           <div className="flex items-center justify-between mb-1">
-            <label className="block text-xs font-bold text-[#2b2b28] uppercase tracking-wider">
+            <label className="block text-xs font-bold text-[#0f172a] uppercase tracking-wider">
               Tier / Track for {selectedCourse.boardCode}
             </label>
             <span className="text-[11px] text-[#3d6b52] font-semibold">
               {selectedCourse.level}
             </span>
           </div>
-          <p className="text-[11px] text-[#6f6b62] mb-2">
+          <p className="text-[11px] text-slate-600 mb-2">
             Dynamically adapted to {selectedCourse.boardName} specifications.
           </p>
 
@@ -136,10 +136,10 @@ export default function NewStudentForm({ courses }: { courses: CourseItem[] }) {
                 key={t.val}
                 type="button"
                 onClick={() => setTier(t.val)}
-                className={`p-3 rounded-lg border text-left transition-all ${
+                className={`glass-inset p-3 text-left transition-all cursor-pointer ${
                   tier === t.val
-                    ? 'bg-[#e8efe9] border-[#3d6b52] text-[#3d6b52] font-semibold'
-                    : 'bg-white/60 border-[#ddd8cd] text-[#6f6b62] hover:bg-white'
+                    ? 'outline outline-2 outline-[#3d6b52] text-[#2d523e] font-semibold'
+                    : 'text-slate-700 opacity-90 hover:opacity-100'
                 }`}
               >
                 <div className="text-xs font-bold">{t.label}</div>
@@ -151,13 +151,13 @@ export default function NewStudentForm({ courses }: { courses: CourseItem[] }) {
       )}
 
       {/* TRUE OPTIONAL TARGET EXAM DATE */}
-      <div className="pt-2 border-t border-[#ddd8cd]/50 space-y-3">
+      <div className="pt-2 border-t border-black/10 space-y-3">
         <div className="flex items-center justify-between">
           <div>
-            <label className="text-xs font-bold text-[#2b2b28] uppercase tracking-wider block">
+            <label className="text-xs font-bold text-[#0f172a] uppercase tracking-wider block">
               Target Exam Series
             </label>
-            <span className="text-[11px] text-[#6f6b62]">
+            <span className="text-[11px] text-slate-600">
               {hasTargetExam ? 'An official exam deadline is configured.' : 'Ongoing tutoring / No fixed exam deadline.'}
             </span>
           </div>
@@ -165,10 +165,10 @@ export default function NewStudentForm({ courses }: { courses: CourseItem[] }) {
           <button
             type="button"
             onClick={() => setHasTargetExam(!hasTargetExam)}
-            className={`text-xs px-3 py-1 rounded-full font-bold border transition-colors ${
+            className={`glass-btn text-xs px-3 py-1 font-bold ${
               hasTargetExam
-                ? 'bg-[#3d6b52] text-white border-[#3d6b52]'
-                : 'bg-white/60 text-[#6f6b62] border-[#ddd8cd] hover:bg-[#e8efe9]'
+                ? 'glass-btn-primary'
+                : ''
             }`}
           >
             {hasTargetExam ? '✓ Date Active' : '+ Set Exam Date'}
@@ -182,9 +182,9 @@ export default function NewStudentForm({ courses }: { courses: CourseItem[] }) {
               required={hasTargetExam}
               value={targetExamDate}
               onChange={(e) => setTargetExamDate(e.target.value)}
-              className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2.5 text-sm focus:border-[#3d6b52] focus:outline-none"
+              className="w-full p-2.5 text-sm glass-input"
             />
-            <span className="text-[10px] text-[#6f6b62] mt-1 block">
+            <span className="text-[10px] text-slate-600 mt-1 block">
               Exam month/year will calculate syllabus coverage velocity against remaining weeks.
             </span>
           </div>
@@ -192,17 +192,17 @@ export default function NewStudentForm({ courses }: { courses: CourseItem[] }) {
       </div>
 
       {/* ACTIONS */}
-      <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#ddd8cd]/50">
+      <div className="flex items-center justify-end gap-3 pt-4 border-t border-black/10">
         <Link
           href="/"
-          className="px-4 py-2 rounded-lg border border-[#ddd8cd] text-xs font-bold text-[#6f6b62] hover:bg-white/80"
+          className="glass-btn px-4 py-2 text-xs font-bold"
         >
           Cancel
         </Link>
         <button
           type="submit"
           disabled={submitting || !name.trim()}
-          className="bg-[#3d6b52] hover:bg-[#2d523e] text-white px-5 py-2.5 rounded-lg text-xs font-bold transition-colors shadow-sm disabled:opacity-50"
+          className="glass-btn glass-btn-primary px-5 py-2.5 text-xs font-bold"
         >
           {submitting ? 'Creating Student Dossier...' : 'Create Student & Open Dossier →'}
         </button>

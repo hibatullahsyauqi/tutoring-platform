@@ -107,14 +107,14 @@ export default async function NewStudentPage() {
   });
 
   return (
-    <main className="min-h-screen text-[#2b2b28] p-6 md:p-10 font-sans">
+    <main className="min-h-screen text-[#0f172a] p-6 md:p-10 font-sans">
       <div className="max-w-xl mx-auto space-y-6">
         <div className="glass-panel rounded-3xl p-6">
           <Link href="/" className="text-xs font-semibold text-[#3d6b52] hover:underline mb-2 inline-block">
             ← Back to Dashboard
           </Link>
-          <h1 className="text-2xl font-bold tracking-tight text-[#2b2b28]">Onboard New Student</h1>
-          <p className="text-xs text-[#6f6b62] mt-1">
+          <h1 className="text-2xl font-bold tracking-tight text-[#0f172a]">Onboard New Student</h1>
+          <p className="text-xs text-slate-600 mt-1">
             Configure student identity, board curriculum, and fluid examination tiering.
           </p>
         </div>

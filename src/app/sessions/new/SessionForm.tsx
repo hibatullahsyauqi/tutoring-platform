@@ -245,7 +245,7 @@ export default function SessionForm({
       {/* SECTION 1: CORE SESSION METADATA */}
       <section className="glass-panel rounded-2xl p-5 space-y-4 shadow-sm">
         <div className="flex items-center justify-between">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-[#6f6b62]">1. Session Details</h2>
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600">1. Session Details</h2>
           {existingSessionId && (
             <span className="text-[10px] bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded border border-blue-200">
               Updating Scheduled Booking
@@ -255,11 +255,11 @@ export default function SessionForm({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-[#6f6b62] mb-1">Student</label>
+            <label className="block text-xs font-semibold text-slate-600 mb-1">Student</label>
             <select
               value={selectedStudentId}
               onChange={(e) => handleStudentChange(e.target.value)}
-              className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2.5 text-sm font-medium"
+              className="w-full p-2.5 text-sm font-medium glass-input"
             >
               {students.map((s) => (
                 <option key={s.id} value={s.id}>
@@ -270,11 +270,11 @@ export default function SessionForm({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-[#6f6b62] mb-1">Session Type</label>
+            <label className="block text-xs font-semibold text-slate-600 mb-1">Session Type</label>
             <select
               value={sessionType}
               onChange={(e) => setSessionType(e.target.value as SessionType)}
-              className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2.5 text-sm font-medium"
+              className="w-full p-2.5 text-sm font-medium glass-input"
             >
               <option value="REGULAR_LESSON">Regular Lesson (Standard Flow)</option>
               <option value="TRIAL_CLASS">Trial Class (New Prospect)</option>
@@ -287,8 +287,8 @@ export default function SessionForm({
 
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="block text-xs font-semibold text-[#6f6b62]">Date & Time Concluded</label>
-              <span className="text-[10px] text-[#6f6b62] font-medium">Past & current only</span>
+              <label className="block text-xs font-semibold text-slate-600">Date & Time Concluded</label>
+              <span className="text-[10px] text-slate-600 font-medium">Past & current only</span>
             </div>
             {/* Actively guarded input */}
             <input
@@ -296,8 +296,8 @@ export default function SessionForm({
               value={sessionDate}
               max={getNowLocalISO()}
               onChange={(e) => handleDateChange(e.target.value)}
-              className={`w-full bg-white/60 border rounded-lg p-2 text-sm focus:outline-none ${
-                dateWarning ? 'border-[#a3462f] bg-red-50/20' : 'border-[#ddd8cd] focus:border-[#3d6b52]'
+              className={`w-full glass-input p-2 text-sm ${
+                dateWarning ? 'outline outline-2 outline-[#a3462f]' : ''
               }`}
             />
             {dateWarning && (
@@ -308,47 +308,47 @@ export default function SessionForm({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-[#6f6b62] mb-1">Duration (Minutes)</label>
+            <label className="block text-xs font-semibold text-slate-600 mb-1">Duration (Minutes)</label>
             <input
               type="number"
               value={durationMinutes}
               onChange={(e) => setDurationMinutes(Number(e.target.value))}
-              className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2 text-sm focus:outline-none focus:border-[#3d6b52]"
+              className="w-full p-2 text-sm glass-input"
             />
           </div>
         </div>
 
         {/* Logistics */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-3 border-t border-[#ddd8cd]/50">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-3 border-t border-black/10">
           <div>
-            <label className="block text-xs font-semibold text-[#6f6b62] mb-1">Lateness (Minutes)</label>
+            <label className="block text-xs font-semibold text-slate-600 mb-1">Lateness (Minutes)</label>
             <input
               type="number"
               value={latenessMinutes}
               onChange={(e) => setLatenessMinutes(Number(e.target.value))}
               placeholder="0"
-              className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2 text-sm focus:outline-none focus:border-[#3d6b52]"
+              className="w-full p-2 text-sm glass-input"
             />
             <span className="text-[11px] text-[#a3462f]">≥15m unexcused triggers fine</span>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-[#6f6b62] mb-1">Meeting Link (Zoom / Meet)</label>
+            <label className="block text-xs font-semibold text-slate-600 mb-1">Meeting Link (Zoom / Meet)</label>
             <input
               type="text"
               value={meetingUrl}
               onChange={(e) => setMeetingUrl(e.target.value)}
               placeholder="https://meet..."
-              className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2 text-sm focus:outline-none focus:border-[#3d6b52]"
+              className="w-full p-2 text-sm glass-input"
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-[#6f6b62] mb-1">Class Recording Link</label>
+            <label className="block text-xs font-semibold text-slate-600 mb-1">Class Recording Link</label>
             <input
               type="text"
               value={recordingUrl}
               onChange={(e) => setRecordingUrl(e.target.value)}
               placeholder="https://drive..."
-              className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2 text-sm focus:outline-none focus:border-[#3d6b52]"
+              className="w-full p-2 text-sm glass-input"
             />
           </div>
         </div>
@@ -358,13 +358,13 @@ export default function SessionForm({
       <section className="glass-panel rounded-2xl p-5 space-y-4 shadow-sm">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xs font-bold uppercase tracking-wider text-[#6f6b62]">2. Topics Covered & Mastery</h2>
-            <p className="text-xs text-[#6f6b62]">Track how deeply the student grasps each concept</p>
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600">2. Topics Covered & Mastery</h2>
+            <p className="text-xs text-slate-600">Track how deeply the student grasps each concept</p>
           </div>
           <button
             type="button"
             onClick={addSegment}
-            className="text-xs bg-[#e8efe9] hover:bg-[#d8e5da] text-[#3d6b52] font-semibold px-3 py-1.5 rounded-lg transition-colors"
+            className="glass-btn text-xs font-semibold px-3 py-1.5"
           >
             + Add Topic Block
           </button>
@@ -379,7 +379,7 @@ export default function SessionForm({
 
         <div className="space-y-4">
           {segments.map((seg, idx) => (
-            <div key={idx} className="p-4 bg-white/60 border border-[#ddd8cd] rounded-lg space-y-3">
+            <div key={idx} className="p-4 space-y-3 glass-inset">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-[#3d6b52]">Block #{idx + 1}</span>
                 {segments.length > 1 && (
@@ -395,7 +395,7 @@ export default function SessionForm({
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="md:col-span-2">
-                  <label className="block text-xs font-medium text-[#6f6b62] mb-1">
+                  <label className="block text-xs font-medium text-slate-600 mb-1">
                     {activeStudent?.topics.length ? 'Syllabus Topic' : 'Custom / Unseeded Topic'}
                   </label>
                   {activeStudent?.topics.length ? (
@@ -406,7 +406,7 @@ export default function SessionForm({
                         updated[idx].topicId = e.target.value;
                         setSegments(updated);
                       }}
-                      className="w-full bg-white border border-[#ddd8cd] rounded p-2 text-xs font-medium"
+                      className="w-full p-2 text-xs font-medium glass-input"
                     >
                       {activeStudent.topics.map((t) => (
                         <option key={t.id} value={t.id}>
@@ -424,13 +424,13 @@ export default function SessionForm({
                         setSegments(updated);
                       }}
                       placeholder="e.g. Kinematics & Projectile Motion"
-                      className="w-full bg-white border border-[#ddd8cd] rounded p-2 text-xs font-medium"
+                      className="w-full p-2 text-xs font-medium glass-input"
                     />
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[#6f6b62] mb-1">Tool / Visual Medium</label>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">Tool / Visual Medium</label>
                   <select
                     value={seg.toolId}
                     onChange={(e) => {
@@ -438,7 +438,7 @@ export default function SessionForm({
                       updated[idx].toolId = e.target.value;
                       setSegments(updated);
                     }}
-                    className="w-full bg-white border border-[#ddd8cd] rounded p-2 text-xs"
+                    className="w-full p-2 text-xs glass-input"
                   >
                     <option value="">No Special Tool</option>
                     {tools.map((tl) => (
@@ -450,7 +450,7 @@ export default function SessionForm({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[#6f6b62] mb-1">Activity</label>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">Activity</label>
                   <select
                     value={seg.activityType}
                     onChange={(e) => {
@@ -458,7 +458,7 @@ export default function SessionForm({
                       updated[idx].activityType = e.target.value as ActivityType;
                       setSegments(updated);
                     }}
-                    className="w-full bg-white border border-[#ddd8cd] rounded p-2 text-xs"
+                    className="w-full p-2 text-xs glass-input"
                   >
                     <option value="DIRECT_EXPLANATION">Concept Explanation (Socratic)</option>
                     <option value="TOOL_EXPLORATION">Interactive Simulation / Dragging Sliders</option>
@@ -470,8 +470,8 @@ export default function SessionForm({
               </div>
 
               {/* Mastery Pills */}
-              <div className="pt-2 border-t border-[#ddd8cd]/40">
-                <label className="block text-xs font-bold text-[#2b2b28] mb-1.5">
+              <div className="pt-2 border-t border-black/10">
+                <label className="block text-xs font-bold text-[#0f172a] mb-1.5">
                   Student Mastery for this Topic
                 </label>
                 <div className="grid grid-cols-3 gap-2">
@@ -488,10 +488,10 @@ export default function SessionForm({
                         updated[idx].masteryStatus = status.val as MasteryStatus;
                         setSegments(updated);
                       }}
-                      className={`p-2 rounded-lg text-left border transition-all ${
+                      className={`glass-inset p-2 text-left transition-all cursor-pointer ${
                         seg.masteryStatus === status.val
-                          ? 'bg-[#e8efe9] border-[#3d6b52] text-[#3d6b52] font-semibold'
-                          : 'bg-white border-[#ddd8cd] text-[#6f6b62] hover:bg-white/80'
+                          ? 'outline outline-2 outline-[#3d6b52] text-[#2d523e] font-semibold'
+                          : 'text-slate-700 opacity-90 hover:opacity-100'
                       }`}
                     >
                       <div className="text-xs">{status.label}</div>
@@ -507,12 +507,12 @@ export default function SessionForm({
 
       {/* SECTION 3: CONTINUITY BRIDGE */}
       <section className="glass-panel rounded-2xl p-5 space-y-4 shadow-sm transition-all">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-[#ddd8cd]/50 pb-3">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-black/10 pb-3">
           <div>
-            <h2 className="text-xs font-bold uppercase tracking-wider text-[#6f6b62]">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600">
               3. Next Session Continuity Bridge
             </h2>
-            <p className="text-xs text-[#6f6b62]">
+            <p className="text-xs text-slate-600">
               Dynamically tuned based on the mastery level you observed above
             </p>
           </div>
@@ -530,7 +530,7 @@ export default function SessionForm({
               value={struggle}
               onChange={(e) => setStruggle(e.target.value)}
               placeholder={continuityConfig.box1Placeholder}
-              className={`w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2.5 text-xs h-24 ${continuityConfig.box1Border}`}
+              className={`w-full glass-input p-2.5 text-xs h-24 ${continuityConfig.box1Border}`}
             />
           </div>
 
@@ -542,14 +542,14 @@ export default function SessionForm({
               value={workedWell}
               onChange={(e) => setWorkedWell(e.target.value)}
               placeholder={continuityConfig.box2Placeholder}
-              className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2.5 text-xs h-24 focus:border-[#3d6b52]"
+              className="w-full p-2.5 text-xs h-24 glass-input"
             />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-[#ddd8cd]/50">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-black/10">
           <div>
-            <label className="block text-xs font-semibold text-[#6f6b62] mb-1">
+            <label className="block text-xs font-semibold text-slate-600 mb-1">
               📝 Assigned Homework (Interleaved Practice)
             </label>
             <input
@@ -557,12 +557,12 @@ export default function SessionForm({
               value={assignedHomework}
               onChange={(e) => setAssignedHomework(e.target.value)}
               placeholder={continuityConfig.homeworkPlaceholder}
-              className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2 text-xs"
+              className="w-full p-2 text-xs glass-input"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-[#6f6b62] mb-1">
+            <label className="block text-xs font-semibold text-slate-600 mb-1">
               🎯 Next Session Objective
             </label>
             <input
@@ -570,7 +570,7 @@ export default function SessionForm({
               value={nextFocusTopic}
               onChange={(e) => setNextFocusTopic(e.target.value)}
               placeholder={continuityConfig.targetPlaceholder}
-              className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2 text-xs"
+              className="w-full p-2 text-xs glass-input"
             />
           </div>
         </div>
@@ -580,14 +580,14 @@ export default function SessionForm({
       <div className="flex justify-end gap-3 pt-2">
         <Link
           href="/"
-          className="px-5 py-2.5 rounded-lg border border-[#ddd8cd] text-xs font-bold text-[#6f6b62] hover:bg-white/80"
+          className="glass-btn px-5 py-2.5 text-xs font-bold"
         >
           Cancel
         </Link>
         <button
           type="submit"
           disabled={isPending}
-          className="bg-[#3d6b52] hover:bg-[#2d523e] text-white px-6 py-2.5 rounded-lg text-xs font-bold transition-colors shadow-sm disabled:opacity-50"
+          className="glass-btn glass-btn-primary px-6 py-2.5 text-xs font-bold"
         >
           {isPending ? 'Saving...' : existingSessionId ? 'Complete & Log Scheduled Lesson' : 'Save Session & Bridge Next Lesson'}
         </button>

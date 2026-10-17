@@ -88,7 +88,7 @@ export default function FinancialGlassCard({
             </span>
           )}
 
-          <div className="flex items-center gap-1.5 bg-white/70 border border-black/10 rounded-xl px-2.5 py-1 shadow-xs">
+          <div className="glass-inset flex items-center gap-1.5 px-2.5 py-1">
             <span className="text-xs">{CURRENCY_METADATA[selectedCurrency].flag}</span>
             <select
               value={selectedCurrency}
@@ -130,7 +130,7 @@ export default function FinancialGlassCard({
           </div>
         </div>
 
-        <div className="p-4 rounded-2xl glass-card-subtle bg-white/90! border-white! shadow-xs">
+        <div className="p-4 glass-card-subtle outline outline-2 outline-[#3d6b52]/40">
           <div className="text-[11px] font-bold text-[#0f172a]">Net Due ({disbursementLabel})</div>
           <div className="text-xl font-bold text-emerald-800 mt-1">
             {formatCurrency(netSalaryIDR, selectedCurrency, rates)}

@@ -59,7 +59,7 @@ export default async function LibraryPage() {
   }));
 
   return (
-    <main className="min-h-screen text-[#2b2b28] p-6 md:p-10 font-sans">
+    <main className="min-h-screen text-[#0f172a] p-6 md:p-10 font-sans">
       <div className="max-w-5xl mx-auto space-y-8">
         
         {/* HEADER */}
@@ -68,15 +68,15 @@ export default async function LibraryPage() {
             <Link href="/" className="text-xs font-semibold text-[#3d6b52] hover:underline mb-2 inline-block">
               ← Back to Dashboard
             </Link>
-            <h1 className="text-2xl font-bold tracking-tight text-[#2b2b28]">
+            <h1 className="text-2xl font-bold tracking-tight text-[#0f172a]">
               Curated Teaching Vault & Bibliography
             </h1>
-            <p className="text-xs text-[#6f6b62] mt-1">
+            <p className="text-xs text-slate-600 mt-1">
               Curate verified past papers, textbooks, and intuitive media for Cambridge, Edexcel, and IB.
             </p>
           </div>
 
-          <span className="text-xs font-bold uppercase tracking-wider bg-[#3d6b52]/10 text-[#3d6b52] px-3 py-1.5 rounded-full border border-[#3d6b52]/20 self-start md:self-auto">
+          <span className="glass-pill text-xs font-bold uppercase tracking-wider px-3 py-1.5 self-start md:self-auto">
             {resources.length} Teaching Assets Indexed
           </span>
         </div>
@@ -84,7 +84,7 @@ export default async function LibraryPage() {
         {/* 3RD-PARTY INSTITUTIONAL LAUNCHER (From Support Kit) */}
         <section className="glass-panel rounded-2xl p-5 shadow-sm space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-[#6f6b62]">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600">
               Institutional 3rd-Party Materials
             </h2>
             <span className="text-[11px] text-[#3d6b52] font-semibold">Active Subscriptions</span>
@@ -92,16 +92,16 @@ export default async function LibraryPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
             {/* Save My Exams */}
-            <div className="p-3.5 bg-white/60 border border-[#ddd8cd] rounded-lg space-y-1.5">
+            <div className="p-3.5 space-y-1.5 glass-inset">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-[#2b2b28]">Save My Exams</span>
-                <span className="text-[10px] bg-[#e8efe9] text-[#3d6b52] font-bold px-1.5 py-0.5 rounded">
+                <span className="font-bold text-[#0f172a]">Save My Exams</span>
+                <span className="glass-chip text-[10px] text-[#2d523e] font-bold px-2 py-0.5">
                   IGCSE / A-Level / IB
                 </span>
               </div>
-              <p className="text-[11px] text-[#6f6b62]">Topic revision notes, model answers & mark schemes.</p>
-              <div className="pt-1 flex items-center justify-between border-t border-[#ddd8cd]/40">
-                <span className="text-[10px] font-mono text-[#6f6b62]">hisensei.k12@gmail.com</span>
+              <p className="text-[11px] text-slate-600">Topic revision notes, model answers & mark schemes.</p>
+              <div className="pt-1 flex items-center justify-between border-t border-black/10">
+                <span className="text-[10px] font-mono text-slate-600">hisensei.k12@gmail.com</span>
                 <a
                   href="https://www.savemyexams.com/igcse/"
                   target="_blank"
@@ -114,16 +114,16 @@ export default async function LibraryPage() {
             </div>
 
             {/* Physics & Maths Tutor */}
-            <div className="p-3.5 bg-white/60 border border-[#ddd8cd] rounded-lg space-y-1.5">
+            <div className="p-3.5 space-y-1.5 glass-inset">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-[#2b2b28]">PMT (Physics & Maths)</span>
-                <span className="text-[10px] bg-[#e8efe9] text-[#3d6b52] font-bold px-1.5 py-0.5 rounded">
+                <span className="font-bold text-[#0f172a]">PMT (Physics & Maths)</span>
+                <span className="glass-chip text-[10px] text-[#2d523e] font-bold px-2 py-0.5">
                   Free Vault
                 </span>
               </div>
-              <p className="text-[11px] text-[#6f6b62]">Topical past paper packs & flashcards for CAIE/Edexcel.</p>
-              <div className="pt-1 flex items-center justify-between border-t border-[#ddd8cd]/40">
-                <span className="text-[10px] font-mono text-[#6f6b62]">Open Access</span>
+              <p className="text-[11px] text-slate-600">Topical past paper packs & flashcards for CAIE/Edexcel.</p>
+              <div className="pt-1 flex items-center justify-between border-t border-black/10">
+                <span className="text-[10px] font-mono text-slate-600">Open Access</span>
                 <a
                   href="https://www.physicsandmathstutor.com/past-papers/gcse-maths/cie-paper-4/"
                   target="_blank"
@@ -136,16 +136,16 @@ export default async function LibraryPage() {
             </div>
 
             {/* Twinkl */}
-            <div className="p-3.5 bg-white/60 border border-[#ddd8cd] rounded-lg space-y-1.5">
+            <div className="p-3.5 space-y-1.5 glass-inset">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-[#2b2b28]">Twinkl Primary</span>
+                <span className="font-bold text-[#0f172a]">Twinkl Primary</span>
                 <span className="text-[10px] bg-amber-50 text-amber-700 font-bold px-1.5 py-0.5 rounded">
                   Primary / Checkpoint
                 </span>
               </div>
-              <p className="text-[11px] text-[#6f6b62]">Curriculum worksheets & visual aids for young learners.</p>
-              <div className="pt-1 flex items-center justify-between border-t border-[#ddd8cd]/40">
-                <span className="text-[10px] font-mono text-[#6f6b62]">Institutional</span>
+              <p className="text-[11px] text-slate-600">Curriculum worksheets & visual aids for young learners.</p>
+              <div className="pt-1 flex items-center justify-between border-t border-black/10">
+                <span className="text-[10px] font-mono text-slate-600">Institutional</span>
                 <a
                   href="https://www.twinkl.co.id/"
                   target="_blank"
@@ -158,16 +158,16 @@ export default async function LibraryPage() {
             </div>
 
             {/* IXL Learning */}
-            <div className="p-3.5 bg-white/60 border border-[#ddd8cd] rounded-lg space-y-1.5">
+            <div className="p-3.5 space-y-1.5 glass-inset">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-[#2b2b28]">IXL Learning</span>
+                <span className="font-bold text-[#0f172a]">IXL Learning</span>
                 <span className="text-[10px] bg-amber-50 text-amber-700 font-bold px-1.5 py-0.5 rounded">
                   Diagnostic ELA/Math
                 </span>
               </div>
-              <p className="text-[11px] text-[#6f6b62]">Adaptive skill drills and baseline diagnostics.</p>
-              <div className="pt-1 flex items-center justify-between border-t border-[#ddd8cd]/40">
-                <span className="text-[10px] font-mono text-[#6f6b62]">k12dev</span>
+              <p className="text-[11px] text-slate-600">Adaptive skill drills and baseline diagnostics.</p>
+              <div className="pt-1 flex items-center justify-between border-t border-black/10">
+                <span className="text-[10px] font-mono text-slate-600">k12dev</span>
                 <a
                   href="https://www.ixl.com/"
                   target="_blank"

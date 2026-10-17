@@ -27,11 +27,11 @@ export default function LoginPage() {
       <div className="w-full max-w-sm glass-panel rounded-3xl p-8 shadow-sm space-y-6 text-center">
         
         <div>
-          <span className="text-[11px] font-bold uppercase tracking-wider text-[#3d6b52] bg-[#e8efe9] px-2.5 py-1 rounded-full border border-[#3d6b52]/20">
+          <span className="glass-pill text-[11px] font-bold uppercase tracking-wider px-2.5 py-1">
             Pedagogical Dashboard
           </span>
-          <h1 className="text-2xl font-bold text-[#2b2b28] mt-3">Teacher Portal</h1>
-          <p className="text-xs text-[#6f6b62] mt-1">
+          <h1 className="text-2xl font-bold text-[#0f172a] mt-3">Teacher Portal</h1>
+          <p className="text-xs text-slate-600 mt-1">
             Access your multi-curriculum dossiers, pedagogical continuity briefings, and automated earnings.
           </p>
         </div>
@@ -41,7 +41,7 @@ export default function LoginPage() {
             type="button"
             onClick={handleGoogleLogin}
             disabled={loading}
-            className="w-full bg-white hover:bg-white/80 text-[#2b2b28] font-bold text-xs py-3 px-4 rounded-xl border border-[#ddd8cd] shadow-sm transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+            className="glass-btn w-full font-bold text-xs py-3 px-4 flex items-center justify-center gap-3"
           >
             {/* Google G Logo SVG */}
             <svg className="w-4 h-4" viewBox="0 0 24 24">
@@ -66,7 +66,7 @@ export default function LoginPage() {
           </button>
         </div>
 
-        <p className="text-[11px] text-[#6f6b62] leading-relaxed pt-2 border-t border-[#ddd8cd]/40">
+        <p className="text-[11px] text-slate-600 leading-relaxed pt-2 border-t border-black/10">
           Protected by Google OAuth & enterprise-grade encryption. No passwords stored.
         </p>
 

@@ -7,7 +7,7 @@ const STATUS_STYLE = {
   ON_TRACK: { label: 'On track', chip: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
   BEHIND: { label: 'Behind pace', chip: 'bg-red-50 text-red-700 border-red-200' },
   ALL_COVERED: { label: 'Fully covered', chip: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  NO_DATA: { label: 'No pace yet', chip: 'bg-white/60 text-[#6f6b62] border-[#ddd8cd]' },
+  NO_DATA: { label: 'No pace yet', chip: 'bg-white/50 text-slate-600 border-white/70' },
 } as const;
 
 function paceMessage(pace: Extract<ExamPace, { kind: 'active' }>): string {
@@ -41,14 +41,14 @@ export default function ProgressInsights({
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {/* EXAM COUNTDOWN */}
       <section className="glass-panel rounded-2xl p-5 shadow-sm space-y-3">
-        <h2 className="text-xs font-bold uppercase tracking-wider text-[#6f6b62]">Exam Countdown</h2>
+        <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600">Exam Countdown</h2>
         {pace.kind === 'none' && (
-          <p className="text-xs text-[#6f6b62]">
+          <p className="text-xs text-slate-600">
             No exam date is set for this student, so there is no countdown or pace to show.
           </p>
         )}
         {pace.kind === 'passed' && (
-          <p className="text-xs text-[#6f6b62]">
+          <p className="text-xs text-slate-600">
             The target exam date passed {pace.daysAgo} day{pace.daysAgo !== 1 ? 's' : ''} ago.
           </p>
         )}
@@ -56,10 +56,10 @@ export default function ProgressInsights({
           <>
             <div className="flex items-end justify-between gap-3">
               <div>
-                <div className="text-2xl font-bold text-[#2b2b28]">
-                  {pace.daysLeft} <span className="text-sm font-semibold text-[#6f6b62]">days left</span>
+                <div className="text-2xl font-bold text-[#0f172a]">
+                  {pace.daysLeft} <span className="text-sm font-semibold text-slate-600">days left</span>
                 </div>
-                <div className="text-[11px] text-[#6f6b62]">About {fmt(pace.weeksLeft)} weeks</div>
+                <div className="text-[11px] text-slate-600">About {fmt(pace.weeksLeft)} weeks</div>
               </div>
               <span
                 className={`text-[11px] font-bold px-2 py-0.5 rounded border ${STATUS_STYLE[pace.status].chip}`}
@@ -68,20 +68,20 @@ export default function ProgressInsights({
               </span>
             </div>
             <div className="grid grid-cols-3 gap-2 text-center text-xs">
-              <div className="p-2 bg-white/60 border border-[#ddd8cd]/60 rounded-lg">
-                <div className="text-[10px] text-[#6f6b62]">To cover</div>
-                <div className="font-bold text-[#2b2b28]">{pace.toCover}</div>
+              <div className="p-2 glass-inset">
+                <div className="text-[10px] text-slate-600">To cover</div>
+                <div className="font-bold text-[#0f172a]">{pace.toCover}</div>
               </div>
-              <div className="p-2 bg-white/60 border border-[#ddd8cd]/60 rounded-lg">
-                <div className="text-[10px] text-[#6f6b62]">To firm up</div>
-                <div className="font-bold text-[#2b2b28]">{pace.toFirmUp}</div>
+              <div className="p-2 glass-inset">
+                <div className="text-[10px] text-slate-600">To firm up</div>
+                <div className="font-bold text-[#0f172a]">{pace.toFirmUp}</div>
               </div>
-              <div className="p-2 bg-white/60 border border-[#ddd8cd]/60 rounded-lg">
-                <div className="text-[10px] text-[#6f6b62]">Needed / week</div>
-                <div className="font-bold text-[#2b2b28]">{fmt(pace.requiredPerWeek)}</div>
+              <div className="p-2 glass-inset">
+                <div className="text-[10px] text-slate-600">Needed / week</div>
+                <div className="font-bold text-[#0f172a]">{fmt(pace.requiredPerWeek)}</div>
               </div>
             </div>
-            <p className="text-xs text-[#6f6b62] leading-relaxed">{paceMessage(pace)}</p>
+            <p className="text-xs text-slate-600 leading-relaxed">{paceMessage(pace)}</p>
           </>
         )}
       </section>
@@ -89,8 +89,8 @@ export default function ProgressInsights({
       {/* MOMENTUM */}
       <section className="glass-panel rounded-2xl p-5 shadow-sm space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-[#6f6b62]">Momentum</h2>
-          <div className="flex gap-3 text-[11px] text-[#6f6b62]">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600">Momentum</h2>
+          <div className="flex gap-3 text-[11px] text-slate-600">
             <span className="inline-flex items-center gap-1">
               <span className="w-2 h-2 rounded-sm bg-[#3d6b52]/40" /> New topics
             </span>
@@ -115,15 +115,15 @@ export default function ProgressInsights({
                     title={`${m.mastered} mastered`}
                   />
                 </div>
-                <div className="text-[10px] text-[#6f6b62]">{m.label}</div>
-                <div className="text-[10px] font-semibold text-[#2b2b28]">
+                <div className="text-[10px] text-slate-600">{m.label}</div>
+                <div className="text-[10px] font-semibold text-[#0f172a]">
                   {m.covered}/{m.mastered}
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-xs text-[#6f6b62]">
+          <p className="text-xs text-slate-600">
             Nothing to chart yet. New and mastered topics per month will appear as you log lessons.
           </p>
         )}

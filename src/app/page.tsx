@@ -146,13 +146,13 @@ export default async function DashboardPage() {
           <div className="flex items-center gap-2.5 flex-wrap">
             <Link
               href="/schedule"
-              className="glass-card-subtle hover:bg-white text-[#0f172a] px-3.5 py-2 rounded-xl text-xs font-bold transition-all hover:shadow-xs active:scale-95 inline-flex items-center gap-1.5"
+              className="glass-btn px-3.5 py-2 text-xs font-bold inline-flex items-center gap-1.5"
             >
               📅 Schedule
             </Link>
             <Link
               href="/library"
-              className="glass-card-subtle hover:bg-white text-[#0f172a] px-3.5 py-2 rounded-xl text-xs font-bold transition-all hover:shadow-xs active:scale-95 inline-flex items-center gap-1.5"
+              className="glass-btn px-3.5 py-2 text-xs font-bold inline-flex items-center gap-1.5"
             >
               📚 Library
             </Link>
@@ -308,7 +308,7 @@ export default async function DashboardPage() {
 
               <Link
                 href="/students/new"
-                className="glass-card-subtle hover:bg-white text-[#0f172a] text-xs font-bold px-3 py-1.5 rounded-xl border border-black/10 transition-all hover:shadow-xs active:scale-95 inline-flex items-center gap-1"
+                className="glass-btn text-xs font-bold px-3 py-1.5 inline-flex items-center gap-1"
               >
                 + Add Student
               </Link>
@@ -348,7 +348,7 @@ export default async function DashboardPage() {
                       <div className="flex flex-col items-stretch gap-2">
                         <Link
                           href={`/students/${student.id}`}
-                          className="glass-card-subtle hover:bg-white text-[#0f172a] text-xs font-bold px-4 py-2 rounded-2xl transition-all border border-black/10 hover:shadow-sm active:scale-95 whitespace-nowrap text-center"
+                          className="glass-btn text-xs font-bold px-4 py-2 whitespace-nowrap text-center"
                         >
                           View Dossier →
                         </Link>

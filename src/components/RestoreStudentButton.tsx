@@ -23,7 +23,7 @@ export default function RestoreStudentButton({ studentId }: { studentId: string 
       type="button"
       onClick={handleRestore}
       disabled={isPending}
-      className="glass-card-subtle hover:bg-white text-[#0f172a] text-xs font-bold px-4 py-2 rounded-2xl transition-all border border-black/10 active:scale-95 whitespace-nowrap disabled:opacity-50"
+      className="glass-btn text-xs font-bold px-4 py-2 whitespace-nowrap"
     >
       {isPending ? 'Restoring...' : 'Restore'}
     </button>

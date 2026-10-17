@@ -200,7 +200,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
   };
 
   return (
-    <main className="min-h-screen text-[#2b2b28] p-6 md:p-10 font-sans">
+    <main className="min-h-screen text-[#0f172a] p-6 md:p-10 font-sans">
       <div className="max-w-4xl mx-auto space-y-8">
         
         {/* HEADER WITH DELETE BUTTON */}
@@ -212,13 +212,13 @@ export default async function StudentDossierPage({ params, searchParams }: Props
           <div className="glass-panel rounded-2xl p-6 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <h1 className="text-2xl font-bold tracking-tight text-[#2b2b28]">{student.name}</h1>
-                <span className="text-xs font-bold uppercase tracking-wider bg-[#3d6b52]/10 text-[#3d6b52] px-2.5 py-0.5 rounded-full border border-[#3d6b52]/20">
+                <h1 className="text-2xl font-bold tracking-tight text-[#0f172a]">{student.name}</h1>
+                <span className="glass-pill text-xs font-bold uppercase tracking-wider px-2.5 py-0.5">
                   {tier} Tier
                 </span>
               </div>
-              <p className="text-xs text-[#6f6b62]">
-                <span className="font-semibold text-[#2b2b28]">{course?.title} ({course?.subjectCode})</span> · {course?.board.name}
+              <p className="text-xs text-slate-600">
+                <span className="font-semibold text-[#0f172a]">{course?.title} ({course?.subjectCode})</span> · {course?.board.name}
               </p>
               {student.targetExamDate && (
                 <p className="text-[11px] text-[#3d6b52] font-semibold mt-2">
@@ -230,14 +230,14 @@ export default async function StudentDossierPage({ params, searchParams }: Props
             <div className="flex items-center gap-2 self-start md:self-auto">
               <Link
                 href="/schedule"
-                className="text-xs font-semibold text-[#3d6b52] border border-[#3d6b52]/30 hover:bg-[#e8efe9] px-3 py-2 rounded-lg transition-colors"
+                className="glass-btn text-xs font-semibold px-3 py-2"
               >
                 📅 Open Timetable
               </Link>
               <DeleteStudentButton studentId={student.id} studentName={student.name} />
               <Link
                 href={`/sessions/new?studentId=${student.id}`}
-                className="bg-[#3d6b52] hover:bg-[#2d523e] text-white px-4 py-2 rounded-lg text-xs font-bold transition-colors shadow-sm"
+                className="glass-btn glass-btn-primary px-4 py-2 text-xs font-bold"
               >
                 + Log Session
               </Link>
@@ -249,15 +249,15 @@ export default async function StudentDossierPage({ params, searchParams }: Props
         <section className="glass-panel rounded-2xl p-5 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xs font-bold uppercase tracking-wider text-[#6f6b62]">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600">
                 {course?.title} Syllabus Coverage
               </h2>
-              <p className="text-xs text-[#6f6b62]">Progress across official syllabus points</p>
+              <p className="text-xs text-slate-600">Progress across official syllabus points</p>
             </div>
             <span className="text-sm font-bold text-[#3d6b52]">{coveragePercent}% Covered</span>
           </div>
 
-          <div className="w-full bg-[#e8efe9] h-3 rounded-full overflow-hidden">
+          <div className="w-full bg-white/40 shadow-inner h-3 rounded-full overflow-hidden">
             <div
               className="bg-[#3d6b52] h-full transition-all duration-500"
               style={{ width: `${coveragePercent}%` }}
@@ -265,15 +265,15 @@ export default async function StudentDossierPage({ params, searchParams }: Props
           </div>
 
           <div className="grid grid-cols-3 gap-3 text-center pt-2 text-xs">
-            <div className="p-2.5 bg-white/60 rounded-lg border border-[#ddd8cd]/60">
-              <div className="text-[11px] text-[#6f6b62]">Covered or Known</div>
-              <div className="text-base font-bold text-[#2b2b28] mt-0.5">{coveredCount} / {totalTopicsCount}</div>
+            <div className="p-2.5 glass-inset">
+              <div className="text-[11px] text-slate-600">Covered or Known</div>
+              <div className="text-base font-bold text-[#0f172a] mt-0.5">{coveredCount} / {totalTopicsCount}</div>
             </div>
-            <div className="p-2.5 bg-[#e8efe9]/50 rounded-lg border border-[#3d6b52]/20">
+            <div className="p-2.5 glass-inset">
               <div className="text-[11px] text-[#3d6b52]">Mastered Autonomously</div>
               <div className="text-base font-bold text-[#3d6b52] mt-0.5">{masteredTopicIds.size}</div>
             </div>
-            <div className="p-2.5 bg-[#a3462f]/5 rounded-lg border border-[#a3462f]/20">
+            <div className="p-2.5 glass-inset">
               <div className="text-[11px] text-[#a3462f]">Active Struggle Points</div>
               <div className="text-base font-bold text-[#a3462f] mt-0.5">{strugglingTopicIds.size}</div>
             </div>
@@ -292,10 +292,10 @@ export default async function StudentDossierPage({ params, searchParams }: Props
         {/* CHRONOLOGICAL SESSION TIMELINE */}
         <section className="space-y-4">
           <div className="glass-panel rounded-2xl px-5 py-3 flex items-center justify-between">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-[#6f6b62]">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600">
               Learning Journey & Session Timeline
             </h2>
-            <span className="text-xs text-[#6f6b62]">
+            <span className="text-xs text-slate-600">
               {completedCount} Recorded Session{completedCount !== 1 ? 's' : ''}
             </span>
           </div>
@@ -305,10 +305,10 @@ export default async function StudentDossierPage({ params, searchParams }: Props
               <Link
                 key={v.value}
                 href={viewHref(v.value)}
-                className={`text-xs px-3 py-1.5 rounded-lg font-bold transition-colors ${
+                className={`glass-btn text-xs px-3 py-1.5 font-bold ${
                   view === v.value
-                    ? 'bg-[#3d6b52] text-white'
-                    : 'bg-white/60 text-[#6f6b62] border border-[#ddd8cd] hover:bg-[#e8efe9]'
+                    ? 'glass-btn-primary'
+                    : ''
                 }`}
               >
                 {v.label}
@@ -317,7 +317,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
           </div>
 
           {displaySessions.length === 0 ? (
-            <div className="glass-panel rounded-2xl p-8 text-center text-xs text-[#6f6b62]">
+            <div className="glass-panel rounded-2xl p-8 text-center text-xs text-slate-600">
               {student.sessions.length === 0
                 ? `No sessions recorded yet. Use the button above to log your first session with ${student.name}.`
                 : 'No sessions match this filter.'}
@@ -350,12 +350,12 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                     key={session.id}
                     className="glass-panel rounded-2xl p-5 shadow-sm space-y-4"
                   >
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-[#ddd8cd]/50 pb-3">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-black/10 pb-3">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-xs font-bold text-[#3d6b52] bg-[#e8efe9] px-2 py-0.5 rounded">
+                        <span className="glass-chip text-xs font-bold text-[#2d523e] px-2.5 py-0.5">
                           {session.meetingNumber}
                         </span>
-                        <span className="text-xs font-bold text-[#2b2b28]">
+                        <span className="text-xs font-bold text-[#0f172a]">
                           {sDate.toLocaleDateString('en-US', {
                             weekday: 'short',
                             month: 'short',
@@ -363,7 +363,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                             year: 'numeric',
                           })}
                         </span>
-                        <span className="text-xs font-semibold text-[#6f6b62]">
+                        <span className="text-xs font-semibold text-slate-600">
                           {sDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' })}
                           {'–'}
                           {new Date(sDate.getTime() + session.durationMinutes * 60000).toLocaleTimeString('en-GB', {
@@ -373,10 +373,10 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                           })}{' '}
                           WIB
                         </span>
-                        <span className="text-[11px] bg-white/60 border border-[#ddd8cd] px-2 py-0.5 rounded text-[#6f6b62]">
+                        <span className="text-[11px] px-2 py-0.5 text-slate-600 glass-chip">
                           {session.durationMinutes} mins
                         </span>
-                        <span className="text-[11px] bg-white/60 border border-[#ddd8cd] px-2 py-0.5 rounded text-[#6f6b62]">
+                        <span className="text-[11px] px-2 py-0.5 text-slate-600 glass-chip">
                           {session.sessionType.replace('_', ' ')}
                         </span>
                       </div>
@@ -396,14 +396,14 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                         {session.status === 'SCHEDULED' && new Date(session.sessionDate) <= new Date() && (
                           <Link
                             href={`/sessions/new?studentId=${student.id}&sessionId=${session.id}`}
-                            className="bg-[#a3462f] hover:bg-[#853623] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"
+                            className="glass-btn glass-btn-danger-solid px-3 py-1.5 text-xs font-bold"
                           >
                             Log Lesson →
                           </Link>
                         )}
                         <Link
                           href={`/schedule?session=${session.id}`}
-                          className="text-xs text-[#3d6b52] hover:underline font-medium"
+                          className="glass-btn text-xs px-3 py-1.5 font-semibold"
                         >
                           📅 Timetable
                         </Link>
@@ -440,16 +440,16 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                         <DeleteSessionButton
                           sessionId={session.id}
                           completed={session.status === 'COMPLETED'}
-                          className="text-xs text-[#a3462f] hover:underline font-medium disabled:opacity-50"
+                          className="glass-btn glass-btn-danger text-xs px-3 py-1.5 font-semibold"
                         />
                       </div>
                     </div>
 
                     {session.status === 'RESCHEDULED' && (
-                      <div className="p-3 bg-white/60 border border-[#ddd8cd] rounded-lg text-xs">
+                      <div className="p-3 text-xs glass-inset">
                         {session.movedTo ? (
                           <>
-                            <span className="font-bold text-[#6f6b62]">Rescheduled to </span>
+                            <span className="font-bold text-slate-600">Rescheduled to </span>
                             <Link
                               href={`/schedule?session=${session.movedTo.id}`}
                               className="font-semibold text-[#3d6b52] hover:underline"
@@ -466,19 +466,19 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                             </Link>
                           </>
                         ) : (
-                          <span className="text-[#6f6b62]">Rescheduled. The new lesson no longer exists.</span>
+                          <span className="text-slate-600">Rescheduled. The new lesson no longer exists.</span>
                         )}
                       </div>
                     )}
 
                     {session.status === 'SCHEDULED' && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
-                        <div className="p-3 bg-white/60 border border-[#ddd8cd] rounded-lg space-y-0.5">
-                          <span className="font-bold text-[#6f6b62] block">Course</span>
-                          <span className="text-[#2b2b28]">{course?.title ?? 'General Course'}</span>
+                        <div className="p-3 space-y-0.5 glass-inset">
+                          <span className="font-bold text-slate-600 block">Course</span>
+                          <span className="text-[#0f172a]">{course?.title ?? 'General Course'}</span>
                         </div>
-                        <div className="p-3 bg-white/60 border border-[#ddd8cd] rounded-lg space-y-0.5">
-                          <span className="font-bold text-[#6f6b62] block">Meeting Link</span>
+                        <div className="p-3 space-y-0.5 glass-inset">
+                          <span className="font-bold text-slate-600 block">Meeting Link</span>
                           {session.meetingUrl ? (
                             <a
                               href={session.meetingUrl}
@@ -489,7 +489,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                               Join call ↗
                             </a>
                           ) : (
-                            <span className="text-[#6f6b62]">Not set</span>
+                            <span className="text-slate-600">Not set</span>
                           )}
                         </div>
                       </div>
@@ -497,7 +497,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
 
                     {session.status === 'COMPLETED' && (
                     <div className="space-y-2">
-                      <div className="text-[11px] font-bold uppercase tracking-wider text-[#6f6b62]">
+                      <div className="text-[11px] font-bold uppercase tracking-wider text-slate-600">
                         Topics & Concept Grasp
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -508,17 +508,17 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                           return (
                             <div
                               key={seg.id}
-                              className="p-3 bg-white/60 border border-[#ddd8cd] rounded-lg text-xs space-y-1"
+                              className="p-3 text-xs space-y-1 glass-inset"
                             >
                               <div className="flex items-start justify-between gap-2">
-                                <span className="font-semibold text-[#2b2b28]">
+                                <span className="font-semibold text-[#0f172a]">
                                   {seg.topic ? `${seg.topic.code} ${seg.topic.title}` : 'General Exploration'}
                                 </span>
                                 <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border flex-shrink-0 ${statusBadge.color}`}>
                                   {statusBadge.label}
                                 </span>
                               </div>
-                              <div className="text-[11px] text-[#6f6b62] flex items-center gap-2 pt-0.5">
+                              <div className="text-[11px] text-slate-600 flex items-center gap-2 pt-0.5">
                                 <span>{seg.durationMinutes}m</span>
                                 <span>·</span>
                                 <span>{seg.activityType.replace('_', ' ')}</span>
@@ -543,7 +543,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                             <span className="font-bold text-[#a3462f] block mb-1">
                               ⚠️ Stumbling Block (Next Warm-up):
                             </span>
-                            <p className="text-[#2b2b28] leading-relaxed">{session.reflection.struggle}</p>
+                            <p className="text-[#0f172a] leading-relaxed">{session.reflection.struggle}</p>
                           </div>
                         )}
 
@@ -552,24 +552,24 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                             <span className="font-bold text-[#3d6b52] block mb-1">
                               💡 Breakthrough / What Worked:
                             </span>
-                            <p className="text-[#2b2b28] leading-relaxed">{session.reflection.workedWell}</p>
+                            <p className="text-[#0f172a] leading-relaxed">{session.reflection.workedWell}</p>
                           </div>
                         )}
                       </div>
                     )}
 
                     {(session.assignedHomework || session.nextFocusTopic) && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1 border-t border-[#ddd8cd]/40 text-xs">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1 border-t border-black/10 text-xs">
                         {session.assignedHomework && (
                           <div>
-                            <span className="font-bold text-[#6f6b62] block mb-0.5">📝 Assigned Homework:</span>
-                            <p className="text-[#2b2b28]">{session.assignedHomework}</p>
+                            <span className="font-bold text-slate-600 block mb-0.5">📝 Assigned Homework:</span>
+                            <p className="text-[#0f172a]">{session.assignedHomework}</p>
                           </div>
                         )}
                         {session.nextFocusTopic && (
                           <div>
                             <span className="font-bold text-[#3d6b52] block mb-0.5">🎯 Next Session Objective:</span>
-                            <p className="text-[#2b2b28] font-medium">{session.nextFocusTopic}</p>
+                            <p className="text-[#0f172a] font-medium">{session.nextFocusTopic}</p>
                           </div>
                         )}
                       </div>
