@@ -1,5 +1,7 @@
 'use client';
 
+import GlassSelect from '@/components/GlassSelect';
+import BlobTabs from '@/components/BlobTabs';
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { hrefWith } from '@/lib/pagination';
@@ -128,29 +130,19 @@ export default function LibraryView({
 
       {/* FILTER & SEARCH BAR */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <div className="flex items-center gap-2 flex-wrap">
-          {[
-            { val: 'ALL', label: 'All Resources' },
-            { val: 'PAST_PAPER', label: 'Past Papers' },
-            { val: 'TEXTBOOK', label: 'Textbooks' },
-            { val: 'INTUITION_ARTICLE', label: 'Articles' },
-            { val: 'SIMULATION', label: 'Simulations' },
-            { val: 'WORKSHEET', label: 'Worksheets' },
-          ].map((tab) => (
-            <button
-              key={tab.val}
-              type="button"
-              onClick={() => applyFilters(tab.val, searchQuery)}
-              className={`glass-btn whitespace-nowrap glass-btn-sm  ${
-                selectedType === tab.val
-                  ? 'glass-btn-primary'
-                  : ''
-              } `}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        <BlobTabs
+          ariaLabel="Resource type"
+          active={selectedType}
+          onSelect={(key) => applyFilters(key, searchQuery)}
+          tabs={[
+            { key: 'ALL', label: 'All Resources' },
+            { key: 'PAST_PAPER', label: 'Past Papers' },
+            { key: 'TEXTBOOK', label: 'Textbooks' },
+            { key: 'INTUITION_ARTICLE', label: 'Articles' },
+            { key: 'SIMULATION', label: 'Simulations' },
+            { key: 'WORKSHEET', label: 'Worksheets' },
+          ]}
+        />
 
         <form
           className="flex flex-wrap items-center gap-2"
@@ -187,7 +179,7 @@ export default function LibraryView({
 
       {/* INLINE ADD RESOURCE FORM */}
       {showAddForm && (
-        <form onSubmit={handleAddSubmit} className="glass-card-subtle outline outline-2 outline-[#3d6b52]/40 p-5 space-y-4">
+        <form onSubmit={handleAddSubmit} className="liquid-in glass-card-subtle outline outline-2 outline-[#3d6b52]/40 p-5 space-y-4">
           <h2 className="text-xs font-bold uppercase tracking-wider text-[#2d523e]">
             Index New Teaching Material
           </h2>
@@ -207,32 +199,30 @@ export default function LibraryView({
 
             <div>
               <label className="block font-bold text-[#0f172a] mb-1">Curriculum Course</label>
-              <select
+              <GlassSelect
                 value={selectedCourseId}
-                onChange={(e) => setSelectedCourseId(e.target.value)}
-                className="w-full p-2.5 font-medium glass-input"
-              >
-                {courses.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.title}
-                  </option>
-                ))}
-              </select>
+                onChange={setSelectedCourseId}
+                className="p-2.5 font-medium"
+                ariaLabel="Curriculum course"
+                options={courses.map((c) => ({ value: c.id, label: c.title }))}
+              />
             </div>
 
             <div>
               <label className="block font-bold text-[#0f172a] mb-1">Resource Type</label>
-              <select
+              <GlassSelect
                 value={resourceType}
-                onChange={(e) => setResourceType(e.target.value as ResourceType)}
-                className="w-full p-2.5 font-medium glass-input"
-              >
-                <option value="PAST_PAPER">Past Exam Paper / Question Set</option>
-                <option value="TEXTBOOK">Textbook Chapter / Core Reading</option>
-                <option value="INTUITION_ARTICLE">Intuition / Explanation Article</option>
-                <option value="SIMULATION">Interactive Simulation (GeoGebra/PhET)</option>
-                <option value="WORKSHEET">Revision Notes / Worksheet</option>
-              </select>
+                onChange={(v) => setResourceType(v as ResourceType)}
+                className="p-2.5 font-medium"
+                ariaLabel="Resource type"
+                options={[
+                  { value: 'PAST_PAPER', label: 'Past Exam Paper / Question Set' },
+                  { value: 'TEXTBOOK', label: 'Textbook Chapter / Core Reading' },
+                  { value: 'INTUITION_ARTICLE', label: 'Intuition / Explanation Article' },
+                  { value: 'SIMULATION', label: 'Interactive Simulation (GeoGebra/PhET)' },
+                  { value: 'WORKSHEET', label: 'Revision Notes / Worksheet' },
+                ]}
+              />
             </div>
 
             <div>

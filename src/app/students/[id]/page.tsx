@@ -10,6 +10,7 @@ import { finalRescheduleTarget, reopenMessage } from '@/lib/reschedule-chain';
 import { computeExamPace } from '@/lib/exam-pace';
 import { monthlyMomentum } from '@/lib/momentum';
 import Pagination from '@/components/Pagination';
+import BlobTabs from '@/components/BlobTabs';
 import { formatDateOnly, formatInZone, resolveTimeZone, zoneLabel } from '@/lib/time';
 import { paginate, parsePage } from '@/lib/pagination';
 import {
@@ -288,7 +289,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
 
           <div className="w-full bg-white/40 shadow-inner h-3 rounded-full overflow-hidden">
             <div
-              className="bg-[#3d6b52] h-full transition-all duration-500"
+              className="liquid-fill bg-[#3d6b52] h-full"
               style={{ width: `${coveragePercent}%` }}
             />
           </div>
@@ -330,20 +331,12 @@ export default async function StudentDossierPage({ params, searchParams }: Props
             </span>
           </div>
 
-          <div className="glass-panel flex flex-wrap gap-2 p-4">
-            {TIMELINE_VIEWS.map((v) => (
-              <Link
-                key={v.value}
-                href={viewHref(v.value)}
-                className={`glass-btn glass-btn-sm  ${
-                  view === v.value
-                    ? 'glass-btn-primary'
-                    : ''
-                } `}
-              >
-                {v.label}
-              </Link>
-            ))}
+          <div className="glass-panel p-4">
+            <BlobTabs
+              ariaLabel="Timeline filter"
+              active={view}
+              tabs={TIMELINE_VIEWS.map((v) => ({ key: v.value, label: v.label, href: viewHref(v.value) }))}
+            />
           </div>
 
           {displaySessions.length === 0 ? (

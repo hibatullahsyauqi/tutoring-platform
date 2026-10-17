@@ -49,15 +49,29 @@ export function useTheme() {
     return () => clearInterval(id);
   }, [setting]);
 
-  const cycle = useCallback(() => {
+  const cycle = useCallback((origin?: { x: number; y: number }) => {
     const following = ORDER[(ORDER.indexOf(setting) + 1) % ORDER.length];
     try {
       localStorage.setItem(THEME_STORAGE_KEY, following);
     } catch {
       // Private mode: the choice just lasts until the tab closes.
     }
-    listeners.forEach((l) => l());
-    applyTheme(following);
+    const change = () => {
+      listeners.forEach((l) => l());
+      applyTheme(following);
+    };
+
+    // Spread the new look out from where you clicked (browsers without view transitions just switch).
+    const doc = document as Document & { startViewTransition?: (update: () => void) => unknown };
+    const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (doc.startViewTransition && !calm) {
+      const root = document.documentElement;
+      root.style.setProperty('--vt-x', `${origin?.x ?? window.innerWidth}px`);
+      root.style.setProperty('--vt-y', `${origin?.y ?? 0}px`);
+      doc.startViewTransition(change);
+    } else {
+      change();
+    }
   }, [setting]);
 
   return { setting, cycle };

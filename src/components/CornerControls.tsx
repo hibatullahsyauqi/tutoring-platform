@@ -198,7 +198,7 @@ export default function CornerControls({ savedTimeZone }: { savedTimeZone: strin
             role="menuitem"
             className="rail-row"
             style={{ ['--i' as string]: 0 }}
-            onClick={cycle}
+            onClick={(e) => cycle({ x: e.clientX, y: e.clientY })}
             title="Auto switches to dark after sunset and light after sunrise, by your local time"
           >
             {themeIcon}

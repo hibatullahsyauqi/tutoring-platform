@@ -103,7 +103,7 @@ export default function SyllabusMap({
             const covered = group.topics.filter((t) => t.state !== 'UNTOUCHED').length;
             const needsAttention = group.topics.some((t) => t.state === 'STRUGGLING');
             return (
-              <details key={group.label} className="group glass-inset" open={needsAttention}>
+              <details key={group.label} className="group glass-inset liquid-details" open={needsAttention}>
                 <summary className="cursor-pointer select-none list-none flex items-center justify-between gap-3 px-3 py-2 text-xs">
                   <span className="font-bold text-[#0f172a]">{group.label}</span>
                   <span className="flex items-center gap-2">

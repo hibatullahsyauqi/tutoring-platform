@@ -1,5 +1,7 @@
 'use client';
 
+import GlassDatePicker from '@/components/GlassDatePicker';
+import GlassSelect from '@/components/GlassSelect';
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { hrefWith } from '@/lib/pagination';
@@ -97,14 +99,15 @@ function CancelReasons({
         Rescheduled / Prior Notice (Pasal 7: No fine)
       </button>
       {rescheduling && (
-        <div className="basis-full p-3 glass-inset space-y-2">
+        <div className="liquid-in basis-full p-3 glass-inset space-y-2">
           <label className="block text-[10px] font-bold text-[#0f172a]">New date & time ({zone.label})</label>
-          <input
-            type="datetime-local"
+          <GlassDatePicker
+            mode="datetime"
             value={newDate}
             min={toLocalInput(new Date())}
-            onChange={(e) => setNewDate(e.target.value)}
-            className="w-full p-2.5 text-[11px] glass-input"
+            onChange={setNewDate}
+            ariaLabel="New date and time"
+            className="p-2.5 text-[11px]"
           />
           {isPast && (
             <p className="text-[10px] font-semibold text-[#a3462f]">
@@ -336,7 +339,7 @@ export default function ScheduleClientView({
       {toast && (
         <div
           role="status"
-          className={`fixed bottom-6 right-6 z-50 max-w-sm glass-card-subtle px-4 py-3 text-sm font-semibold ${
+          className={`liquid-toast fixed bottom-6 right-6 z-50 max-w-sm glass-card-subtle px-4 py-3 text-sm font-semibold ${
             toast.tone === 'ok'
               ? 'text-emerald-900 outline outline-1 outline-emerald-500'
               : 'glass-card-subtle text-[#0f172a]'
@@ -379,7 +382,7 @@ export default function ScheduleClientView({
 
       {/* SCHEDULE FORM MODAL */}
       {showScheduleForm && (
-        <form onSubmit={handleScheduleSubmit} className="glass-card-subtle outline outline-2 outline-[#3d6b52]/40 p-5 space-y-4">
+        <form onSubmit={handleScheduleSubmit} className="liquid-in glass-card-subtle outline outline-2 outline-[#3d6b52]/40 p-5 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xs font-bold uppercase tracking-wider text-[#2d523e]">
               Book Teaching Slot
@@ -392,40 +395,39 @@ export default function ScheduleClientView({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
             <div>
               <label className="block font-bold text-[#0f172a] mb-1">Student</label>
-              <select
+              <GlassSelect
                 value={selectedStudentId}
-                onChange={(e) => setSelectedStudentId(e.target.value)}
-                className="w-full p-2.5 font-medium glass-input"
-              >
-                {students.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name} — {s.courseTitle} ({s.tier})
-                  </option>
-                ))}
-              </select>
+                onChange={setSelectedStudentId}
+                className="p-2.5 font-medium"
+                ariaLabel="Student"
+                options={students.map((s) => ({ value: s.id, label: `${s.name} — ${s.courseTitle} (${s.tier})` }))}
+              />
             </div>
 
             <div>
               <label className="block font-bold text-[#0f172a] mb-1">Session Type</label>
-              <select
+              <GlassSelect
                 value={sessionType}
-                onChange={(e) => setSessionType(e.target.value as SessionType)}
-                className="w-full p-2.5 font-medium glass-input"
-              >
-                <option value="REGULAR_LESSON">Regular Lesson (Standard Flow)</option>
-                <option value="TRIAL_CLASS">Trial Class (New Prospect)</option>
-                <option value="EXAM_SIMULATION">Past Paper Mock Simulation</option>
-                <option value="REVISION_RECALL">Revision & Interleaving</option>
-              </select>
+                onChange={(v) => setSessionType(v as SessionType)}
+                className="p-2.5 font-medium"
+                ariaLabel="Session type"
+                options={[
+                  { value: 'REGULAR_LESSON', label: 'Regular Lesson (Standard Flow)' },
+                  { value: 'TRIAL_CLASS', label: 'Trial Class (New Prospect)' },
+                  { value: 'EXAM_SIMULATION', label: 'Past Paper Mock Simulation' },
+                  { value: 'REVISION_RECALL', label: 'Revision & Interleaving' },
+                ]}
+              />
             </div>
 
             <div>
               <label className="block font-bold text-[#0f172a] mb-1">Date & Time ({zone.label})</label>
-              <input
-                type="datetime-local"
+              <GlassDatePicker
+                mode="datetime"
                 value={sessionDate}
-                onChange={(e) => setSessionDate(e.target.value)}
-                className="w-full p-2.5 glass-input"
+                onChange={setSessionDate}
+                ariaLabel="Lesson date and time"
+                className="p-2.5"
               />
               <span className="text-[10px] text-slate-600 mt-0.5 block">Standard window: 18:30 {zone.label}</span>
             </div>
@@ -502,21 +504,20 @@ export default function ScheduleClientView({
               <span className="text-sm font-bold text-[#0f172a] ml-1">
                 {weekStartLabel} – {weekEndLabel}, {currentYear}
               </span>
-              <input
-                type="date"
-                aria-label="Jump to a date"
-                title="Jump to a date"
-                className="glass-input px-3 py-1.5 text-xs font-semibold"
-                value={highlightDate ?? weekDays[0].dateStr}
-                min={dateInputBound(-3650)}
-                max={dateInputBound(3650)}
-                onChange={(e) => {
-                  const [y, m, d] = e.target.value.split('-').map(Number);
-                  if (!y || !m || !d) return;
-                  setWeekDirection(e.target.value > weekDays[0].dateStr ? 'next' : 'prev');
-                  navigate({ date: e.target.value, week: undefined });
-                }}
-              />
+              <div className="w-44">
+                <GlassDatePicker
+                  ariaLabel="Jump to a date"
+                  className="px-3 py-1.5 text-xs font-semibold"
+                  value={highlightDate ?? weekDays[0].dateStr}
+                  min={dateInputBound(-3650)}
+                  max={dateInputBound(3650)}
+                  onChange={(picked) => {
+                    if (!picked) return;
+                    setWeekDirection(picked > weekDays[0].dateStr ? 'next' : 'prev');
+                    navigate({ date: picked, week: undefined });
+                  }}
+                />
+              </div>
             </div>
 
             <div className="flex items-center gap-3 text-xs font-medium text-slate-700">
@@ -716,7 +717,7 @@ export default function ScheduleClientView({
                   </div>
 
                   {cancellingId === s.id && (
-                    <div className="glass-inset p-3 space-y-2 text-xs" onClick={(e) => e.stopPropagation()}>
+                    <div className="liquid-in glass-inset p-3 space-y-2 text-xs" onClick={(e) => e.stopPropagation()}>
                       <span className="font-bold text-[#a3462f] block">Select Cancellation Reason:</span>
                       <CancelReasons
                         session={s}
@@ -759,11 +760,11 @@ export default function ScheduleClientView({
       {/* RATIONAL INSPECTOR MODAL */}
       {selectedSessionModal && (
         <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-150"
+          className="modal-backdrop fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 z-50"
           onClick={() => setSelectedSessionModal(null)}
         >
           <div
-            className="glass-panel max-w-md w-full p-6 space-y-4 text-left"
+            className="liquid-pop glass-panel max-w-md w-full p-6 space-y-4 text-left"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
@@ -928,7 +929,7 @@ export default function ScheduleClientView({
                 </div>
 
                 {cancellingId === selectedSessionModal.id && (
-                  <div className="mt-2 glass-inset p-3 space-y-1.5 text-left text-xs">
+                  <div className="liquid-in mt-2 glass-inset p-3 space-y-1.5 text-left text-xs">
                     <span className="font-bold text-[#a3462f] text-[10px] block">Select Reason:</span>
                     <CancelReasons
                       compact

@@ -1,5 +1,7 @@
 'use client';
 
+import GlassDatePicker from '@/components/GlassDatePicker';
+import GlassSelect from '@/components/GlassSelect';
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { createSessionAction, type MasteryStatus } from '@/app/actions/session';
@@ -251,7 +253,7 @@ export default function SessionForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {pendingForStudent.length > 0 && (
-        <div className="glass-card-subtle p-4 space-y-2 text-xs accent-amber">
+        <div className="liquid-in glass-card-subtle p-4 space-y-2 text-xs accent-amber">
           <p className="font-bold text-[#0f172a]">
             {activeStudent?.name} already has a scheduled lesson waiting to be logged. Log that one instead of creating a duplicate?
           </p>
@@ -292,33 +294,31 @@ export default function SessionForm({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-1">Student</label>
-            <select
+            <GlassSelect
               value={selectedStudentId}
-              onChange={(e) => handleStudentChange(e.target.value)}
-              className="w-full p-2.5 text-sm font-medium glass-input"
-            >
-              {students.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name} — {s.courseTitle}
-                </option>
-              ))}
-            </select>
+              onChange={handleStudentChange}
+              className="p-2.5 text-sm font-medium"
+              ariaLabel="Student"
+              options={students.map((s) => ({ value: s.id, label: `${s.name} — ${s.courseTitle}` }))}
+            />
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-1">Session Type</label>
-            <select
+            <GlassSelect
               value={sessionType}
-              onChange={(e) => setSessionType(e.target.value as SessionType)}
-              className="w-full p-2.5 text-sm font-medium glass-input"
-            >
-              <option value="REGULAR_LESSON">Regular Lesson (Standard Flow)</option>
-              <option value="TRIAL_CLASS">Trial Class (New Prospect)</option>
-              <option value="CONCEPT_INTRO">Concept Introduction (Deep Dive)</option>
-              <option value="REVISION_RECALL">Revision & Interleaving</option>
-              <option value="EXAM_SIMULATION">Past Paper Mock Simulation</option>
-              <option value="HOMEWORK_HELP">Homework Assistance / School Prep</option>
-            </select>
+              onChange={(v) => setSessionType(v as SessionType)}
+              className="p-2.5 text-sm font-medium"
+              ariaLabel="Session type"
+              options={[
+                { value: 'REGULAR_LESSON', label: 'Regular Lesson (Standard Flow)' },
+                { value: 'TRIAL_CLASS', label: 'Trial Class (New Prospect)' },
+                { value: 'CONCEPT_INTRO', label: 'Concept Introduction (Deep Dive)' },
+                { value: 'REVISION_RECALL', label: 'Revision & Interleaving' },
+                { value: 'EXAM_SIMULATION', label: 'Past Paper Mock Simulation' },
+                { value: 'HOMEWORK_HELP', label: 'Homework Assistance / School Prep' },
+              ]}
+            />
           </div>
 
           <div>
@@ -327,14 +327,13 @@ export default function SessionForm({
               <span className="text-[10px] text-slate-600 font-medium">Past & current only</span>
             </div>
             {/* Actively guarded input */}
-            <input
-              type="datetime-local"
+            <GlassDatePicker
+              mode="datetime"
               value={sessionDate}
               max={getNowLocalISO()}
-              onChange={(e) => handleDateChange(e.target.value)}
-              className={`w-full glass-input p-2.5 text-sm  ${
-                dateWarning ? 'outline outline-2 outline-[#a3462f]' : ''
-              } `}
+              onChange={handleDateChange}
+              ariaLabel="Date and time concluded"
+              className={`p-2.5 text-sm ${dateWarning ? 'outline outline-2 outline-[#a3462f]' : ''}`}
             />
             {dateWarning && (
               <p className="text-[11px] text-[#a3462f] font-semibold mt-1 animate-in fade-in duration-150">
@@ -435,21 +434,17 @@ export default function SessionForm({
                     {activeStudent?.topics.length ? 'Syllabus Topic' : 'Custom / Unseeded Topic'}
                   </label>
                   {activeStudent?.topics.length ? (
-                    <select
+                    <GlassSelect
                       value={seg.topicId}
-                      onChange={(e) => {
+                      onChange={(v) => {
                         const updated = [...segments];
-                        updated[idx].topicId = e.target.value;
+                        updated[idx].topicId = v;
                         setSegments(updated);
                       }}
-                      className="w-full p-2.5 text-xs font-medium glass-input"
-                    >
-                      {activeStudent.topics.map((t) => (
-                        <option key={t.id} value={t.id}>
-                          {t.code} — {t.title}
-                        </option>
-                      ))}
-                    </select>
+                      className="p-2.5 text-xs font-medium"
+                      ariaLabel="Syllabus topic"
+                      options={activeStudent.topics.map((t) => ({ value: t.id, label: `${t.code} — ${t.title}` }))}
+                    />
                   ) : (
                     <input
                       type="text"
@@ -467,41 +462,41 @@ export default function SessionForm({
 
                 <div>
                   <label className="block text-xs font-medium text-slate-600 mb-1">Tool / Visual Medium</label>
-                  <select
+                  <GlassSelect
                     value={seg.toolId}
-                    onChange={(e) => {
+                    onChange={(v) => {
                       const updated = [...segments];
-                      updated[idx].toolId = e.target.value;
+                      updated[idx].toolId = v;
                       setSegments(updated);
                     }}
-                    className="w-full p-2.5 text-xs glass-input"
-                  >
-                    <option value="">No Special Tool</option>
-                    {tools.map((tl) => (
-                      <option key={tl.id} value={tl.id}>
-                        {tl.name} ({tl.category})
-                      </option>
-                    ))}
-                  </select>
+                    className="p-2.5 text-xs"
+                    ariaLabel="Tool"
+                    options={[
+                      { value: '', label: 'No Special Tool' },
+                      ...tools.map((tl) => ({ value: tl.id, label: `${tl.name} (${tl.category})` })),
+                    ]}
+                  />
                 </div>
 
                 <div>
                   <label className="block text-xs font-medium text-slate-600 mb-1">Activity</label>
-                  <select
+                  <GlassSelect
                     value={seg.activityType}
-                    onChange={(e) => {
+                    onChange={(v) => {
                       const updated = [...segments];
-                      updated[idx].activityType = e.target.value as ActivityType;
+                      updated[idx].activityType = v as ActivityType;
                       setSegments(updated);
                     }}
-                    className="w-full p-2.5 text-xs glass-input"
-                  >
-                    <option value="DIRECT_EXPLANATION">Concept Explanation (Socratic)</option>
-                    <option value="TOOL_EXPLORATION">Interactive Simulation / Dragging Sliders</option>
-                    <option value="GUIDED_PRACTICE">Guided Practice (Scaffolded)</option>
-                    <option value="INDEPENDENT_DRILL">Independent Problem Solving</option>
-                    <option value="ERROR_ANALYSIS">Past Paper Mistake Analysis</option>
-                  </select>
+                    className="p-2.5 text-xs"
+                    ariaLabel="Activity"
+                    options={[
+                      { value: 'DIRECT_EXPLANATION', label: 'Concept Explanation (Socratic)' },
+                      { value: 'TOOL_EXPLORATION', label: 'Interactive Simulation / Dragging Sliders' },
+                      { value: 'GUIDED_PRACTICE', label: 'Guided Practice (Scaffolded)' },
+                      { value: 'INDEPENDENT_DRILL', label: 'Independent Problem Solving' },
+                      { value: 'ERROR_ANALYSIS', label: 'Past Paper Mistake Analysis' },
+                    ]}
+                  />
                 </div>
               </div>
 
@@ -526,7 +521,7 @@ export default function SessionForm({
                       }}
                       className={`glass-inset p-3 text-left transition-all  ${
                         seg.masteryStatus === status.val
-                          ? 'outline outline-2 outline-[#3d6b52] text-[#2d523e] font-semibold'
+                          ? 'blob-picked outline outline-2 outline-[#3d6b52] text-[#2d523e] font-semibold'
                           : 'text-slate-700 opacity-90 hover:opacity-100'
                       }  glass-interactive`}
                     >

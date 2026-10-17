@@ -1,5 +1,7 @@
 'use client';
 
+import GlassDatePicker from '@/components/GlassDatePicker';
+import GlassSelect from '@/components/GlassSelect';
 import { useState } from 'react';
 import Link from 'next/link';
 import { createStudentAction } from '@/app/actions/student';
@@ -46,6 +48,10 @@ export default function NewStudentForm({ courses }: { courses: CourseItem[] }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !selectedCourseId) return;
+    if (hasTargetExam && !targetExamDate) {
+      alert('Pick the exam date, or switch the exam date off.');
+      return;
+    }
     setSubmitting(true);
 
     try {
@@ -94,25 +100,17 @@ export default function NewStudentForm({ courses }: { courses: CourseItem[] }) {
         <label className="block text-xs font-bold text-[#0f172a] uppercase tracking-wider mb-1">
           Curriculum & Subject
         </label>
-        <select
+        <GlassSelect
           value={selectedCourseId}
-          onChange={(e) => handleCourseChange(e.target.value)}
-          className="w-full p-2.5 text-sm font-medium glass-input"
-        >
-          {boards.map((bCode) => {
-            const group = courses.filter((c) => c.boardCode === bCode);
-            if (!group.length) return null;
-            return (
-              <optgroup key={bCode} label={boardLabels[bCode] || bCode}>
-                {group.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.title} ({c.subjectCode})
-                  </option>
-                ))}
-              </optgroup>
-            );
-          })}
-        </select>
+          onChange={handleCourseChange}
+          className="p-2.5 text-sm font-medium"
+          ariaLabel="Curriculum and subject"
+          options={boards.flatMap((bCode) =>
+            courses
+              .filter((c) => c.boardCode === bCode)
+              .map((c) => ({ value: c.id, label: `${c.title} (${c.subjectCode})`, group: boardLabels[bCode] || bCode }))
+          )}
+        />
       </div>
 
       {/* FLUID TIERS */}
@@ -138,7 +136,7 @@ export default function NewStudentForm({ courses }: { courses: CourseItem[] }) {
                 onClick={() => setTier(t.val)}
                 className={`glass-inset p-3 text-left transition-all  ${
                   tier === t.val
-                    ? 'outline outline-2 outline-[#3d6b52] text-[#2d523e] font-semibold'
+                    ? 'blob-picked outline outline-2 outline-[#3d6b52] text-[#2d523e] font-semibold'
                     : 'text-slate-700 opacity-90 hover:opacity-100'
                 }  glass-interactive`}
               >
@@ -177,12 +175,12 @@ export default function NewStudentForm({ courses }: { courses: CourseItem[] }) {
 
         {hasTargetExam && (
           <div className="pt-1">
-            <input
-              type="date"
-              required={hasTargetExam}
+            <GlassDatePicker
               value={targetExamDate}
-              onChange={(e) => setTargetExamDate(e.target.value)}
-              className="w-full p-2.5 text-sm glass-input"
+              onChange={setTargetExamDate}
+              ariaLabel="Target exam date"
+              placeholder="Pick the exam date"
+              className="p-2.5 text-sm"
             />
             <span className="text-[10px] text-slate-600 mt-1 block">
               Exam month/year will calculate syllabus coverage velocity against remaining weeks.

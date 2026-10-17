@@ -105,12 +105,12 @@ export default function ProgressInsights({
               <div key={m.key} className="flex-1 flex flex-col items-center gap-1 min-w-0">
                 <div className="flex items-end gap-1 h-20 w-full justify-center">
                   <div
-                    className="w-3 bg-[#3d6b52]/40 rounded-t"
+                    className="liquid-rise w-3 bg-[#3d6b52]/40 rounded-t"
                     style={{ height: `${(m.covered / max) * 100}%` }}
                     title={`${m.covered} new topics`}
                   />
                   <div
-                    className="w-3 bg-[#3d6b52] rounded-t"
+                    className="liquid-rise w-3 bg-[#3d6b52] rounded-t"
                     style={{ height: `${(m.mastered / max) * 100}%` }}
                     title={`${m.mastered} mastered`}
                   />

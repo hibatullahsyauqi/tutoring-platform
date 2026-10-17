@@ -1,5 +1,6 @@
 'use client';
 
+import GlassSelect from '@/components/GlassSelect';
 import { useState } from 'react';
 import {
   CurrencyCode,
@@ -90,17 +91,13 @@ export default function FinancialGlassCard({
 
           <div className="glass-inset flex items-center gap-1.5 px-2.5 py-1">
             <span className="text-xs">{CURRENCY_METADATA[selectedCurrency].flag}</span>
-            <select
+            <GlassSelect
+              variant="inline"
               value={selectedCurrency}
-              onChange={(e) => setSelectedCurrency(e.target.value as CurrencyCode)}
-              className="bg-transparent text-xs font-bold text-[#0f172a] focus:outline-none cursor-pointer"
-            >
-              {currencies.map((code) => (
-                <option key={code} value={code}>
-                  {code} ({CURRENCY_METADATA[code].symbol})
-                </option>
-              ))}
-            </select>
+              onChange={(v) => setSelectedCurrency(v as CurrencyCode)}
+              ariaLabel="Currency"
+              options={currencies.map((code) => ({ value: code, label: `${code} (${CURRENCY_METADATA[code].symbol})` }))}
+            />
           </div>
         </div>
       </div>
