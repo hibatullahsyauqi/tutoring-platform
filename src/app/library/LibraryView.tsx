@@ -97,7 +97,7 @@ export default function LibraryView({
     <div className="space-y-6">
       
       {/* FILTER & SEARCH BAR */}
-      <div className="bg-white border border-[#ddd8cd] rounded-xl p-4 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div className="glass-panel rounded-2xl p-4 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
           {[
             { val: 'ALL', label: 'All Resources' },
@@ -114,7 +114,7 @@ export default function LibraryView({
               className={`text-xs px-3 py-1.5 rounded-lg font-bold transition-colors whitespace-nowrap ${
                 selectedType === tab.val
                   ? 'bg-[#3d6b52] text-white'
-                  : 'bg-[#faf9f6] text-[#6f6b62] border border-[#ddd8cd] hover:bg-[#e8efe9]'
+                  : 'bg-white/60 text-[#6f6b62] border border-[#ddd8cd] hover:bg-[#e8efe9]'
               }`}
             >
               {tab.label}
@@ -128,7 +128,7 @@ export default function LibraryView({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search title, author, or chapter..."
-            className="w-full md:w-64 bg-[#faf9f6] border border-[#ddd8cd] rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-[#3d6b52]"
+            className="w-full md:w-64 bg-white/60 border border-[#ddd8cd] rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-[#3d6b52]"
           />
           <button
             type="button"
@@ -142,7 +142,7 @@ export default function LibraryView({
 
       {/* INLINE ADD RESOURCE FORM */}
       {showAddForm && (
-        <form onSubmit={handleAddSubmit} className="bg-white border-2 border-[#3d6b52]/30 rounded-xl p-6 shadow-sm space-y-4">
+        <form onSubmit={handleAddSubmit} className="glass-panel ring-2 ring-[#3d6b52]/30 rounded-2xl p-6 shadow-sm space-y-4">
           <h2 className="text-xs font-bold uppercase tracking-wider text-[#3d6b52]">
             Index New Teaching Material
           </h2>
@@ -156,7 +156,7 @@ export default function LibraryView({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. Cambridge IGCSE 0580 Paper 42 (May/June 2023) or Haese Chapter 4"
-                className="w-full bg-[#faf9f6] border border-[#ddd8cd] rounded-lg p-2.5 focus:outline-none focus:border-[#3d6b52]"
+                className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2.5 focus:outline-none focus:border-[#3d6b52]"
               />
             </div>
 
@@ -165,7 +165,7 @@ export default function LibraryView({
               <select
                 value={selectedCourseId}
                 onChange={(e) => setSelectedCourseId(e.target.value)}
-                className="w-full bg-[#faf9f6] border border-[#ddd8cd] rounded-lg p-2.5 font-medium focus:outline-none focus:border-[#3d6b52]"
+                className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2.5 font-medium focus:outline-none focus:border-[#3d6b52]"
               >
                 {courses.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -180,7 +180,7 @@ export default function LibraryView({
               <select
                 value={resourceType}
                 onChange={(e) => setResourceType(e.target.value as ResourceType)}
-                className="w-full bg-[#faf9f6] border border-[#ddd8cd] rounded-lg p-2.5 font-medium focus:outline-none focus:border-[#3d6b52]"
+                className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2.5 font-medium focus:outline-none focus:border-[#3d6b52]"
               >
                 <option value="PAST_PAPER">Past Exam Paper / Question Set</option>
                 <option value="TEXTBOOK">Textbook Chapter / Core Reading</option>
@@ -197,7 +197,7 @@ export default function LibraryView({
                 value={author}
                 onChange={(e) => setAuthor(e.target.value)}
                 placeholder="e.g. Hodder Education, Save My Exams, David Sang"
-                className="w-full bg-[#faf9f6] border border-[#ddd8cd] rounded-lg p-2.5 focus:outline-none focus:border-[#3d6b52]"
+                className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2.5 focus:outline-none focus:border-[#3d6b52]"
               />
             </div>
 
@@ -208,7 +208,7 @@ export default function LibraryView({
                 value={locationDetails}
                 onChange={(e) => setLocationDetails(e.target.value)}
                 placeholder="e.g. Chapter 4, pp. 62–65, Question 5 & 7"
-                className="w-full bg-[#faf9f6] border border-[#ddd8cd] rounded-lg p-2.5 focus:outline-none focus:border-[#3d6b52]"
+                className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2.5 focus:outline-none focus:border-[#3d6b52]"
               />
             </div>
 
@@ -219,7 +219,7 @@ export default function LibraryView({
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="https://..."
-                className="w-full bg-[#faf9f6] border border-[#ddd8cd] rounded-lg p-2.5 focus:outline-none focus:border-[#3d6b52]"
+                className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2.5 focus:outline-none focus:border-[#3d6b52]"
               />
             </div>
           </div>
@@ -245,7 +245,7 @@ export default function LibraryView({
 
       {/* RESOURCE CARDS GRID */}
       {filtered.length === 0 ? (
-        <div className="bg-white border border-[#ddd8cd] rounded-xl p-10 text-center text-xs text-[#6f6b62]">
+        <div className="glass-panel rounded-2xl p-10 text-center text-xs text-[#6f6b62]">
           No teaching materials match this filter or search query.
         </div>
       ) : (
@@ -255,7 +255,7 @@ export default function LibraryView({
             return (
               <article
                 key={item.id}
-                className="bg-white border border-[#ddd8cd] rounded-xl p-5 shadow-sm space-y-3 flex flex-col justify-between"
+                className="glass-panel rounded-2xl p-5 shadow-sm space-y-3 flex flex-col justify-between"
               >
                 <div className="space-y-2">
                   <div className="flex items-start justify-between gap-2">
@@ -271,7 +271,7 @@ export default function LibraryView({
                   <p className="text-xs text-[#6f6b62]">{item.authorOrPublisher}</p>
 
                   {item.locationDetails && (
-                    <div className="p-2.5 bg-[#faf9f6] border border-[#ddd8cd]/60 rounded-lg text-xs font-mono text-[#2b2b28]">
+                    <div className="p-2.5 bg-white/60 border border-[#ddd8cd]/60 rounded-lg text-xs font-mono text-[#2b2b28]">
                       📍 {item.locationDetails}
                     </div>
                   )}

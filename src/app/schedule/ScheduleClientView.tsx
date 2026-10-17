@@ -101,7 +101,7 @@ function CancelReasons({
             value={newDate}
             min={toLocalInput(new Date())}
             onChange={(e) => setNewDate(e.target.value)}
-            className="w-full bg-[#faf9f6] border border-[#ddd8cd] rounded p-1.5 text-[11px] focus:outline-none focus:border-[#3d6b52]"
+            className="w-full bg-white/60 border border-[#ddd8cd] rounded p-1.5 text-[11px] focus:outline-none focus:border-[#3d6b52]"
           />
           {isPast && (
             <p className="text-[10px] font-semibold text-[#a3462f]">
@@ -343,7 +343,7 @@ export default function ScheduleClientView({
       )}
 
       {/* TIMETABLE CONTROLS */}
-      <div className="bg-white border border-[#ddd8cd] rounded-xl p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="glass-panel rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -351,7 +351,7 @@ export default function ScheduleClientView({
             className={`text-xs px-3 py-1.5 rounded-lg font-bold transition-colors ${
               viewMode === 'CALENDAR'
                 ? 'bg-[#3d6b52] text-white'
-                : 'bg-[#faf9f6] text-[#6f6b62] border border-[#ddd8cd] hover:bg-[#e8efe9]'
+                : 'bg-white/60 text-[#6f6b62] border border-[#ddd8cd] hover:bg-[#e8efe9]'
             }`}
           >
             📅 Weekly Calendar
@@ -362,7 +362,7 @@ export default function ScheduleClientView({
             className={`text-xs px-3 py-1.5 rounded-lg font-bold transition-colors ${
               viewMode === 'AGENDA'
                 ? 'bg-[#3d6b52] text-white'
-                : 'bg-[#faf9f6] text-[#6f6b62] border border-[#ddd8cd] hover:bg-[#e8efe9]'
+                : 'bg-white/60 text-[#6f6b62] border border-[#ddd8cd] hover:bg-[#e8efe9]'
             }`}
           >
             📋 All Sessions List ({sessions.length})
@@ -380,7 +380,7 @@ export default function ScheduleClientView({
 
       {/* SCHEDULE FORM MODAL */}
       {showScheduleForm && (
-        <form onSubmit={handleScheduleSubmit} className="bg-white border-2 border-[#3d6b52]/30 rounded-xl p-6 shadow-sm space-y-4">
+        <form onSubmit={handleScheduleSubmit} className="glass-panel ring-2 ring-[#3d6b52]/30 rounded-2xl p-6 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xs font-bold uppercase tracking-wider text-[#3d6b52]">
               Book Teaching Slot
@@ -396,7 +396,7 @@ export default function ScheduleClientView({
               <select
                 value={selectedStudentId}
                 onChange={(e) => setSelectedStudentId(e.target.value)}
-                className="w-full bg-[#faf9f6] border border-[#ddd8cd] rounded-lg p-2.5 font-medium focus:outline-none focus:border-[#3d6b52]"
+                className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2.5 font-medium focus:outline-none focus:border-[#3d6b52]"
               >
                 {students.map((s) => (
                   <option key={s.id} value={s.id}>
@@ -411,7 +411,7 @@ export default function ScheduleClientView({
               <select
                 value={sessionType}
                 onChange={(e) => setSessionType(e.target.value as SessionType)}
-                className="w-full bg-[#faf9f6] border border-[#ddd8cd] rounded-lg p-2.5 font-medium focus:outline-none focus:border-[#3d6b52]"
+                className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2.5 font-medium focus:outline-none focus:border-[#3d6b52]"
               >
                 <option value="REGULAR_LESSON">Regular Lesson (Standard Flow)</option>
                 <option value="TRIAL_CLASS">Trial Class (New Prospect)</option>
@@ -426,7 +426,7 @@ export default function ScheduleClientView({
                 type="datetime-local"
                 value={sessionDate}
                 onChange={(e) => setSessionDate(e.target.value)}
-                className="w-full bg-[#faf9f6] border border-[#ddd8cd] rounded-lg p-2.5 focus:outline-none focus:border-[#3d6b52]"
+                className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2.5 focus:outline-none focus:border-[#3d6b52]"
               />
               <span className="text-[10px] text-[#6f6b62] mt-0.5 block">Standard window: 18:30 WIB</span>
             </div>
@@ -437,7 +437,7 @@ export default function ScheduleClientView({
                 type="number"
                 value={durationMinutes}
                 onChange={(e) => setDurationMinutes(Number(e.target.value))}
-                className="w-full bg-[#faf9f6] border border-[#ddd8cd] rounded-lg p-2.5 focus:outline-none focus:border-[#3d6b52]"
+                className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2.5 focus:outline-none focus:border-[#3d6b52]"
               />
             </div>
 
@@ -448,7 +448,7 @@ export default function ScheduleClientView({
                 value={meetingUrl}
                 onChange={(e) => setMeetingUrl(e.target.value)}
                 placeholder="https://meet.google.com/... or https://zoom.us/..."
-                className="w-full bg-[#faf9f6] border border-[#ddd8cd] rounded-lg p-2.5 focus:outline-none focus:border-[#3d6b52]"
+                className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2.5 focus:outline-none focus:border-[#3d6b52]"
               />
             </div>
           </div>
@@ -480,7 +480,7 @@ export default function ScheduleClientView({
               <button
                 type="button"
                 onClick={() => setWeekOffset(weekOffset - 1)}
-                className="px-2.5 py-1 bg-white border border-[#ddd8cd] rounded hover:bg-[#faf9f6] text-xs font-bold"
+                className="px-2.5 py-1 bg-white/70 border border-[#ddd8cd] rounded hover:bg-white text-xs font-bold"
                 title="Previous Week"
               >
                 ←
@@ -491,7 +491,7 @@ export default function ScheduleClientView({
                 className={`px-2.5 py-1 rounded text-xs font-bold border transition-colors ${
                   weekOffset === 0
                     ? 'bg-[#3d6b52] text-white border-[#3d6b52]'
-                    : 'bg-white border-[#ddd8cd] hover:bg-[#faf9f6] text-[#2b2b28]'
+                    : 'bg-white border-[#ddd8cd] hover:bg-white/80 text-[#2b2b28]'
                 }`}
               >
                 Today
@@ -499,7 +499,7 @@ export default function ScheduleClientView({
               <button
                 type="button"
                 onClick={() => setWeekOffset(weekOffset + 1)}
-                className="px-2.5 py-1 bg-white border border-[#ddd8cd] rounded hover:bg-[#faf9f6] text-xs font-bold"
+                className="px-2.5 py-1 bg-white/70 border border-[#ddd8cd] rounded hover:bg-white text-xs font-bold"
                 title="Next Week"
               >
                 →
@@ -523,10 +523,12 @@ export default function ScheduleClientView({
               return (
                 <div
                   key={day.dateStr}
-                  className={`bg-white border rounded-xl p-3 flex flex-col justify-between min-h-[175px] transition-all ${
-                    day.isToday ? 'ring-2 ring-[#3d6b52] shadow-sm' : ''
-                  } ${
-                    day.contractSlot ? 'border-[#3d6b52]/40 bg-[#faf9f6]/40' : 'border-[#ddd8cd]'
+                  className={`glass-card-subtle rounded-xl p-3 flex flex-col justify-between min-h-[175px] transition-all ${
+                    day.isToday
+                      ? 'ring-2 ring-[#3d6b52]'
+                      : day.contractSlot
+                        ? 'ring-1 ring-[#3d6b52]/40'
+                        : ''
                   }`}
                 >
                   <div className="border-b border-[#ddd8cd]/40 pb-1.5 mb-2 flex items-center justify-between">
@@ -546,7 +548,7 @@ export default function ScheduleClientView({
                       <button
                         type="button"
                         onClick={() => handleSlotClick(day.dateStr, day.contractSlot)}
-                        className="w-5 h-5 rounded-full bg-[#faf9f6] hover:bg-[#e8efe9] border border-[#ddd8cd] text-[#3d6b52] font-bold text-xs flex items-center justify-center transition-colors"
+                        className="w-5 h-5 rounded-full bg-white/60 hover:bg-[#e8efe9] border border-[#ddd8cd] text-[#3d6b52] font-bold text-xs flex items-center justify-center transition-colors"
                         title="Book another session on this day"
                       >
                         +
@@ -586,7 +588,7 @@ export default function ScheduleClientView({
                           <div
                             key={s.id}
                             onClick={() => setSelectedSessionModal(s)}
-                            className="p-2.5 bg-white border border-[#ddd8cd] hover:border-[#3d6b52] rounded-lg shadow-2xs space-y-1 text-left cursor-pointer transition-all hover:shadow-md group"
+                            className="p-2.5 glass-card-subtle rounded-lg shadow-2xs space-y-1 text-left cursor-pointer transition-all hover:shadow-md group"
                           >
                             <div className="flex items-center justify-between">
                               <span className="text-[10px] font-bold text-[#2b2b28]">{sTime}</span>
@@ -616,7 +618,7 @@ export default function ScheduleClientView({
       {viewMode === 'AGENDA' && (
         <div className="space-y-4">
           {sessions.length === 0 ? (
-            <div className="bg-white border border-[#ddd8cd] rounded-xl p-10 text-center text-xs text-[#6f6b62]">
+            <div className="glass-panel rounded-2xl p-10 text-center text-xs text-[#6f6b62]">
               No sessions scheduled yet.
             </div>
           ) : (
@@ -635,7 +637,7 @@ export default function ScheduleClientView({
                 <article
                   key={s.id}
                   onClick={() => setSelectedSessionModal(s)}
-                  className="bg-white border border-[#ddd8cd] hover:border-[#3d6b52] rounded-xl p-5 shadow-sm space-y-4 cursor-pointer transition-all hover:shadow-md"
+                  className="glass-panel rounded-2xl p-5 shadow-sm space-y-4 cursor-pointer transition-all hover:shadow-md"
                 >
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[#ddd8cd]/50 pb-3">
                     <div>
@@ -651,7 +653,7 @@ export default function ScheduleClientView({
                           {sDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} ·{' '}
                           {sDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })} WIB
                         </span>
-                        <span className="text-[11px] bg-[#faf9f6] border border-[#ddd8cd] px-2 py-0.5 rounded text-[#6f6b62]">
+                        <span className="text-[11px] bg-white/60 border border-[#ddd8cd] px-2 py-0.5 rounded text-[#6f6b62]">
                           {s.durationMinutes} mins
                         </span>
                       </div>
@@ -685,7 +687,7 @@ export default function ScheduleClientView({
                       {state === 'COMPLETED' && (
                         <Link
                           href={`/students/${s.studentId}`}
-                          className="bg-[#faf9f6] hover:bg-[#e8efe9] text-[#3d6b52] border border-[#ddd8cd] px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors"
+                          className="bg-white/60 hover:bg-[#e8efe9] text-[#3d6b52] border border-[#ddd8cd] px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors"
                         >
                           View in Dossier →
                         </Link>
@@ -735,7 +737,7 @@ export default function ScheduleClientView({
                   )}
 
                   {(s.nextFocusTopic || s.assignedHomework || s.topicsSummary) && (
-                    <div className="p-3 bg-[#faf9f6] border border-[#ddd8cd]/60 rounded-lg text-xs space-y-1">
+                    <div className="p-3 bg-white/60 border border-[#ddd8cd]/60 rounded-lg text-xs space-y-1">
                       {s.topicsSummary && (
                         <p className="text-[#2b2b28]">
                           <strong>Topics Covered:</strong> {s.topicsSummary}
@@ -767,7 +769,7 @@ export default function ScheduleClientView({
           onClick={() => setSelectedSessionModal(null)}
         >
           <div
-            className="bg-white border border-[#ddd8cd] rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl text-left"
+            className="glass-panel rounded-3xl max-w-md w-full p-6 space-y-4 shadow-xl text-left"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
@@ -812,7 +814,7 @@ export default function ScheduleClientView({
               <button
                 type="button"
                 onClick={() => setSelectedSessionModal(null)}
-                className="text-[#6f6b62] hover:text-[#2b2b28] text-sm font-bold w-7 h-7 rounded-full bg-[#faf9f6] flex items-center justify-center"
+                className="text-[#6f6b62] hover:text-[#2b2b28] text-sm font-bold w-7 h-7 rounded-full bg-white/60 flex items-center justify-center"
               >
                 ✕
               </button>
@@ -825,13 +827,13 @@ export default function ScheduleClientView({
                   Completed Session Ledger
                 </span>
                 {selectedSessionModal.topicsSummary && (
-                  <div className="p-3 bg-[#faf9f6] border border-[#ddd8cd] rounded-lg">
+                  <div className="p-3 bg-white/60 border border-[#ddd8cd] rounded-lg">
                     <strong className="text-[#2b2b28] block mb-0.5">Topics Mastered & Practiced:</strong>
                     <p className="text-[#6f6b62] leading-relaxed">{selectedSessionModal.topicsSummary}</p>
                   </div>
                 )}
                 {selectedSessionModal.assignedHomework && (
-                  <div className="p-3 bg-[#faf9f6] border border-[#ddd8cd] rounded-lg">
+                  <div className="p-3 bg-white/60 border border-[#ddd8cd] rounded-lg">
                     <strong className="text-[#3d6b52] block mb-0.5">Assigned Homework:</strong>
                     <p className="text-[#2b2b28]">{selectedSessionModal.assignedHomework}</p>
                   </div>
@@ -849,13 +851,13 @@ export default function ScheduleClientView({
                     {selectedSessionModal.nextFocusTopic}
                   </div>
                 ) : (
-                  <div className="p-3 bg-[#faf9f6] border border-[#ddd8cd] rounded-lg text-[#6f6b62] italic">
+                  <div className="p-3 bg-white/60 border border-[#ddd8cd] rounded-lg text-[#6f6b62] italic">
                     Standard lesson progression.
                   </div>
                 )}
 
                 {selectedSessionModal.assignedHomework && (
-                  <div className="p-3 bg-[#faf9f6] border border-[#ddd8cd] rounded-lg text-[#2b2b28]">
+                  <div className="p-3 bg-white/60 border border-[#ddd8cd] rounded-lg text-[#2b2b28]">
                     <strong className="text-[#6f6b62] block mb-0.5">📝 Homework to Audit:</strong>
                     {selectedSessionModal.assignedHomework}
                   </div>
@@ -909,7 +911,7 @@ export default function ScheduleClientView({
                   <button
                     type="button"
                     onClick={() => setSelectedSessionModal(null)}
-                    className="px-4 py-1.5 rounded-lg border border-[#ddd8cd] text-xs font-bold text-[#6f6b62] hover:bg-[#faf9f6]"
+                    className="px-4 py-1.5 rounded-lg border border-[#ddd8cd] text-xs font-bold text-[#6f6b62] hover:bg-white/80"
                   >
                     Close
                   </button>

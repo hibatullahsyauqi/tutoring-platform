@@ -110,11 +110,11 @@ export default async function SchedulePage({ searchParams }: Props) {
   const initialWeekOffset = focusTarget ? weekOffsetFor(focusTarget, new Date()) : 0;
 
   return (
-    <main className="min-h-screen bg-[#faf9f6] text-[#2b2b28] p-6 md:p-10 font-sans">
+    <main className="min-h-screen text-[#2b2b28] p-6 md:p-10 font-sans">
       <div className="max-w-5xl mx-auto space-y-6">
         
         {/* HEADER */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#ddd8cd] pb-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-panel rounded-3xl p-6">
           <div>
             <Link href="/" className="text-xs font-semibold text-[#3d6b52] hover:underline mb-2 inline-block">
               ← Back to Dashboard

@@ -107,9 +107,9 @@ export default async function NewStudentPage() {
   });
 
   return (
-    <main className="min-h-screen bg-[#faf9f6] text-[#2b2b28] p-6 md:p-10 font-sans">
+    <main className="min-h-screen text-[#2b2b28] p-6 md:p-10 font-sans">
       <div className="max-w-xl mx-auto space-y-6">
-        <div>
+        <div className="glass-panel rounded-3xl p-6">
           <Link href="/" className="text-xs font-semibold text-[#3d6b52] hover:underline mb-2 inline-block">
             ← Back to Dashboard
           </Link>

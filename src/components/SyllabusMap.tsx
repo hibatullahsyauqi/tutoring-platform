@@ -8,7 +8,7 @@ import {
 } from '@/lib/syllabus-progress';
 
 const STATE_STYLE: Record<TopicState, { label: string; chip: string; dot: string }> = {
-  UNTOUCHED: { label: 'Not covered', chip: 'bg-[#faf9f6] text-[#6f6b62] border-[#ddd8cd]', dot: 'bg-[#ddd8cd]' },
+  UNTOUCHED: { label: 'Not covered', chip: 'bg-white/60 text-[#6f6b62] border-[#ddd8cd]', dot: 'bg-[#ddd8cd]' },
   PRIOR: { label: 'Prior knowledge', chip: 'bg-violet-50 text-violet-700 border-violet-200', dot: 'bg-violet-400' },
   STRUGGLING: { label: 'Struggling', chip: 'bg-red-50 text-red-700 border-red-200', dot: 'bg-red-500' },
   DEVELOPING: { label: 'Developing', chip: 'bg-amber-50 text-amber-700 border-amber-200', dot: 'bg-amber-400' },
@@ -38,7 +38,7 @@ export default function SyllabusMap({
 }) {
   if (progress.length === 0) {
     return (
-      <section className="bg-white border border-[#ddd8cd] rounded-xl p-5 shadow-sm text-xs text-[#6f6b62]">
+      <section className="glass-panel rounded-2xl p-5 shadow-sm text-xs text-[#6f6b62]">
         No syllabus topics are loaded for {courseTitle} yet, so there is no map to show.
       </section>
     );
@@ -53,7 +53,7 @@ export default function SyllabusMap({
   return (
     <div className="space-y-4">
       {/* SUGGESTED NEXT */}
-      <section className="bg-white border border-[#ddd8cd] rounded-xl p-5 shadow-sm space-y-3">
+      <section className="glass-panel rounded-2xl p-5 shadow-sm space-y-3">
         <h2 className="text-xs font-bold uppercase tracking-wider text-[#6f6b62]">Suggested Next</h2>
         {suggestions.length === 0 ? (
           <p className="text-xs text-[#6f6b62]">
@@ -64,7 +64,7 @@ export default function SyllabusMap({
             {suggestions.map(({ topic, kind, reason }) => (
               <li
                 key={topic.id}
-                className="flex items-start gap-3 p-3 bg-[#faf9f6] border border-[#ddd8cd]/70 rounded-lg text-xs"
+                className="flex items-start gap-3 p-3 bg-white/60 border border-[#ddd8cd]/70 rounded-lg text-xs"
               >
                 <span className="text-[10px] font-bold uppercase tracking-wide text-[#3d6b52] bg-[#e8efe9] px-2 py-0.5 rounded flex-shrink-0 mt-0.5">
                   {KIND_LABEL[kind]}
@@ -82,7 +82,7 @@ export default function SyllabusMap({
       </section>
 
       {/* SYLLABUS MAP */}
-      <section className="bg-white border border-[#ddd8cd] rounded-xl p-5 shadow-sm space-y-4">
+      <section className="glass-panel rounded-2xl p-5 shadow-sm space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-xs font-bold uppercase tracking-wider text-[#6f6b62]">Syllabus Map</h2>
           <div className="flex flex-wrap gap-x-3 gap-y-1">
@@ -144,7 +144,7 @@ export default function SyllabusMap({
                   {group.topics.map((t) => (
                     <li
                       key={t.id}
-                      className="flex items-center justify-between gap-2 p-2 bg-[#faf9f6] border border-[#ddd8cd]/60 rounded-md text-[11px]"
+                      className="flex items-center justify-between gap-2 p-2 bg-white/60 border border-[#ddd8cd]/60 rounded-md text-[11px]"
                     >
                       <span className="min-w-0 text-[#2b2b28]">
                         <span className="font-semibold">{t.code}</span> {shortTitle(t.title)}

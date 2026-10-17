@@ -200,16 +200,16 @@ export default async function StudentDossierPage({ params, searchParams }: Props
   };
 
   return (
-    <main className="min-h-screen bg-[#faf9f6] text-[#2b2b28] p-6 md:p-10 font-sans">
+    <main className="min-h-screen text-[#2b2b28] p-6 md:p-10 font-sans">
       <div className="max-w-4xl mx-auto space-y-8">
         
         {/* HEADER WITH DELETE BUTTON */}
         <div>
-          <Link href="/" className="text-xs font-semibold text-[#3d6b52] hover:underline mb-3 inline-block">
+          <Link href="/" className="glass-pill text-xs font-semibold px-3 py-1 rounded-full hover:underline mb-3 inline-block">
             ← Back to Dashboard
           </Link>
 
-          <div className="bg-white border border-[#ddd8cd] rounded-xl p-6 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="glass-panel rounded-2xl p-6 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <h1 className="text-2xl font-bold tracking-tight text-[#2b2b28]">{student.name}</h1>
@@ -246,7 +246,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
         </div>
 
         {/* SYLLABUS READINESS */}
-        <section className="bg-white border border-[#ddd8cd] rounded-xl p-5 shadow-sm space-y-4">
+        <section className="glass-panel rounded-2xl p-5 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xs font-bold uppercase tracking-wider text-[#6f6b62]">
@@ -265,7 +265,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
           </div>
 
           <div className="grid grid-cols-3 gap-3 text-center pt-2 text-xs">
-            <div className="p-2.5 bg-[#faf9f6] rounded-lg border border-[#ddd8cd]/60">
+            <div className="p-2.5 bg-white/60 rounded-lg border border-[#ddd8cd]/60">
               <div className="text-[11px] text-[#6f6b62]">Covered or Known</div>
               <div className="text-base font-bold text-[#2b2b28] mt-0.5">{coveredCount} / {totalTopicsCount}</div>
             </div>
@@ -291,7 +291,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
 
         {/* CHRONOLOGICAL SESSION TIMELINE */}
         <section className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="glass-panel rounded-2xl px-5 py-3 flex items-center justify-between">
             <h2 className="text-xs font-bold uppercase tracking-wider text-[#6f6b62]">
               Learning Journey & Session Timeline
             </h2>
@@ -300,7 +300,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
             </span>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="glass-panel rounded-2xl px-4 py-3 flex flex-wrap gap-2">
             {TIMELINE_VIEWS.map((v) => (
               <Link
                 key={v.value}
@@ -308,7 +308,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                 className={`text-xs px-3 py-1.5 rounded-lg font-bold transition-colors ${
                   view === v.value
                     ? 'bg-[#3d6b52] text-white'
-                    : 'bg-[#faf9f6] text-[#6f6b62] border border-[#ddd8cd] hover:bg-[#e8efe9]'
+                    : 'bg-white/60 text-[#6f6b62] border border-[#ddd8cd] hover:bg-[#e8efe9]'
                 }`}
               >
                 {v.label}
@@ -317,7 +317,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
           </div>
 
           {displaySessions.length === 0 ? (
-            <div className="bg-white border border-[#ddd8cd] rounded-xl p-8 text-center text-xs text-[#6f6b62]">
+            <div className="glass-panel rounded-2xl p-8 text-center text-xs text-[#6f6b62]">
               {student.sessions.length === 0
                 ? `No sessions recorded yet. Use the button above to log your first session with ${student.name}.`
                 : 'No sessions match this filter.'}
@@ -348,7 +348,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                 return (
                   <article
                     key={session.id}
-                    className="bg-white border border-[#ddd8cd] rounded-xl p-5 shadow-sm space-y-4"
+                    className="glass-panel rounded-2xl p-5 shadow-sm space-y-4"
                   >
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-[#ddd8cd]/50 pb-3">
                       <div className="flex items-center gap-2 flex-wrap">
@@ -373,10 +373,10 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                           })}{' '}
                           WIB
                         </span>
-                        <span className="text-[11px] bg-[#faf9f6] border border-[#ddd8cd] px-2 py-0.5 rounded text-[#6f6b62]">
+                        <span className="text-[11px] bg-white/60 border border-[#ddd8cd] px-2 py-0.5 rounded text-[#6f6b62]">
                           {session.durationMinutes} mins
                         </span>
-                        <span className="text-[11px] bg-[#faf9f6] border border-[#ddd8cd] px-2 py-0.5 rounded text-[#6f6b62]">
+                        <span className="text-[11px] bg-white/60 border border-[#ddd8cd] px-2 py-0.5 rounded text-[#6f6b62]">
                           {session.sessionType.replace('_', ' ')}
                         </span>
                       </div>
@@ -446,7 +446,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                     </div>
 
                     {session.status === 'RESCHEDULED' && (
-                      <div className="p-3 bg-[#faf9f6] border border-[#ddd8cd] rounded-lg text-xs">
+                      <div className="p-3 bg-white/60 border border-[#ddd8cd] rounded-lg text-xs">
                         {session.movedTo ? (
                           <>
                             <span className="font-bold text-[#6f6b62]">Rescheduled to </span>
@@ -473,11 +473,11 @@ export default async function StudentDossierPage({ params, searchParams }: Props
 
                     {session.status === 'SCHEDULED' && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
-                        <div className="p-3 bg-[#faf9f6] border border-[#ddd8cd] rounded-lg space-y-0.5">
+                        <div className="p-3 bg-white/60 border border-[#ddd8cd] rounded-lg space-y-0.5">
                           <span className="font-bold text-[#6f6b62] block">Course</span>
                           <span className="text-[#2b2b28]">{course?.title ?? 'General Course'}</span>
                         </div>
-                        <div className="p-3 bg-[#faf9f6] border border-[#ddd8cd] rounded-lg space-y-0.5">
+                        <div className="p-3 bg-white/60 border border-[#ddd8cd] rounded-lg space-y-0.5">
                           <span className="font-bold text-[#6f6b62] block">Meeting Link</span>
                           {session.meetingUrl ? (
                             <a
@@ -508,7 +508,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                           return (
                             <div
                               key={seg.id}
-                              className="p-3 bg-[#faf9f6] border border-[#ddd8cd] rounded-lg text-xs space-y-1"
+                              className="p-3 bg-white/60 border border-[#ddd8cd] rounded-lg text-xs space-y-1"
                             >
                               <div className="flex items-start justify-between gap-2">
                                 <span className="font-semibold text-[#2b2b28]">
@@ -584,7 +584,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
             <div className="text-center">
               <Link
                 href={viewHref(view, true)}
-                className="text-xs font-bold text-[#3d6b52] hover:underline"
+                className="glass-pill text-xs font-bold px-4 py-1.5 rounded-full hover:underline inline-block"
               >
                 Show {hiddenCount} older session{hiddenCount !== 1 ? 's' : ''}
               </Link>

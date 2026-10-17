@@ -85,9 +85,9 @@ export default async function NewSessionPage({ searchParams }: Props) {
   });
 
   return (
-    <main className="min-h-screen bg-[#faf9f6] text-[#2b2b28] p-6 md:p-10 font-sans">
+    <main className="min-h-screen text-[#2b2b28] p-6 md:p-10 font-sans">
       <div className="max-w-3xl mx-auto space-y-6">
-        <div className="flex items-center justify-between border-b border-[#ddd8cd] pb-4">
+        <div className="flex items-center justify-between glass-panel rounded-3xl p-6">
           <div>
             <Link href="/" className="text-xs font-semibold text-[#3d6b52] hover:underline mb-1 inline-block">
               ← Back to Dashboard

@@ -23,8 +23,8 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#faf9f6] flex items-center justify-center p-6 font-sans">
-      <div className="w-full max-w-sm bg-white border border-[#ddd8cd] rounded-2xl p-8 shadow-sm space-y-6 text-center">
+    <main className="min-h-screen flex items-center justify-center p-6 font-sans">
+      <div className="w-full max-w-sm glass-panel rounded-3xl p-8 shadow-sm space-y-6 text-center">
         
         <div>
           <span className="text-[11px] font-bold uppercase tracking-wider text-[#3d6b52] bg-[#e8efe9] px-2.5 py-1 rounded-full border border-[#3d6b52]/20">
@@ -41,7 +41,7 @@ export default function LoginPage() {
             type="button"
             onClick={handleGoogleLogin}
             disabled={loading}
-            className="w-full bg-white hover:bg-[#faf9f6] text-[#2b2b28] font-bold text-xs py-3 px-4 rounded-xl border border-[#ddd8cd] shadow-sm transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+            className="w-full bg-white hover:bg-white/80 text-[#2b2b28] font-bold text-xs py-3 px-4 rounded-xl border border-[#ddd8cd] shadow-sm transition-all flex items-center justify-center gap-3 disabled:opacity-50"
           >
             {/* Google G Logo SVG */}
             <svg className="w-4 h-4" viewBox="0 0 24 24">

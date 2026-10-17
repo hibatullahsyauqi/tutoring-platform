@@ -243,7 +243,7 @@ export default function SessionForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* SECTION 1: CORE SESSION METADATA */}
-      <section className="bg-white border border-[#ddd8cd] rounded-xl p-5 space-y-4 shadow-sm">
+      <section className="glass-panel rounded-2xl p-5 space-y-4 shadow-sm">
         <div className="flex items-center justify-between">
           <h2 className="text-xs font-bold uppercase tracking-wider text-[#6f6b62]">1. Session Details</h2>
           {existingSessionId && (
@@ -259,7 +259,7 @@ export default function SessionForm({
             <select
               value={selectedStudentId}
               onChange={(e) => handleStudentChange(e.target.value)}
-              className="w-full bg-[#faf9f6] border border-[#ddd8cd] rounded-lg p-2.5 text-sm font-medium"
+              className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2.5 text-sm font-medium"
             >
               {students.map((s) => (
                 <option key={s.id} value={s.id}>
@@ -274,7 +274,7 @@ export default function SessionForm({
             <select
               value={sessionType}
               onChange={(e) => setSessionType(e.target.value as SessionType)}
-              className="w-full bg-[#faf9f6] border border-[#ddd8cd] rounded-lg p-2.5 text-sm font-medium"
+              className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2.5 text-sm font-medium"
             >
               <option value="REGULAR_LESSON">Regular Lesson (Standard Flow)</option>
               <option value="TRIAL_CLASS">Trial Class (New Prospect)</option>
@@ -296,7 +296,7 @@ export default function SessionForm({
               value={sessionDate}
               max={getNowLocalISO()}
               onChange={(e) => handleDateChange(e.target.value)}
-              className={`w-full bg-[#faf9f6] border rounded-lg p-2 text-sm focus:outline-none ${
+              className={`w-full bg-white/60 border rounded-lg p-2 text-sm focus:outline-none ${
                 dateWarning ? 'border-[#a3462f] bg-red-50/20' : 'border-[#ddd8cd] focus:border-[#3d6b52]'
               }`}
             />
@@ -313,7 +313,7 @@ export default function SessionForm({
               type="number"
               value={durationMinutes}
               onChange={(e) => setDurationMinutes(Number(e.target.value))}
-              className="w-full bg-[#faf9f6] border border-[#ddd8cd] rounded-lg p-2 text-sm focus:outline-none focus:border-[#3d6b52]"
+              className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2 text-sm focus:outline-none focus:border-[#3d6b52]"
             />
           </div>
         </div>
@@ -327,7 +327,7 @@ export default function SessionForm({
               value={latenessMinutes}
               onChange={(e) => setLatenessMinutes(Number(e.target.value))}
               placeholder="0"
-              className="w-full bg-[#faf9f6] border border-[#ddd8cd] rounded-lg p-2 text-sm focus:outline-none focus:border-[#3d6b52]"
+              className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2 text-sm focus:outline-none focus:border-[#3d6b52]"
             />
             <span className="text-[11px] text-[#a3462f]">≥15m unexcused triggers fine</span>
           </div>
@@ -338,7 +338,7 @@ export default function SessionForm({
               value={meetingUrl}
               onChange={(e) => setMeetingUrl(e.target.value)}
               placeholder="https://meet..."
-              className="w-full bg-[#faf9f6] border border-[#ddd8cd] rounded-lg p-2 text-sm focus:outline-none focus:border-[#3d6b52]"
+              className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2 text-sm focus:outline-none focus:border-[#3d6b52]"
             />
           </div>
           <div>
@@ -348,14 +348,14 @@ export default function SessionForm({
               value={recordingUrl}
               onChange={(e) => setRecordingUrl(e.target.value)}
               placeholder="https://drive..."
-              className="w-full bg-[#faf9f6] border border-[#ddd8cd] rounded-lg p-2 text-sm focus:outline-none focus:border-[#3d6b52]"
+              className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2 text-sm focus:outline-none focus:border-[#3d6b52]"
             />
           </div>
         </div>
       </section>
 
       {/* SECTION 2: TOPICS COVERED & MASTERY */}
-      <section className="bg-white border border-[#ddd8cd] rounded-xl p-5 space-y-4 shadow-sm">
+      <section className="glass-panel rounded-2xl p-5 space-y-4 shadow-sm">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xs font-bold uppercase tracking-wider text-[#6f6b62]">2. Topics Covered & Mastery</h2>
@@ -379,7 +379,7 @@ export default function SessionForm({
 
         <div className="space-y-4">
           {segments.map((seg, idx) => (
-            <div key={idx} className="p-4 bg-[#faf9f6] border border-[#ddd8cd] rounded-lg space-y-3">
+            <div key={idx} className="p-4 bg-white/60 border border-[#ddd8cd] rounded-lg space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-[#3d6b52]">Block #{idx + 1}</span>
                 {segments.length > 1 && (
@@ -491,7 +491,7 @@ export default function SessionForm({
                       className={`p-2 rounded-lg text-left border transition-all ${
                         seg.masteryStatus === status.val
                           ? 'bg-[#e8efe9] border-[#3d6b52] text-[#3d6b52] font-semibold'
-                          : 'bg-white border-[#ddd8cd] text-[#6f6b62] hover:bg-[#faf9f6]'
+                          : 'bg-white border-[#ddd8cd] text-[#6f6b62] hover:bg-white/80'
                       }`}
                     >
                       <div className="text-xs">{status.label}</div>
@@ -506,7 +506,7 @@ export default function SessionForm({
       </section>
 
       {/* SECTION 3: CONTINUITY BRIDGE */}
-      <section className="bg-white border border-[#ddd8cd] rounded-xl p-5 space-y-4 shadow-sm transition-all">
+      <section className="glass-panel rounded-2xl p-5 space-y-4 shadow-sm transition-all">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-[#ddd8cd]/50 pb-3">
           <div>
             <h2 className="text-xs font-bold uppercase tracking-wider text-[#6f6b62]">
@@ -530,7 +530,7 @@ export default function SessionForm({
               value={struggle}
               onChange={(e) => setStruggle(e.target.value)}
               placeholder={continuityConfig.box1Placeholder}
-              className={`w-full bg-[#faf9f6] border border-[#ddd8cd] rounded-lg p-2.5 text-xs h-24 ${continuityConfig.box1Border}`}
+              className={`w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2.5 text-xs h-24 ${continuityConfig.box1Border}`}
             />
           </div>
 
@@ -542,7 +542,7 @@ export default function SessionForm({
               value={workedWell}
               onChange={(e) => setWorkedWell(e.target.value)}
               placeholder={continuityConfig.box2Placeholder}
-              className="w-full bg-[#faf9f6] border border-[#ddd8cd] rounded-lg p-2.5 text-xs h-24 focus:border-[#3d6b52]"
+              className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2.5 text-xs h-24 focus:border-[#3d6b52]"
             />
           </div>
         </div>
@@ -557,7 +557,7 @@ export default function SessionForm({
               value={assignedHomework}
               onChange={(e) => setAssignedHomework(e.target.value)}
               placeholder={continuityConfig.homeworkPlaceholder}
-              className="w-full bg-[#faf9f6] border border-[#ddd8cd] rounded-lg p-2 text-xs"
+              className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2 text-xs"
             />
           </div>
 
@@ -570,7 +570,7 @@ export default function SessionForm({
               value={nextFocusTopic}
               onChange={(e) => setNextFocusTopic(e.target.value)}
               placeholder={continuityConfig.targetPlaceholder}
-              className="w-full bg-[#faf9f6] border border-[#ddd8cd] rounded-lg p-2 text-xs"
+              className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2 text-xs"
             />
           </div>
         </div>
@@ -580,7 +580,7 @@ export default function SessionForm({
       <div className="flex justify-end gap-3 pt-2">
         <Link
           href="/"
-          className="px-5 py-2.5 rounded-lg border border-[#ddd8cd] text-xs font-bold text-[#6f6b62] hover:bg-[#faf9f6]"
+          className="px-5 py-2.5 rounded-lg border border-[#ddd8cd] text-xs font-bold text-[#6f6b62] hover:bg-white/80"
         >
           Cancel
         </Link>

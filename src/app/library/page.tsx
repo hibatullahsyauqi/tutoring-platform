@@ -59,11 +59,11 @@ export default async function LibraryPage() {
   }));
 
   return (
-    <main className="min-h-screen bg-[#faf9f6] text-[#2b2b28] p-6 md:p-10 font-sans">
+    <main className="min-h-screen text-[#2b2b28] p-6 md:p-10 font-sans">
       <div className="max-w-5xl mx-auto space-y-8">
         
         {/* HEADER */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#ddd8cd] pb-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-panel rounded-3xl p-6">
           <div>
             <Link href="/" className="text-xs font-semibold text-[#3d6b52] hover:underline mb-2 inline-block">
               ← Back to Dashboard
@@ -82,7 +82,7 @@ export default async function LibraryPage() {
         </div>
 
         {/* 3RD-PARTY INSTITUTIONAL LAUNCHER (From Support Kit) */}
-        <section className="bg-white border border-[#ddd8cd] rounded-xl p-5 shadow-sm space-y-3">
+        <section className="glass-panel rounded-2xl p-5 shadow-sm space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-xs font-bold uppercase tracking-wider text-[#6f6b62]">
               Institutional 3rd-Party Materials
@@ -92,7 +92,7 @@ export default async function LibraryPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
             {/* Save My Exams */}
-            <div className="p-3.5 bg-[#faf9f6] border border-[#ddd8cd] rounded-lg space-y-1.5">
+            <div className="p-3.5 bg-white/60 border border-[#ddd8cd] rounded-lg space-y-1.5">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-[#2b2b28]">Save My Exams</span>
                 <span className="text-[10px] bg-[#e8efe9] text-[#3d6b52] font-bold px-1.5 py-0.5 rounded">
@@ -114,7 +114,7 @@ export default async function LibraryPage() {
             </div>
 
             {/* Physics & Maths Tutor */}
-            <div className="p-3.5 bg-[#faf9f6] border border-[#ddd8cd] rounded-lg space-y-1.5">
+            <div className="p-3.5 bg-white/60 border border-[#ddd8cd] rounded-lg space-y-1.5">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-[#2b2b28]">PMT (Physics & Maths)</span>
                 <span className="text-[10px] bg-[#e8efe9] text-[#3d6b52] font-bold px-1.5 py-0.5 rounded">
@@ -136,7 +136,7 @@ export default async function LibraryPage() {
             </div>
 
             {/* Twinkl */}
-            <div className="p-3.5 bg-[#faf9f6] border border-[#ddd8cd] rounded-lg space-y-1.5">
+            <div className="p-3.5 bg-white/60 border border-[#ddd8cd] rounded-lg space-y-1.5">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-[#2b2b28]">Twinkl Primary</span>
                 <span className="text-[10px] bg-amber-50 text-amber-700 font-bold px-1.5 py-0.5 rounded">
@@ -158,7 +158,7 @@ export default async function LibraryPage() {
             </div>
 
             {/* IXL Learning */}
-            <div className="p-3.5 bg-[#faf9f6] border border-[#ddd8cd] rounded-lg space-y-1.5">
+            <div className="p-3.5 bg-white/60 border border-[#ddd8cd] rounded-lg space-y-1.5">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-[#2b2b28]">IXL Learning</span>
                 <span className="text-[10px] bg-amber-50 text-amber-700 font-bold px-1.5 py-0.5 rounded">

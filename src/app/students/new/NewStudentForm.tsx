@@ -72,7 +72,7 @@ export default function NewStudentForm({ courses }: { courses: CourseItem[] }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white border border-[#ddd8cd] rounded-xl p-6 shadow-sm space-y-5">
+    <form onSubmit={handleSubmit} className="glass-panel rounded-2xl p-6 shadow-sm space-y-5">
       
       {/* STUDENT NAME */}
       <div>
@@ -85,7 +85,7 @@ export default function NewStudentForm({ courses }: { courses: CourseItem[] }) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="e.g. Liam, Sophia, Maya"
-          className="w-full bg-[#faf9f6] border border-[#ddd8cd] rounded-lg p-2.5 text-sm focus:border-[#3d6b52] focus:outline-none"
+          className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2.5 text-sm focus:border-[#3d6b52] focus:outline-none"
         />
       </div>
 
@@ -97,7 +97,7 @@ export default function NewStudentForm({ courses }: { courses: CourseItem[] }) {
         <select
           value={selectedCourseId}
           onChange={(e) => handleCourseChange(e.target.value)}
-          className="w-full bg-[#faf9f6] border border-[#ddd8cd] rounded-lg p-2.5 text-sm font-medium focus:border-[#3d6b52] focus:outline-none"
+          className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2.5 text-sm font-medium focus:border-[#3d6b52] focus:outline-none"
         >
           {boards.map((bCode) => {
             const group = courses.filter((c) => c.boardCode === bCode);
@@ -139,7 +139,7 @@ export default function NewStudentForm({ courses }: { courses: CourseItem[] }) {
                 className={`p-3 rounded-lg border text-left transition-all ${
                   tier === t.val
                     ? 'bg-[#e8efe9] border-[#3d6b52] text-[#3d6b52] font-semibold'
-                    : 'bg-[#faf9f6] border-[#ddd8cd] text-[#6f6b62] hover:bg-white'
+                    : 'bg-white/60 border-[#ddd8cd] text-[#6f6b62] hover:bg-white'
                 }`}
               >
                 <div className="text-xs font-bold">{t.label}</div>
@@ -168,7 +168,7 @@ export default function NewStudentForm({ courses }: { courses: CourseItem[] }) {
             className={`text-xs px-3 py-1 rounded-full font-bold border transition-colors ${
               hasTargetExam
                 ? 'bg-[#3d6b52] text-white border-[#3d6b52]'
-                : 'bg-[#faf9f6] text-[#6f6b62] border-[#ddd8cd] hover:bg-[#e8efe9]'
+                : 'bg-white/60 text-[#6f6b62] border-[#ddd8cd] hover:bg-[#e8efe9]'
             }`}
           >
             {hasTargetExam ? '✓ Date Active' : '+ Set Exam Date'}
@@ -182,7 +182,7 @@ export default function NewStudentForm({ courses }: { courses: CourseItem[] }) {
               required={hasTargetExam}
               value={targetExamDate}
               onChange={(e) => setTargetExamDate(e.target.value)}
-              className="w-full bg-[#faf9f6] border border-[#ddd8cd] rounded-lg p-2.5 text-sm focus:border-[#3d6b52] focus:outline-none"
+              className="w-full bg-white/60 border border-[#ddd8cd] rounded-lg p-2.5 text-sm focus:border-[#3d6b52] focus:outline-none"
             />
             <span className="text-[10px] text-[#6f6b62] mt-1 block">
               Exam month/year will calculate syllabus coverage velocity against remaining weeks.
@@ -195,7 +195,7 @@ export default function NewStudentForm({ courses }: { courses: CourseItem[] }) {
       <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#ddd8cd]/50">
         <Link
           href="/"
-          className="px-4 py-2 rounded-lg border border-[#ddd8cd] text-xs font-bold text-[#6f6b62] hover:bg-[#faf9f6]"
+          className="px-4 py-2 rounded-lg border border-[#ddd8cd] text-xs font-bold text-[#6f6b62] hover:bg-white/80"
         >
           Cancel
         </Link>
