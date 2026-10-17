@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
-import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
+import { requireTutor } from '@/lib/auth';
+import { computePayroll, monthBounds, nextDisbursementDate } from '@/lib/payroll';
 import Link from 'next/link';
 import { signOutAction } from '@/app/actions/auth';
 import { getLiveExchangeRates } from '@/lib/currency';
@@ -9,27 +9,7 @@ import FinancialGlassCard from '@/components/FinancialGlassCard';
 export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user || !user.email) {
-    redirect('/login');
-  }
-
-  const tutor = await prisma.tutor.findUnique({
-    where: { email: user.email },
-  });
-
-  const activeTutor =
-    tutor ||
-    (await prisma.tutor.create({
-      data: {
-        email: user.email,
-        name: user.user_metadata?.full_name || user.email.split('@')[0],
-      },
-    }));
+  const activeTutor = await requireTutor();
 
   const now = new Date();
 
@@ -37,13 +17,10 @@ export default async function DashboardPage() {
   const { rates } = await getLiveExchangeRates();
 
   // Monthly Payroll Calculations
-  const currentYear = now.getFullYear();
-  const currentMonthIndex = now.getMonth();
-  const startOfMonth = new Date(currentYear, currentMonthIndex, 1, 0, 0, 0, 0);
-  const endOfMonth = new Date(currentYear, currentMonthIndex + 1, 0, 23, 59, 59, 999);
+  const { start: startOfMonth, end: endOfMonth } = monthBounds(now);
 
   const activeMonthName = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  const nextMonthDisbursement = new Date(currentYear, currentMonthIndex + 1, 20);
+  const nextMonthDisbursement = nextDisbursementDate(now);
   const disbursementLabel = nextMonthDisbursement.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
@@ -62,38 +39,7 @@ export default async function DashboardPage() {
     include: { course: true },
   });
 
-  let grossSalary = 0;
-  let totalFines = 0;
-
-  completedSessions.forEach((s) => {
-    if (s.sessionType === 'TRIAL_CLASS') {
-      grossSalary += 60000;
-    } else {
-      switch (s.course.level) {
-        case 'PRIMARY':
-          grossSalary += 60000;
-          break;
-        case 'LOWER_SECONDARY':
-        case 'MYP':
-          grossSalary += 75000;
-          break;
-        case 'IGCSE':
-          grossSalary += 100000;
-          break;
-        case 'A_LEVEL':
-        case 'DP':
-          grossSalary += 150000;
-          break;
-        default:
-          grossSalary += 75000;
-      }
-    }
-    totalFines += s.fineAmount;
-  });
-
-  const pphTax = grossSalary * 0.025;
-  const totalDeductions = pphTax + totalFines;
-  const netSalary = Math.max(0, grossSalary - totalDeductions);
+  const { grossSalary, pphTax, totalFines, totalDeductions, netSalary } = computePayroll(completedSessions);
 
   // Smart Next Up Briefing
   const nextUpcomingSession = await prisma.session.findFirst({
@@ -163,7 +109,7 @@ export default async function DashboardPage() {
               Tutoring Command Center
             </h1>
             <p className="text-xs text-slate-600 mt-0.5 font-medium">
-              Tutor: <span className="font-bold text-[#0f172a]">{activeTutor.name}</span> · {user.email}
+              Tutor: <span className="font-bold text-[#0f172a]">{activeTutor.name}</span> · {activeTutor.email}
             </p>
           </div>
 
@@ -204,6 +150,8 @@ export default async function DashboardPage() {
           disbursementLabel={disbursementLabel}
           completedCount={completedSessions.length}
           grossSalaryIDR={grossSalary}
+          pphTaxIDR={pphTax}
+          totalFinesIDR={totalFines}
           totalDeductionsIDR={totalDeductions}
           netSalaryIDR={netSalary}
           rates={rates}

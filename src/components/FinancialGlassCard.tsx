@@ -14,6 +14,8 @@ export default function FinancialGlassCard({
   disbursementLabel,
   completedCount,
   grossSalaryIDR,
+  pphTaxIDR,
+  totalFinesIDR,
   totalDeductionsIDR,
   netSalaryIDR,
   rates,
@@ -23,6 +25,8 @@ export default function FinancialGlassCard({
   disbursementLabel: string;
   completedCount: number;
   grossSalaryIDR: number;
+  pphTaxIDR: number;
+  totalFinesIDR: number;
   totalDeductionsIDR: number;
   netSalaryIDR: number;
   rates: ExchangeRates;
@@ -108,6 +112,10 @@ export default function FinancialGlassCard({
           <div className="text-xl font-bold text-rose-600 mt-1">
             -{formatCurrency(totalDeductionsIDR, selectedCurrency, rates)}
           </div>
+          <div className="text-[10px] text-slate-500 mt-1.5 space-y-0.5">
+            <div>PPh 2.5%: {formatCurrency(pphTaxIDR, selectedCurrency, rates)}</div>
+            <div>Fines: {formatCurrency(totalFinesIDR, selectedCurrency, rates)}</div>
+          </div>
         </div>
 
         <div className="p-4 rounded-2xl glass-card-subtle bg-white/90! border-white! shadow-xs">
@@ -115,6 +123,11 @@ export default function FinancialGlassCard({
           <div className="text-xl font-bold text-emerald-800 mt-1">
             {formatCurrency(netSalaryIDR, selectedCurrency, rates)}
           </div>
+          {totalDeductionsIDR > grossSalaryIDR && (
+            <div className="text-[10px] text-rose-600 mt-1.5">
+              Deductions exceed earnings this month, so net is shown as 0.
+            </div>
+          )}
         </div>
       </div>
     </section>
