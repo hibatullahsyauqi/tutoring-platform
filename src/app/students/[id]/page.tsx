@@ -9,7 +9,15 @@ import ProgressInsights from '@/components/ProgressInsights';
 import { finalRescheduleTarget, reopenMessage } from '@/lib/reschedule-chain';
 import { computeExamPace } from '@/lib/exam-pace';
 import { monthlyMomentum } from '@/lib/momentum';
-import { matchesView, parseTimelineView, TIMELINE_PAGE_SIZE, TIMELINE_VIEWS } from '@/lib/timeline';
+import Pagination from '@/components/Pagination';
+import { paginate, parsePage } from '@/lib/pagination';
+import {
+  matchesView,
+  parseTimelineView,
+  SESSION_HISTORY_CAP,
+  TIMELINE_PAGE_SIZE,
+  TIMELINE_VIEWS,
+} from '@/lib/timeline';
 import { computeTopicProgress, suggestNext } from '@/lib/syllabus-progress';
 import { notFound } from 'next/navigation';
 import CopyPresenceButton from '@/components/CopyPresenceButton';
@@ -19,7 +27,7 @@ export const dynamic = 'force-dynamic';
 
 interface Props {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ view?: string; show?: string }>;
+  searchParams: Promise<{ view?: string; page?: string }>;
 }
 
 const MASTERY_BADGES: Record<string, { label: string; color: string }> = {
@@ -83,7 +91,7 @@ function getSheetPlace(): string {
 
 export default async function StudentDossierPage({ params, searchParams }: Props) {
   const { id } = await params;
-  const { view: viewParam, show } = await searchParams;
+  const { view: viewParam, page: pageParam } = await searchParams;
   const view = parseTimelineView(viewParam);
   const tutor = await requireTutor();
 
@@ -103,24 +111,27 @@ export default async function StudentDossierPage({ params, searchParams }: Props
         },
       },
       baselineTopics: { select: { topicId: true } },
-      sessions: {
-        orderBy: { sessionDate: 'asc' },
-        include: {
-          segments: {
-            include: {
-              topic: true,
-              tool: true,
-            },
-          },
-          reflection: true,
-        },
-      },
     },
   });
 
   if (!student) {
     notFound();
   }
+
+  // Light read of every lesson (only what the stats need, hard-capped) for progress, pace,
+  // momentum and meeting numbers. The heavy per-lesson detail is fetched for one page only.
+  const history = await prisma.session.findMany({
+    where: { studentId: student.id },
+    orderBy: [{ sessionDate: 'asc' }, { id: 'asc' }],
+    take: SESSION_HISTORY_CAP,
+    select: {
+      id: true,
+      sessionDate: true,
+      status: true,
+      rescheduledFromId: true,
+      segments: { select: { topicId: true, masteryStatus: true } },
+    },
+  });
 
   const enrollment = student.enrollments[0];
   const course = enrollment?.course;
@@ -131,34 +142,23 @@ export default async function StudentDossierPage({ params, searchParams }: Props
   const masteredTopicIds = new Set<string>();
   const strugglingTopicIds = new Set<string>();
 
-  student.sessions.forEach((s) => {
+  history.forEach((s) => {
     s.segments.forEach((seg) => {
       coveredTopicIds.add(seg.topicId);
-      if ((seg as any).masteryStatus === 'MASTERED') masteredTopicIds.add(seg.topicId);
-      if ((seg as any).masteryStatus === 'STRUGGLING') strugglingTopicIds.add(seg.topicId);
+      if (seg.masteryStatus === 'MASTERED') masteredTopicIds.add(seg.topicId);
+      if (seg.masteryStatus === 'STRUGGLING') strugglingTopicIds.add(seg.topicId);
     });
   });
 
   const priorTopicIds = new Set(student.baselineTopics.map((b) => b.topicId));
   const topicProgress = computeTopicProgress(
     allTopics,
-    student.sessions.map((s) => ({
-      sessionDate: s.sessionDate,
-      status: s.status,
-      segments: s.segments.map((seg) => ({
-        topicId: seg.topicId,
-        masteryStatus: seg.masteryStatus,
-      })),
-    })),
+    history,
     new Date(),
     priorTopicIds
   );
   const suggestions = suggestNext(topicProgress);
-  const progressSessions = student.sessions.map((s) => ({
-    sessionDate: s.sessionDate,
-    status: s.status,
-    segments: s.segments.map((seg) => ({ topicId: seg.topicId, masteryStatus: seg.masteryStatus })),
-  }));
+  const progressSessions = history;
   const examPace = computeExamPace(student.targetExamDate, new Date(), topicProgress, progressSessions);
   const momentum = monthlyMomentum(progressSessions, new Date());
 
@@ -168,34 +168,49 @@ export default async function StudentDossierPage({ params, searchParams }: Props
   const coveragePercent = totalTopicsCount > 0 ? Math.round((coveredCount / totalTopicsCount) * 100) : 0;
 
   // Only lessons that actually happened get a meeting number (it feeds the attendance sheet).
-  const completedCount = student.sessions.filter((s) => s.status === 'COMPLETED').length;
-  const chronologicalSessions = student.sessions.map((s, idx) => {
-    const label =
-      s.status === 'COMPLETED'
-        ? `Meeting ${student.sessions.slice(0, idx + 1).filter((x) => x.status === 'COMPLETED').length}`
-        : s.status === 'SCHEDULED'
-          ? new Date(s.sessionDate) <= new Date()
-            ? 'Needs log'
-            : 'Upcoming'
-          : s.status === 'ABSENT_UNNOTIFIED'
-            ? 'Absent'
-            : s.status === 'RESCHEDULED'
-              ? 'Rescheduled'
-              : 'Cancelled';
-    const movedTo =
-      s.status === 'RESCHEDULED' ? finalRescheduleTarget(s.id, student.sessions) : null;
-    return { ...s, meetingNumber: label, movedTo };
+  const labelById = new Map<string, string>();
+  let meetings = 0;
+  for (const h of history) {
+    if (h.status === 'COMPLETED') {
+      meetings += 1;
+      labelById.set(h.id, `Meeting ${meetings}`);
+    } else if (h.status === 'SCHEDULED') {
+      labelById.set(h.id, h.sessionDate <= new Date() ? 'Needs log' : 'Upcoming');
+    } else if (h.status === 'ABSENT_UNNOTIFIED') {
+      labelById.set(h.id, 'Absent');
+    } else if (h.status === 'RESCHEDULED') {
+      labelById.set(h.id, 'Rescheduled');
+    } else {
+      labelById.set(h.id, 'Cancelled');
+    }
+  }
+  const completedCount = meetings;
+
+  // One timeline page: newest first, filtered by view, read in full for just these lessons.
+  const matching = history.filter((h) => matchesView(h.status, view)).reverse();
+  const window = paginate(parsePage(pageParam), matching.length, TIMELINE_PAGE_SIZE);
+  const pageIds = matching.slice(window.skip, window.skip + window.take).map((h) => h.id);
+  const detailRows = pageIds.length
+    ? await prisma.session.findMany({
+        where: { id: { in: pageIds }, studentId: student.id },
+        include: { segments: { include: { topic: true, tool: true } }, reflection: true },
+      })
+    : [];
+  const detailById = new Map(detailRows.map((r) => [r.id, r]));
+  const displaySessions = pageIds.flatMap((sid) => {
+    const row = detailById.get(sid);
+    if (!row) return [];
+    return [
+      {
+        ...row,
+        meetingNumber: labelById.get(sid) ?? 'Lesson',
+        movedTo: row.status === 'RESCHEDULED' ? finalRescheduleTarget(sid, history) : null,
+      },
+    ];
   });
-  const filteredSessions = [...chronologicalSessions]
-    .reverse()
-    .filter((s) => matchesView(s.status, view));
-  const showAll = show === 'all';
-  const displaySessions = showAll ? filteredSessions : filteredSessions.slice(0, TIMELINE_PAGE_SIZE);
-  const hiddenCount = filteredSessions.length - displaySessions.length;
-  const viewHref = (v: string, all = false) => {
+  const viewHref = (v: string) => {
     const q = new URLSearchParams();
     if (v !== 'all') q.set('view', v);
-    if (all) q.set('show', 'all');
     const qs = q.toString();
     return `/students/${student.id}${qs ? `?${qs}` : ''}`;
   };
@@ -319,7 +334,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
 
           {displaySessions.length === 0 ? (
             <div className="glass-panel p-8 text-center text-xs text-slate-600">
-              {student.sessions.length === 0
+              {history.length === 0
                 ? `No sessions recorded yet. Use the button above to log your first session with ${student.name}.`
                 : 'No sessions match this filter.'}
             </div>
@@ -581,14 +596,16 @@ export default async function StudentDossierPage({ params, searchParams }: Props
             </div>
           )}
 
-          {hiddenCount > 0 && (
-            <div className="text-center">
-              <Link
-                href={viewHref(view, true)}
-                className="glass-btn glass-btn-sm"
-              >
-                Show {hiddenCount} older session{hiddenCount !== 1 ? 's' : ''}
-              </Link>
+          {window.pageCount > 1 && (
+            <div className="glass-panel p-4">
+              <Pagination
+                basePath={`/students/${student.id}`}
+                params={{ view: view === 'all' ? undefined : view }}
+                page={window.page}
+                pageCount={window.pageCount}
+                total={window.total}
+                noun="session"
+              />
             </div>
           )}
         </section>

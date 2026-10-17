@@ -4,17 +4,55 @@ import { requireTutor } from '@/lib/auth';
 import Link from 'next/link';
 import ScheduleClientView from './ScheduleClientView';
 import { absenceFine } from '@/lib/payroll';
-import { finalRescheduleTarget, weekOffsetFor } from '@/lib/reschedule-chain';
+import { finalRescheduleTarget, weekOffsetFor, type ChainSession } from '@/lib/reschedule-chain';
+import Pagination from '@/components/Pagination';
+import { paginate, parsePage } from '@/lib/pagination';
+
+const LIST_PAGE_SIZE = 12;
+/** A week never holds more than this many lessons; a hard stop on the query. */
+const WEEK_FETCH_CAP = 300;
+const MAX_WEEK_OFFSET = 520;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export const dynamic = 'force-dynamic';
 
 interface Props {
-  searchParams: Promise<{ session?: string; date?: string }>;
+  searchParams: Promise<{ session?: string; date?: string; week?: string; view?: string; page?: string }>;
 }
 
 export default async function SchedulePage({ searchParams }: Props) {
   const tutor = await requireTutor();
-  const { session: focusSessionId, date: focusDate } = await searchParams;
+  const sp = await searchParams;
+  const view: 'week' | 'list' = sp.view === 'list' ? 'list' : 'week';
+
+  // Which week to show: an explicit ?week=, else the week of a deep-linked lesson or date, else now.
+  const focusRow =
+    sp.session && UUID.test(sp.session)
+      ? await prisma.session.findFirst({
+          where: { id: sp.session, student: { tutorId: tutor.id, archivedAt: null } },
+          select: { id: true, sessionDate: true },
+        })
+      : null;
+  const explicitWeek = Number.isInteger(Number(sp.week)) && sp.week !== undefined && sp.week !== '' ? Number(sp.week) : null;
+  const focusDate = sp.date && !Number.isNaN(new Date(sp.date).getTime()) ? new Date(sp.date) : null;
+  const weekOffset = Math.max(
+    -MAX_WEEK_OFFSET,
+    Math.min(
+      MAX_WEEK_OFFSET,
+      explicitWeek ??
+        (focusRow ? weekOffsetFor(focusRow.sessionDate, new Date()) : focusDate ? weekOffsetFor(focusDate, new Date()) : 0)
+    )
+  );
+
+  // The week's window, padded by a day each side so a timezone difference never drops a lesson.
+  const monday = new Date();
+  monday.setHours(0, 0, 0, 0);
+  monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7) + weekOffset * 7);
+  const windowStart = new Date(monday);
+  windowStart.setDate(windowStart.getDate() - 1);
+  const windowEnd = new Date(monday);
+  windowEnd.setDate(windowEnd.getDate() + 8);
+  const tutorScope = { student: { tutorId: tutor.id, archivedAt: null } };
 
   // 1. Fetch all students under this tutor
   const studentsQuery = prisma.student.findMany({
@@ -38,32 +76,49 @@ export default async function SchedulePage({ searchParams }: Props) {
       },
     },
     orderBy: { name: 'asc' },
+    take: 200,
   });
 
-  // 2. Fetch all sessions (Scheduled and Completed) to populate the timetable
-  const allSessionsQuery = prisma.session.findMany({
-    where: {
-      student: { tutorId: tutor.id, archivedAt: null },
-    },
-    include: {
-      student: true,
-      course: {
-        include: {
-          board: true,
-        },
-      },
-      segments: {
-        include: {
-          topic: true,
-        },
-      },
-    },
-    orderBy: {
-      sessionDate: 'asc',
-    },
-  });
+  // 2. Sessions: one week (calendar view) or one page (list view), never the whole history.
+  const sessionInclude = {
+    student: true,
+    course: { include: { board: true } },
+    segments: { include: { topic: true } },
+  } as const;
 
-  const [students, allSessions] = await Promise.all([studentsQuery, allSessionsQuery]);
+  const listTotal = view === 'list' ? await prisma.session.count({ where: tutorScope }) : 0;
+  const listWindow = paginate(parsePage(sp.page), listTotal, LIST_PAGE_SIZE);
+
+  const [students, allSessions] = await Promise.all([
+    studentsQuery,
+    view === 'list'
+      ? prisma.session.findMany({
+          where: tutorScope,
+          orderBy: [{ sessionDate: 'desc' }, { id: 'asc' }],
+          skip: listWindow.skip,
+          take: listWindow.take,
+          include: sessionInclude,
+        })
+      : prisma.session.findMany({
+          where: { ...tutorScope, sessionDate: { gte: windowStart, lt: windowEnd } },
+          orderBy: [{ sessionDate: 'asc' }, { id: 'asc' }],
+          take: WEEK_FETCH_CAP,
+          include: sessionInclude,
+        }),
+  ]);
+
+  // Follow reschedule chains for the lessons on screen (a few hops, each one a single query).
+  let chainPool: ChainSession[] = allSessions;
+  let frontier = allSessions.filter((x) => x.status === 'RESCHEDULED').map((x) => x.id);
+  for (let hop = 0; hop < 5 && frontier.length > 0; hop += 1) {
+    const next = await prisma.session.findMany({
+      where: { rescheduledFromId: { in: frontier }, ...tutorScope },
+      select: { id: true, sessionDate: true, status: true, rescheduledFromId: true },
+      take: 200,
+    });
+    chainPool = [...chainPool, ...next];
+    frontier = next.filter((x) => x.status === 'RESCHEDULED').map((x) => x.id);
+  }
 
   const formattedStudents = students.map((s) => ({
     id: s.id,
@@ -93,22 +148,13 @@ export default async function SchedulePage({ searchParams }: Props) {
     nextFocusTopic: s.nextFocusTopic,
     movedTo: (() => {
       if (s.status !== 'RESCHEDULED') return null;
-      const target = finalRescheduleTarget(s.id, allSessions);
+      const target = finalRescheduleTarget(s.id, chainPool);
       return target ? { id: target.id, sessionDate: target.sessionDate.toISOString() } : null;
     })(),
     fineAmount: s.fineAmount,
     absenceFineIDR: absenceFine(s.course.level),
     topicsSummary: s.segments.map((seg) => `${seg.topic.code} ${seg.topic.title}`).join(', '),
   }));
-
-  // Deep link from the dossier: open the week of the lesson, or of an explicit date.
-  const focusSession = focusSessionId ? formattedSessions.find((s) => s.id === focusSessionId) : null;
-  const focusTarget = focusSession
-    ? new Date(focusSession.sessionDate)
-    : focusDate && !Number.isNaN(new Date(focusDate).getTime())
-      ? new Date(focusDate)
-      : null;
-  const initialWeekOffset = focusTarget ? weekOffsetFor(focusTarget, new Date()) : 0;
 
   return (
     <main className="min-h-screen text-[#0f172a] p-6 md:p-10 font-sans">
@@ -139,8 +185,22 @@ export default async function SchedulePage({ searchParams }: Props) {
         <ScheduleClientView
           students={formattedStudents}
           sessions={formattedSessions}
-          initialWeekOffset={initialWeekOffset}
-          initialSessionId={focusSession?.id}
+          weekOffset={weekOffset}
+          view={view}
+          totalSessions={view === 'list' ? listWindow.total : formattedSessions.length}
+          initialSessionId={focusRow?.id}
+          listFooter={
+            view === 'list' ? (
+              <Pagination
+                basePath="/schedule"
+                params={{ view: 'list' }}
+                page={listWindow.page}
+                pageCount={listWindow.pageCount}
+                total={listWindow.total}
+                noun="session"
+              />
+            ) : null
+          }
         />
 
       </div>

@@ -1,6 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
+import { hrefWith } from '@/lib/pagination';
 import Link from 'next/link';
 import RevertSessionButton from '@/components/RevertSessionButton';
 import DeleteSessionButton from '@/components/DeleteSessionButton';
@@ -154,15 +156,26 @@ function CancelReasons({
 export default function ScheduleClientView({
   students = [],
   sessions = [],
-  initialWeekOffset = 0,
+  weekOffset = 0,
+  view = 'week',
+  totalSessions = 0,
   initialSessionId,
+  listFooter = null,
 }: {
   students?: StudentSummary[];
   sessions?: SessionItem[];
-  initialWeekOffset?: number;
+  /** Week shown, relative to this week. Set by the server from ?week=. */
+  weekOffset?: number;
+  view?: 'week' | 'list';
+  totalSessions?: number;
   initialSessionId?: string;
+  listFooter?: React.ReactNode;
 }) {
-  const [viewMode, setViewMode] = useState<'CALENDAR' | 'AGENDA'>('CALENDAR');
+  const router = useRouter();
+  const [isNavigating, startNavigation] = useTransition();
+  const viewMode: 'CALENDAR' | 'AGENDA' = view === 'list' ? 'AGENDA' : 'CALENDAR';
+  const navigate = (changes: Record<string, string | undefined>) =>
+    startNavigation(() => router.push(hrefWith('/schedule', {}, changes), { scroll: false }));
   const [showScheduleForm, setShowScheduleForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
@@ -283,13 +296,12 @@ export default function ScheduleClientView({
     }
   };
 
-  const [weekOffset, setWeekOffset] = useState(initialWeekOffset);
   // Which way the week list slides in: later weeks from the right, earlier ones from the left.
   const [weekDirection, setWeekDirection] = useState<'next' | 'prev' | 'none'>('none');
   const goToWeek = (target: number) => {
     if (target === weekOffset) return;
     setWeekDirection(target > weekOffset ? 'next' : 'prev');
-    setWeekOffset(target);
+    navigate({ week: target === 0 ? undefined : String(target) });
   };
 
   const getDynamicWeek = (offset: number) => {
@@ -357,14 +369,14 @@ export default function ScheduleClientView({
               {viewMode === 'CALENDAR' ? 'Weekly Timetable' : 'All Sessions'}
             </h2>
             <span className="glass-pill text-xs font-bold px-2.5 py-0.5">
-              {sessions.length} Session{sessions.length !== 1 ? 's' : ''}
+              {totalSessions} Session{totalSessions !== 1 ? 's' : ''}
             </span>
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
             <button
               type="button"
-              onClick={() => setViewMode(viewMode === 'CALENDAR' ? 'AGENDA' : 'CALENDAR')}
+              onClick={() => navigate({ view: viewMode === 'CALENDAR' ? 'list' : undefined })}
               className="glass-btn"
             >
               {viewMode === 'CALENDAR' ? '📋 List View' : '📅 Week View'}
@@ -515,7 +527,7 @@ export default function ScheduleClientView({
 
           <div
             key={weekOffset}
-            className={`divide-y divide-black/5 ${
+            className={`divide-y divide-black/5 transition-opacity ${isNavigating ? 'opacity-60' : ''} ${
               weekDirection === 'next' ? 'week-slide-next' : weekDirection === 'prev' ? 'week-slide-prev' : ''
             }`}
           >
@@ -738,6 +750,8 @@ export default function ScheduleClientView({
           )}
         </div>
       )}
+
+      {viewMode === 'AGENDA' && listFooter}
       </section>
 
       {/* RATIONAL INSPECTOR MODAL */}
@@ -941,8 +955,11 @@ export default function ScheduleClientView({
                           type="button"
                           className="underline"
                           onClick={() => {
-                            const target = sessions.find((x) => x.id === selectedSessionModal.movedTo?.id);
-                            if (target) setSelectedSessionModal(target);
+                            const targetId = selectedSessionModal.movedTo?.id;
+                            if (targetId) {
+                              setSelectedSessionModal(null);
+                              router.push(`/schedule?session=${targetId}`);
+                            }
                           }}
                         >
                           {formatMoved(selectedSessionModal.movedTo.sessionDate)}

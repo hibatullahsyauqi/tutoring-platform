@@ -7,8 +7,11 @@ export const TIMELINE_VIEWS: { value: TimelineView; label: string }[] = [
   { value: 'cancelled', label: 'Cancelled' },
 ];
 
-/** Lessons shown before the "show all" link appears. */
-export const TIMELINE_PAGE_SIZE = 6;
+/** Lessons per timeline page. */
+export const TIMELINE_PAGE_SIZE = 8;
+
+/** Safety ceiling on how many of a student's lessons the dossier will read for its stats. */
+export const SESSION_HISTORY_CAP = 3000;
 
 export function parseTimelineView(value: string | undefined): TimelineView {
   return TIMELINE_VIEWS.some((v) => v.value === value) ? (value as TimelineView) : 'all';

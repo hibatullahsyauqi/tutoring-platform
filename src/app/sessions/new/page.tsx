@@ -29,6 +29,7 @@ export default async function NewSessionPage({ searchParams }: Props) {
       },
     },
     orderBy: { name: 'asc' },
+    take: 200,
   });
 
   // When completing a scheduled lesson, prefill the form from it instead of "now".
@@ -52,6 +53,7 @@ export default async function NewSessionPage({ searchParams }: Props) {
         },
         orderBy: { sessionDate: 'desc' },
         select: { id: true, studentId: true, sessionDate: true },
+        take: 200,
       });
 
   const toolsQuery = prisma.tool.findMany({

@@ -1,4 +1,6 @@
 import RefreshButton from '@/components/RefreshButton';
+import Pagination from '@/components/Pagination';
+import { paginate, parsePage, type PageWindow } from '@/lib/pagination';
 import { prisma } from '@/lib/prisma';
 import { requireTutor } from '@/lib/auth';
 import { computePayroll, monthBounds, nextDisbursementDate } from '@/lib/payroll';
@@ -11,7 +13,15 @@ import RestoreStudentButton from '@/components/RestoreStudentButton';
 
 export const dynamic = 'force-dynamic';
 
-export default async function DashboardPage() {
+const STUDENT_PAGE_SIZE = 8;
+const ARCHIVED_PAGE_SIZE = 6;
+
+interface Props {
+  searchParams: Promise<{ page?: string; apage?: string }>;
+}
+
+export default async function DashboardPage({ searchParams }: Props) {
+  const sp = await searchParams;
   const activeTutor = await requireTutor();
 
   const now = new Date();
@@ -78,8 +88,15 @@ export default async function DashboardPage() {
     },
   });
 
-  const studentsQuery = prisma.student.findMany({
+  const studentCountQuery = prisma.student.count({ where: { tutorId: activeTutor.id, archivedAt: null } });
+  const archivedCountQuery = prisma.student.count({
+    where: { tutorId: activeTutor.id, archivedAt: { not: null } },
+  });
+
+  const studentsQuery = (window: PageWindow) => prisma.student.findMany({
     where: { tutorId: activeTutor.id, archivedAt: null },
+    skip: window.skip,
+    take: window.take,
     include: {
       enrollments: {
         include: {
@@ -91,35 +108,45 @@ export default async function DashboardPage() {
         },
       },
     },
-    orderBy: { name: 'asc' },
+    orderBy: [{ name: 'asc' }, { id: 'asc' }],
   });
 
-  const archivedQuery = prisma.student.findMany({
+  const archivedQuery = (window: PageWindow) => prisma.student.findMany({
     where: { tutorId: activeTutor.id, archivedAt: { not: null } },
+    skip: window.skip,
+    take: window.take,
     select: {
       id: true,
       name: true,
       archivedAt: true,
       enrollments: { select: { course: { select: { title: true, subjectCode: true } } }, take: 1 },
     },
-    orderBy: { name: 'asc' },
+    orderBy: [{ name: 'asc' }, { id: 'asc' }],
   });
 
-  // Independent reads run together instead of one round trip after another.
+  // Independent reads run together instead of one round trip after another. The student lists
+  // are read one page at a time, so the counts come first.
   const [
     { rates, lastUpdated, isLive },
     payrollSessions,
     nextUpcomingSession,
     fallbackRecentSession,
-    students,
-    archivedStudents,
+    studentTotal,
+    archivedTotal,
   ] = await Promise.all([
     ratesQuery,
     payrollQuery,
     nextUpcomingQuery,
     fallbackQuery,
-    studentsQuery,
-    archivedQuery,
+    studentCountQuery,
+    archivedCountQuery,
+  ]);
+
+  const studentWindow = paginate(parsePage(sp.page), studentTotal, STUDENT_PAGE_SIZE);
+  const archivedWindow = paginate(parsePage(sp.apage), archivedTotal, ARCHIVED_PAGE_SIZE);
+  const [students, archivedStudents] = await Promise.all([
+    studentsQuery(studentWindow),
+    archivedQuery(archivedWindow),
   ]);
 
   const { grossSalary, pphTax, totalFines, totalDeductions, netSalary } = computePayroll(payrollSessions);
@@ -304,7 +331,7 @@ export default async function DashboardPage() {
                   Active Students
                 </h2>
                 <span className="glass-pill text-xs font-bold px-2.5 py-0.5 rounded-full">
-                  {students.length} Student{students.length !== 1 ? 's' : ''}
+                  {studentTotal} Student{studentTotal !== 1 ? 's' : ''}
                 </span>
               </div>
 
@@ -361,14 +388,22 @@ export default async function DashboardPage() {
                 })}
               </div>
             )}
+            <Pagination
+              basePath="/"
+              params={{ apage: sp.apage }}
+              page={studentWindow.page}
+              pageCount={studentWindow.pageCount}
+              total={studentWindow.total}
+              noun="student"
+            />
           </section>
 
-          {archivedStudents.length > 0 && (
+          {archivedTotal > 0 && (
             <section className="md:col-span-3 glass-panel p-6 space-y-4">
               <div className="flex items-center gap-2 border-b border-black/5 pb-3">
                 <h2 className="text-base font-bold text-[#0f172a]">Archived Students</h2>
                 <span className="glass-pill text-xs font-bold px-2.5 py-0.5 rounded-full">
-                  {archivedStudents.length}
+                  {archivedTotal}
                 </span>
                 <span className="text-xs text-slate-500 ml-1">Hidden from the dashboard and schedule. Payroll history is kept.</span>
               </div>
@@ -393,6 +428,15 @@ export default async function DashboardPage() {
                   );
                 })}
               </div>
+              <Pagination
+                basePath="/"
+                params={{ page: sp.page }}
+                pageParam="apage"
+                page={archivedWindow.page}
+                pageCount={archivedWindow.pageCount}
+                total={archivedWindow.total}
+                noun="archived student"
+              />
             </section>
           )}
 
