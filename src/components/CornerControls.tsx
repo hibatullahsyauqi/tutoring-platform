@@ -8,6 +8,7 @@ import { signOutAction } from '@/app/actions/auth';
 import { THEME_LABEL, useTheme } from '@/components/useTheme';
 import { setTimeZoneAction } from '@/app/actions/profile';
 import { useTimeZone } from '@/components/TimeZoneProvider';
+import { OPEN_PALETTE_EVENT } from '@/components/CommandPalette';
 
 /** Pointer left the corner: wait a moment before closing, so a slip off the edge doesn't snap it shut. */
 const CLOSE_DELAY_MS = 260;
@@ -196,11 +197,30 @@ export default function CornerControls({ savedTimeZone }: { savedTimeZone: strin
             if (e.target === e.currentTarget && !open) setRendered(false);
           }}
         >
+          {!onAuthScreen && (
+            <button
+              type="button"
+              role="menuitem"
+              className="rail-row"
+              style={{ ['--i' as string]: 0 }}
+              onClick={() => {
+                closeMenu();
+                window.dispatchEvent(new Event(OPEN_PALETTE_EVENT));
+              }}
+            >
+              <Icon>
+                <circle cx="11" cy="11" r="7" />
+                <path d="m20 20-3.5-3.5" />
+              </Icon>
+              Quick jump
+            </button>
+          )}
+
           <button
             type="button"
             role="menuitem"
             className="rail-row"
-            style={{ ['--i' as string]: 0 }}
+            style={{ ['--i' as string]: 1 }}
             onClick={(e) => cycle({ x: e.clientX, y: e.clientY })}
             title="Auto switches to dark after sunset and light after sunrise, by your local time"
           >
@@ -213,7 +233,7 @@ export default function CornerControls({ savedTimeZone }: { savedTimeZone: strin
               type="button"
               role="menuitem"
               className="rail-row"
-              style={{ ['--i' as string]: 1 }}
+              style={{ ['--i' as string]: 2 }}
               disabled={switching || !zoneDiffers}
               onClick={useDeviceZone}
               title={
@@ -236,7 +256,7 @@ export default function CornerControls({ savedTimeZone }: { savedTimeZone: strin
                 type="submit"
                 role="menuitem"
                 className="rail-row rail-row-danger"
-                style={{ ['--i' as string]: 2 }}
+                style={{ ['--i' as string]: 3 }}
               >
                 <Icon>
                   <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />

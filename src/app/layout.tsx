@@ -6,6 +6,7 @@ import CornerControls from '@/components/CornerControls';
 import { themeBootstrapScript } from '@/lib/theme';
 import { TimeZoneProvider } from '@/components/TimeZoneProvider';
 import { DialogProvider } from '@/components/DialogProvider';
+import CommandPalette from '@/components/CommandPalette';
 import TimeZoneSync from '@/components/TimeZoneSync';
 import { getTutorOrNull } from '@/lib/auth';
 import { resolveTimeZone } from '@/lib/time';
@@ -49,6 +50,7 @@ export default async function RootLayout({
           <DialogProvider>
             <CornerControls savedTimeZone={tutor?.timeZone ?? null} />
             <TimeZoneSync savedTimeZone={tutor?.timeZone ?? null} signedIn={!!tutor} />
+            <CommandPalette />
             {children}
           </DialogProvider>
         </TimeZoneProvider>
