@@ -50,3 +50,18 @@ export async function deleteStudentAction(studentId: string) {
   revalidatePath('/schedule');
   redirect('/');
 }
+
+export async function restoreStudentAction(studentId: string) {
+  parseInput(idSchema, studentId);
+  const tutor = await requireTutor();
+
+  const { count } = await prisma.student.updateMany({
+    where: { id: studentId, tutorId: tutor.id, archivedAt: { not: null } },
+    data: { archivedAt: null },
+  });
+  if (count === 0) throw new Error('Archived student not found.');
+
+  revalidatePath('/');
+  revalidatePath('/schedule');
+  return { ok: true as const };
+}

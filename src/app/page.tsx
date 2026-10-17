@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { signOutAction } from '@/app/actions/auth';
 import { getLiveExchangeRates } from '@/lib/currency';
 import FinancialGlassCard from '@/components/FinancialGlassCard';
+import RestoreStudentButton from '@/components/RestoreStudentButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -90,6 +91,12 @@ export default async function DashboardPage() {
         },
       },
     },
+    orderBy: { name: 'asc' },
+  });
+
+  const archivedStudents = await prisma.student.findMany({
+    where: { tutorId: activeTutor.id, archivedAt: { not: null } },
+    select: { id: true, name: true },
     orderBy: { name: 'asc' },
   });
 
@@ -327,6 +334,20 @@ export default async function DashboardPage() {
               </div>
             )}
           </section>
+
+          {archivedStudents.length > 0 && (
+            <section className="md:col-span-3 glass-panel rounded-3xl p-6 space-y-3">
+              <h2 className="text-base font-bold text-[#0f172a]">Archived Students</h2>
+              <div className="divide-y divide-black/5">
+                {archivedStudents.map((s) => (
+                  <div key={s.id} className="py-3 first:pt-0 last:pb-0 flex items-center justify-between gap-4">
+                    <span className="text-sm font-semibold text-slate-600">{s.name}</span>
+                    <RestoreStudentButton studentId={s.id} />
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
         </div>
 
