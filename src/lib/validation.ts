@@ -47,6 +47,12 @@ export const cancelSessionSchema = z.object({
 
 export const deleteSessionSchema = z.object({ sessionId: uuid });
 
+export const setBaselineSchema = z.object({
+  studentId: uuid,
+  topicIds: z.array(uuid).min(1).max(500),
+  covered: z.boolean(),
+});
+
 export const createSessionSchema = z.object({
   existingSessionId: uuid.optional(),
   studentId: uuid,

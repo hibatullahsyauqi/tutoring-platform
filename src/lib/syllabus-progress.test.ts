@@ -57,6 +57,14 @@ describe('computeTopicProgress', () => {
     expect(stateOf(p, 'a')).toBe('UNTOUCHED');
   });
 
+  test('prior knowledge applies only until a lesson is taught', () => {
+    const prior = new Set(['a', 'b']);
+    const p = computeTopicProgress(topics, [session(3, [['a', 'STRUGGLING']])], NOW, prior);
+    expect(stateOf(p, 'a')).toBe('STRUGGLING');
+    expect(stateOf(p, 'b')).toBe('PRIOR');
+    expect(stateOf(p, 'c')).toBe('UNTOUCHED');
+  });
+
   test('reports lesson count and days since last taught', () => {
     const p = computeTopicProgress(
       topics,
@@ -128,6 +136,13 @@ describe('suggestNext', () => {
 
   test('suggests untouched topics in syllabus order, limited to two', () => {
     expect(out.filter((s) => s.kind === 'new').map((s) => s.topic.id)).toEqual(['n1', 'n2']);
+  });
+
+  test('starts new material after prior-knowledge topics', () => {
+    const p = computeTopicProgress(many, [], NOW, new Set(['s1', 'p1', 'p2']));
+    const out = suggestNext(p);
+    expect(out.map((s) => s.kind)).toEqual(['new', 'new']);
+    expect(out.map((s) => s.topic.id)).toEqual(['n1', 'n2']);
   });
 
   test('is empty when everything is fresh and mastered', () => {

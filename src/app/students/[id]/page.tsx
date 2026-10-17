@@ -93,6 +93,7 @@ export default async function StudentDossierPage({ params }: Props) {
           },
         },
       },
+      baselineTopics: { select: { topicId: true } },
       sessions: {
         orderBy: { sessionDate: 'asc' },
         include: {
@@ -129,6 +130,7 @@ export default async function StudentDossierPage({ params }: Props) {
     });
   });
 
+  const priorTopicIds = new Set(student.baselineTopics.map((b) => b.topicId));
   const topicProgress = computeTopicProgress(
     allTopics,
     student.sessions.map((s) => ({
@@ -139,11 +141,13 @@ export default async function StudentDossierPage({ params }: Props) {
         masteryStatus: seg.masteryStatus,
       })),
     })),
-    new Date()
+    new Date(),
+    priorTopicIds
   );
   const suggestions = suggestNext(topicProgress);
 
   const totalTopicsCount = allTopics.length;
+  priorTopicIds.forEach((id) => coveredTopicIds.add(id));
   const coveredCount = coveredTopicIds.size;
   const coveragePercent = totalTopicsCount > 0 ? Math.round((coveredCount / totalTopicsCount) * 100) : 0;
 
@@ -225,7 +229,7 @@ export default async function StudentDossierPage({ params }: Props) {
 
           <div className="grid grid-cols-3 gap-3 text-center pt-2 text-xs">
             <div className="p-2.5 bg-[#faf9f6] rounded-lg border border-[#ddd8cd]/60">
-              <div className="text-[11px] text-[#6f6b62]">Covered in Lessons</div>
+              <div className="text-[11px] text-[#6f6b62]">Covered or Known</div>
               <div className="text-base font-bold text-[#2b2b28] mt-0.5">{coveredCount} / {totalTopicsCount}</div>
             </div>
             <div className="p-2.5 bg-[#e8efe9]/50 rounded-lg border border-[#3d6b52]/20">
@@ -240,6 +244,7 @@ export default async function StudentDossierPage({ params }: Props) {
         </section>
 
         <SyllabusMap
+          studentId={student.id}
           courseTitle={course?.title ?? 'this course'}
           progress={topicProgress}
           suggestions={suggestions}

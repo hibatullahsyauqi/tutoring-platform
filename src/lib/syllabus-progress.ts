@@ -1,6 +1,12 @@
 export type Mastery = 'STRUGGLING' | 'NEEDS_PRACTICE' | 'MASTERED';
 
-export type TopicState = 'UNTOUCHED' | 'STRUGGLING' | 'DEVELOPING' | 'IMPROVING' | 'MASTERED';
+export type TopicState =
+  | 'UNTOUCHED'
+  | 'PRIOR'
+  | 'STRUGGLING'
+  | 'DEVELOPING'
+  | 'IMPROVING'
+  | 'MASTERED';
 
 export type ProgressTopic = { id: string; code: string; title: string };
 
@@ -34,12 +40,14 @@ export const RECALL_STALE_DAYS = 30;
 
 /**
  * Derives each topic's state from completed lessons only. The latest rating wins, except that a
- * "developing" rating after an earlier struggle reads as improving.
+ * "developing" rating after an earlier struggle reads as improving. A topic with no lessons but
+ * marked as known when the student joined is PRIOR; any lesson taught since overrides that.
  */
 export function computeTopicProgress(
   topics: ProgressTopic[],
   sessions: ProgressSession[],
-  now: Date
+  now: Date,
+  priorTopicIds: ReadonlySet<string> = new Set()
 ): TopicProgress[] {
   const history = new Map<string, { date: Date; mastery: Mastery }[]>();
   for (const s of sessions) {
@@ -54,7 +62,8 @@ export function computeTopicProgress(
   return topics.map((t) => {
     const entries = (history.get(t.id) ?? []).sort((a, b) => a.date.getTime() - b.date.getTime());
     if (entries.length === 0) {
-      return { ...t, state: 'UNTOUCHED', lessons: 0, lastTaught: null, daysSince: null };
+      const state = priorTopicIds.has(t.id) ? 'PRIOR' : 'UNTOUCHED';
+      return { ...t, state, lessons: 0, lastTaught: null, daysSince: null };
     }
     const latest = entries[entries.length - 1];
     let state: TopicState;

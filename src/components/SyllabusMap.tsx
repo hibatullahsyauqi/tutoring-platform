@@ -1,3 +1,4 @@
+import BaselineButton from '@/components/BaselineButton';
 import {
   groupTopics,
   shortTitle,
@@ -8,6 +9,7 @@ import {
 
 const STATE_STYLE: Record<TopicState, { label: string; chip: string; dot: string }> = {
   UNTOUCHED: { label: 'Not covered', chip: 'bg-[#faf9f6] text-[#6f6b62] border-[#ddd8cd]', dot: 'bg-[#ddd8cd]' },
+  PRIOR: { label: 'Prior knowledge', chip: 'bg-violet-50 text-violet-700 border-violet-200', dot: 'bg-violet-400' },
   STRUGGLING: { label: 'Struggling', chip: 'bg-red-50 text-red-700 border-red-200', dot: 'bg-red-500' },
   DEVELOPING: { label: 'Developing', chip: 'bg-amber-50 text-amber-700 border-amber-200', dot: 'bg-amber-400' },
   IMPROVING: { label: 'Improving', chip: 'bg-sky-50 text-sky-700 border-sky-200', dot: 'bg-sky-400' },
@@ -21,13 +23,15 @@ const KIND_LABEL: Record<Suggestion['kind'], string> = {
   recall: 'Recall',
 };
 
-const LEGEND: TopicState[] = ['UNTOUCHED', 'STRUGGLING', 'DEVELOPING', 'IMPROVING', 'MASTERED'];
+const LEGEND: TopicState[] = ['UNTOUCHED', 'PRIOR', 'STRUGGLING', 'DEVELOPING', 'IMPROVING', 'MASTERED'];
 
 export default function SyllabusMap({
+  studentId,
   courseTitle,
   progress,
   suggestions,
 }: {
+  studentId: string;
   courseTitle: string;
   progress: TopicProgress[];
   suggestions: Suggestion[];
@@ -110,6 +114,32 @@ export default function SyllabusMap({
                     </span>
                   </span>
                 </summary>
+                {(() => {
+                  const untouchedIds = group.topics.filter((t) => t.state === 'UNTOUCHED').map((t) => t.id);
+                  const priorIds = group.topics.filter((t) => t.state === 'PRIOR').map((t) => t.id);
+                  if (untouchedIds.length === 0 && priorIds.length === 0) return null;
+                  return (
+                    <div className="px-3 pt-1 flex flex-wrap gap-x-4 gap-y-1">
+                      {untouchedIds.length > 0 && (
+                        <BaselineButton
+                          studentId={studentId}
+                          topicIds={untouchedIds}
+                          covered
+                          label="Mark uncovered topics as already known"
+                        />
+                      )}
+                      {priorIds.length > 0 && (
+                        <BaselineButton
+                          studentId={studentId}
+                          topicIds={priorIds}
+                          covered={false}
+                          label="Clear prior knowledge"
+                          className="text-[11px] font-semibold text-[#6f6b62] hover:underline disabled:opacity-50"
+                        />
+                      )}
+                    </div>
+                  );
+                })()}
                 <ul className="px-3 pb-3 pt-1 grid grid-cols-1 md:grid-cols-2 gap-1.5">
                   {group.topics.map((t) => (
                     <li
@@ -119,8 +149,18 @@ export default function SyllabusMap({
                       <span className="min-w-0 text-[#2b2b28]">
                         <span className="font-semibold">{t.code}</span> {shortTitle(t.title)}
                       </span>
+                      <span className="flex flex-shrink-0 items-center gap-2">
+                      {(t.state === 'UNTOUCHED' || t.state === 'PRIOR') && (
+                        <BaselineButton
+                          studentId={studentId}
+                          topicIds={[t.id]}
+                          covered={t.state === 'UNTOUCHED'}
+                          label={t.state === 'UNTOUCHED' ? 'Known' : 'Undo'}
+                          className="text-[10px] font-semibold text-[#6f6b62] hover:text-[#3d6b52] hover:underline disabled:opacity-50"
+                        />
+                      )}
                       <span
-                        className={`flex-shrink-0 border font-bold px-1.5 py-0.5 rounded ${STATE_STYLE[t.state].chip}`}
+                        className={`border font-bold px-1.5 py-0.5 rounded ${STATE_STYLE[t.state].chip}`}
                         title={
                           t.lastTaught
                             ? `Taught ${t.lessons}×, last ${t.lastTaught.toLocaleDateString('en-GB')}`
@@ -128,6 +168,7 @@ export default function SyllabusMap({
                         }
                       >
                         {STATE_STYLE[t.state].label}
+                      </span>
                       </span>
                     </li>
                   ))}

@@ -33,6 +33,7 @@ model Student {
   tutor          Tutor        @relation(fields: [tutorId], references: [id], onDelete: Cascade)
   enrollments    Enrollment[]
   sessions       Session[]
+  baselineTopics StudentTopicBaseline[]
 
   @@map("students")
 }
@@ -87,9 +88,24 @@ model SyllabusTopic {
   course      Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
   segments    SessionSegment[]
   resources   Resource[]
+  baselines   StudentTopicBaseline[]
 
   @@unique([courseId, code])
   @@map("syllabus_topics")
+}
+
+// Topics a student already knew when they joined, so they aren't suggested as new material.
+model StudentTopicBaseline {
+  id        String        @id @default(uuid()) @db.Uuid
+  studentId String        @map("student_id") @db.Uuid
+  topicId   String        @map("topic_id") @db.Uuid
+  createdAt DateTime      @default(now()) @map("created_at")
+
+  student   Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  topic     SyllabusTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, topicId])
+  @@map("student_topic_baselines")
 }
 
 model Enrollment {

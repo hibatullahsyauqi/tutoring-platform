@@ -3,8 +3,8 @@
 import { prisma } from '../../lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { requireTutor } from '../../lib/auth';
-import { createStudentSchema, idSchema, parseInput } from '../../lib/validation';
+import { assertOwnsStudent, requireTutor } from '../../lib/auth';
+import { createStudentSchema, idSchema, parseInput, setBaselineSchema } from '../../lib/validation';
 
 export type CreateStudentInput = {
   name: string;
@@ -63,5 +63,39 @@ export async function restoreStudentAction(studentId: string) {
 
   revalidatePath('/');
   revalidatePath('/schedule');
+  return { ok: true as const };
+}
+
+export async function setTopicBaselineAction(input: {
+  studentId: string;
+  topicIds: string[];
+  covered: boolean;
+}) {
+  const data = parseInput(setBaselineSchema, input);
+  const tutor = await requireTutor();
+  await assertOwnsStudent(tutor.id, data.studentId);
+
+  // Only topics of a course this student is enrolled in can be marked.
+  const topicIds = [...new Set(data.topicIds)];
+  const valid = await prisma.syllabusTopic.count({
+    where: {
+      id: { in: topicIds },
+      course: { enrollments: { some: { studentId: data.studentId } } },
+    },
+  });
+  if (valid !== topicIds.length) throw new Error('One or more topics are not in this student’s course.');
+
+  if (data.covered) {
+    await prisma.studentTopicBaseline.createMany({
+      data: topicIds.map((topicId) => ({ studentId: data.studentId, topicId })),
+      skipDuplicates: true,
+    });
+  } else {
+    await prisma.studentTopicBaseline.deleteMany({
+      where: { studentId: data.studentId, topicId: { in: topicIds } },
+    });
+  }
+
+  revalidatePath(`/students/${data.studentId}`);
   return { ok: true as const };
 }
