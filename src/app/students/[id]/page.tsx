@@ -11,6 +11,7 @@ import { computeExamPace } from '@/lib/exam-pace';
 import { monthlyMomentum } from '@/lib/momentum';
 import Pagination from '@/components/Pagination';
 import BlobTabs from '@/components/BlobTabs';
+import LeavingRow from '@/components/LeavingRow';
 import { formatDateOnly, formatInZone, resolveTimeZone, zoneLabel } from '@/lib/time';
 import { paginate, parsePage } from '@/lib/pagination';
 import {
@@ -264,7 +265,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
               >
                 📅 Open Timetable
               </Link>
-              <DeleteStudentButton studentId={student.id} studentName={student.name} />
+              <DeleteStudentButton studentId={student.id} studentName={student.name} redirectTo="/" />
               <Link
                 href={`/sessions/new?studentId=${student.id}`}
                 className="glass-btn glass-btn-primary"
@@ -366,8 +367,10 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                 };
 
                 return (
-                  <article
+                  <LeavingRow
                     key={session.id}
+                    as="article"
+                    index={displaySessions.indexOf(session)}
                     className="glass-panel p-6 space-y-4"
                   >
                     <div className="session-head flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-b border-black/10 pb-3">
@@ -574,7 +577,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                         )}
                       </div>
                     )}
-                  </article>
+                  </LeavingRow>
                 );
               })}
             </div>

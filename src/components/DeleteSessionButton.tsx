@@ -1,8 +1,9 @@
 'use client';
 
 import { useDialog } from '@/components/DialogProvider';
+import { useLeavingRow } from '@/components/LeavingRow';
 import { useTransition } from 'react';
-import { deleteSessionAction } from '@/app/actions/schedule';
+import { deleteSessionAction, undoDeleteSessionAction } from '@/app/actions/schedule';
 import { describeError } from '@/lib/errors';
 
 export default function DeleteSessionButton({
@@ -20,24 +21,33 @@ export default function DeleteSessionButton({
 }) {
   const [isPending, startTransition] = useTransition();
   const dialog = useDialog();
+  const row = useLeavingRow();
 
-  const handleDelete = async () => {
-    const confirmed = await dialog.confirm({
-      title: completed ? 'Delete this logged lesson?' : 'Delete this session?',
-      message: completed
-        ? 'Its topics, notes and ratings are removed, and it stops counting toward payroll. This cannot be undone.'
-        : 'This cannot be undone.',
-      confirmLabel: 'Delete',
-      tone: 'danger',
-    });
-    if (!confirmed) return;
-
+  const handleDelete = () => {
+    row?.setLeaving(true);
     startTransition(async () => {
       try {
-        await deleteSessionAction(sessionId);
+        const { undoToken } = await deleteSessionAction(sessionId);
         onDeleted?.();
+        dialog.toast({
+          text: completed ? 'Logged lesson deleted' : 'Session deleted',
+          tone: 'info',
+          durationMs: 8000,
+          action: {
+            label: 'Undo',
+            onClick: async () => {
+              try {
+                await undoDeleteSessionAction(undoToken);
+                dialog.toast({ text: 'Lesson restored' });
+              } catch (err) {
+                void dialog.notify({ message: describeError('Could not restore that lesson.', err) });
+              }
+            },
+          },
+        });
       } catch (err) {
         console.error('Failed to delete session:', err);
+        row?.setLeaving(false);
         void dialog.notify({ message: describeError('Could not delete this session.', err) });
       }
     });

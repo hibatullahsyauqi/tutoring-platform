@@ -48,7 +48,7 @@ export async function deleteStudentAction(studentId: string) {
 
   revalidatePath('/');
   revalidatePath('/schedule');
-  redirect('/');
+  return { ok: true as const };
 }
 
 export async function restoreStudentAction(studentId: string) {

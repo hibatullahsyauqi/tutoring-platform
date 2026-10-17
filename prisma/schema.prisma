@@ -20,8 +20,23 @@ model Tutor {
   // IANA zone such as "Asia/Jakarta". Null until the browser reports one on the first visit.
   timeZone  String?   @map("time_zone")
   students  Student[]
+  deletedSessions DeletedSession[]
 
   @@map("tutors")
+}
+
+// A copy of a deleted lesson (with its topics, ratings and notes), kept briefly so Undo can bring
+// it back exactly as it was. Rows older than a day are purged on the next delete.
+model DeletedSession {
+  id        String   @id @default(uuid()) @db.Uuid
+  tutorId   String   @map("tutor_id") @db.Uuid
+  payload   Json
+  deletedAt DateTime @default(now()) @map("deleted_at")
+
+  tutor     Tutor    @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+
+  @@index([tutorId, deletedAt])
+  @@map("deleted_sessions")
 }
 
 model Student {

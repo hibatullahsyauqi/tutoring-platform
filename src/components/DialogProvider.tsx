@@ -25,7 +25,24 @@ type ConfirmOptions = {
 
 type NotifyOptions = { title?: string; message: string; tone?: 'error' | 'info' };
 
+type ToastOptions = {
+  text: string;
+  tone?: 'ok' | 'info';
+  /** A button on the toast, such as Undo. Clicking it runs onClick and dismisses the toast. */
+  action?: { label: string; onClick: () => void | Promise<void> };
+  durationMs?: number;
+};
+
+type ToastItem = Required<Pick<ToastOptions, 'text' | 'tone' | 'durationMs'>> & {
+  id: number;
+  action?: ToastOptions['action'];
+};
+
+const DEFAULT_TOAST_MS = 5500;
+
 type DialogApi = {
+  /** A short message in the corner. Pass an action for an Undo button. */
+  toast: (options: ToastOptions) => void;
   /** Resolves true when the tutor confirms, false when they cancel, press Escape or click away. */
   confirm: (options: ConfirmOptions) => Promise<boolean>;
   /** A message with a single OK button, in place of the browser's alert(). */
@@ -40,6 +57,8 @@ const EXIT_MS = 340;
 export function DialogProvider({ children }: { children: React.ReactNode }) {
   const [queue, setQueue] = useState<Request[]>([]);
   const [closing, setClosing] = useState(false);
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const nextToastId = useRef(1);
   const primaryRef = useRef<HTMLButtonElement>(null);
   const cancelRef = useRef<HTMLButtonElement>(null);
   const current = queue[0] ?? null;
@@ -80,6 +99,23 @@ export function DialogProvider({ children }: { children: React.ReactNode }) {
         ]);
       }),
     []
+  );
+
+  const dismissToast = useCallback((id: number) => {
+    setToasts((list) => list.filter((t) => t.id !== id));
+  }, []);
+
+  const toast = useCallback(
+    (options: ToastOptions) => {
+      const id = nextToastId.current++;
+      const durationMs = options.durationMs ?? DEFAULT_TOAST_MS;
+      setToasts((list) => [
+        ...list.slice(-3),
+        { id, text: options.text, tone: options.tone ?? 'ok', durationMs, action: options.action },
+      ]);
+      setTimeout(() => dismissToast(id), durationMs);
+    },
+    [dismissToast]
   );
 
   const settle = useCallback(
@@ -124,12 +160,45 @@ export function DialogProvider({ children }: { children: React.ReactNode }) {
     return () => document.removeEventListener('keydown', onKey);
   }, [current, closing, settle]);
 
-  const api = useMemo(() => ({ confirm, notify }), [confirm, notify]);
+  const api = useMemo(() => ({ confirm, notify, toast }), [confirm, notify, toast]);
   const danger = current?.tone === 'danger';
 
   return (
     <DialogContext.Provider value={api}>
       {children}
+      {toasts.length > 0 &&
+        createPortal(
+          <div className="pointer-events-none fixed bottom-6 right-6 z-[90] flex flex-col items-end gap-2">
+            {toasts.map((t) => (
+              <div
+                key={t.id}
+                role="status"
+                className={`liquid-toast pointer-events-auto glass-card-subtle flex max-w-sm items-center gap-3 px-4 py-3 text-sm font-semibold ${
+                  t.tone === 'ok' ? 'text-emerald-900 outline outline-1 outline-emerald-500' : 'text-[#0f172a]'
+                }`}
+                style={{ animationDelay: `0s, ${Math.max(0, t.durationMs - 220)}ms` }}
+              >
+                <span>
+                  {t.tone === 'ok' ? '✓ ' : ''}
+                  {t.text}
+                </span>
+                {t.action && (
+                  <button
+                    type="button"
+                    className="glass-btn glass-btn-sm"
+                    onClick={async () => {
+                      dismissToast(t.id);
+                      await t.action?.onClick();
+                    }}
+                  >
+                    {t.action.label}
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>,
+          document.body
+        )}
       {current &&
         createPortal(
           <div

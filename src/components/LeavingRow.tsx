@@ -18,10 +18,14 @@ export function useLeavingRow(): RowApi | null {
 export default function LeavingRow({
   className = '',
   index = 0,
+  as: Tag = 'div',
+  onClick,
   children,
 }: {
   className?: string;
   index?: number;
+  as?: 'div' | 'article';
+  onClick?: () => void;
   children: React.ReactNode;
 }) {
   const [leaving, setLeaving] = useState(false);
@@ -29,12 +33,13 @@ export default function LeavingRow({
 
   return (
     <RowContext.Provider value={api}>
-      <div
+      <Tag
         className={`${leaving ? 'row-leaving' : 'row-entering'} ${className}`}
         style={{ ['--i' as string]: Math.min(index, 8) }}
+        onClick={onClick}
       >
         {children}
-      </div>
+      </Tag>
     </RowContext.Provider>
   );
 }

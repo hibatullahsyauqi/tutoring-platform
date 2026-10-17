@@ -2,8 +2,8 @@
 
 import { prisma } from '../../lib/prisma';
 import { revalidatePath } from 'next/cache';
-import { SessionStatus, SessionType } from '@prisma/client';
-import { assertEnrolled, assertOwnsStudent, requireTutor } from '../../lib/auth';
+import { Prisma, SessionStatus, SessionType } from '@prisma/client';
+import { assertEnrolled, assertOwnsStudent, assertOwnsStudentIn, requireTutor } from '../../lib/auth';
 import {
   cancelSessionSchema,
   deleteSessionSchema,
@@ -12,6 +12,7 @@ import {
   scheduleSessionSchema,
 } from '../../lib/validation';
 import { absenceFine } from '../../lib/payroll';
+import { isSnapshot, restoreInput, snapshotOf } from '../../lib/session-snapshot';
 
 export type ScheduleSessionInput = {
   studentId: string;
@@ -81,15 +82,78 @@ export async function cancelSessionAction(sessionId: string, newStatus: SessionS
   return { ok: true as const, fineAmount };
 }
 
+const TRASH_KEEP_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Deletes a lesson. A full copy goes to the tutor's trash first, and the returned token lets
+ * undoDeleteSessionAction put it back exactly as it was.
+ */
 export async function deleteSessionAction(sessionId: string) {
   const { sessionId: id } = parseInput(deleteSessionSchema, { sessionId });
   const tutor = await requireTutor();
 
-  // Segments, ratings, reflections and resource links cascade with the session.
-  const { count } = await prisma.session.deleteMany({
-    where: { id, student: { tutorId: tutor.id } },
+  const trashId = await prisma.$transaction(async (tx) => {
+    const row = await tx.session.findFirst({
+      where: { id, student: { tutorId: tutor.id } },
+      include: {
+        segments: true,
+        rating: true,
+        checklist: true,
+        reflection: true,
+        resources: true,
+        rescheduledTo: { select: { id: true } },
+      },
+    });
+    if (!row) throw new Error('Session not found.');
+
+    // Old copies are only useful for a moment; keep the table small.
+    await tx.deletedSession.deleteMany({
+      where: { tutorId: tutor.id, deletedAt: { lt: new Date(Date.now() - TRASH_KEEP_MS) } },
+    });
+    const trash = await tx.deletedSession.create({
+      data: { tutorId: tutor.id, payload: snapshotOf(row) as unknown as Prisma.InputJsonValue },
+    });
+
+    // Segments, ratings, reflections and resource links cascade with the session.
+    await tx.session.delete({ where: { id: row.id } });
+    return trash.id;
   });
-  if (count === 0) throw new Error('Session not found.');
+
+  revalidatePath('/schedule');
+  revalidatePath('/');
+  revalidatePath('/students/[id]', 'page');
+  return { ok: true as const, undoToken: trashId };
+}
+
+/** Brings back a lesson deleted in the last day, from the copy kept when it was deleted. */
+export async function undoDeleteSessionAction(undoToken: string) {
+  const { sessionId: token } = parseInput(deleteSessionSchema, { sessionId: undoToken });
+  const tutor = await requireTutor();
+
+  const trash = await prisma.deletedSession.findFirst({ where: { id: token, tutorId: tutor.id } });
+  if (!trash || !isSnapshot(trash.payload)) throw new Error('That deleted lesson can no longer be restored.');
+  const snap = trash.payload;
+
+  await prisma.$transaction(async (tx) => {
+    await assertOwnsStudentIn(tx, tutor.id, snap.session.studentId);
+
+    // Re-make the reschedule links only where they still make sense.
+    const origin = snap.session.rescheduledFromId;
+    const originFree = origin
+      ? (await tx.session.findUnique({ where: { id: origin }, select: { id: true } })) !== null &&
+        (await tx.session.findFirst({ where: { rescheduledFromId: origin }, select: { id: true } })) === null
+      : false;
+
+    await tx.session.create({ data: restoreInput(snap, originFree) });
+
+    if (snap.replacementId) {
+      await tx.session.updateMany({
+        where: { id: snap.replacementId, rescheduledFromId: null },
+        data: { rescheduledFromId: snap.session.id },
+      });
+    }
+    await tx.deletedSession.delete({ where: { id: trash.id } });
+  });
 
   revalidatePath('/schedule');
   revalidatePath('/');

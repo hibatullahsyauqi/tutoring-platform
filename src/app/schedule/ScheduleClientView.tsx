@@ -9,6 +9,7 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { hrefWith } from '@/lib/pagination';
 import { useTimeZone } from '@/components/TimeZoneProvider';
+import LeavingRow from '@/components/LeavingRow';
 import Link from 'next/link';
 import RevertSessionButton from '@/components/RevertSessionButton';
 import DeleteSessionButton from '@/components/DeleteSessionButton';
@@ -49,9 +50,6 @@ type SessionItem = {
   /** For a rescheduled lesson: the lesson it ended up as. */
   movedTo: { id: string; sessionDate: string } | null;
 };
-
-/** How long a toast stays: 0.3s in, about 5s to read, 0.22s out (see .liquid-toast in globals.css). */
-const TOAST_MS = 5500;
 
 const SLOT_FORMAT: Intl.DateTimeFormatOptions = {
   weekday: 'short',
@@ -198,12 +196,7 @@ export default function ScheduleClientView({
   const [showScheduleForm, setShowScheduleForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ text: string; tone: 'ok' | 'info' } | null>(null);
-
-  const showToast = (text: string, tone: 'ok' | 'info' = 'ok') => {
-    setToast({ text, tone });
-    setTimeout(() => setToast(null), TOAST_MS);
-  };
+  const showToast = (text: string, tone: 'ok' | 'info' = 'ok') => dialog.toast({ text, tone });
 
   // The popup stays mounted for its exit animation: "leaving" keeps the last lesson on screen
   // while it shrinks away.
@@ -357,19 +350,6 @@ export default function ScheduleClientView({
 
   return (
     <div className="space-y-6">
-      {toast && (
-        <div
-          role="status"
-          className={`liquid-toast fixed bottom-6 right-6 z-[90] max-w-sm glass-card-subtle px-4 py-3 text-sm font-semibold ${
-            toast.tone === 'ok'
-              ? 'text-emerald-900 outline outline-1 outline-emerald-500'
-              : 'glass-card-subtle text-[#0f172a]'
-          }`}
-        >
-          {toast.tone === 'ok' ? '✓ ' : ''}
-          {toast.text}
-        </div>
-      )}
 
       <section className="glass-panel p-6 space-y-5">
         {/* SECTION HEADER */}
@@ -650,10 +630,11 @@ export default function ScheduleClientView({
               }[state];
 
               return (
-                <article
+                <LeavingRow
                   key={s.id}
+                  as="article"
                   onClick={() => setSelectedSessionModal(s)}
-                  className="py-4 first:pt-0 last:pb-0 space-y-3 cursor-pointer transition-all"
+                  className="py-4 first:pt-0 last:pb-0 space-y-3 cursor-pointer"
                 >
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-black/10 pb-3">
                     <div>
@@ -771,7 +752,7 @@ export default function ScheduleClientView({
                       )}
                     </div>
                   )}
-                </article>
+                </LeavingRow>
               );
             })
           )}

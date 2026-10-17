@@ -57,6 +57,19 @@ export async function assertOwnsStudent(tutorId: string, studentId: string) {
   if (!student) throw new Error('Student not found.');
 }
 
+/** Same check as assertOwnsStudent, but inside a transaction. */
+export async function assertOwnsStudentIn(
+  tx: Pick<typeof prisma, 'student'>,
+  tutorId: string,
+  studentId: string
+) {
+  const student = await tx.student.findFirst({
+    where: { id: studentId, tutorId },
+    select: { id: true },
+  });
+  if (!student) throw new Error('Student not found.');
+}
+
 /** Throws unless the student is enrolled in the course. */
 export async function assertEnrolled(studentId: string, courseId: string) {
   const enrollment = await prisma.enrollment.findUnique({
