@@ -45,6 +45,11 @@ export const cancelSessionSchema = z.object({
   }),
 });
 
+export const rescheduleSessionSchema = z.object({
+  sessionId: uuid,
+  newDate: isoDate,
+});
+
 export const deleteSessionSchema = z.object({ sessionId: uuid });
 
 export const setBaselineSchema = z.object({

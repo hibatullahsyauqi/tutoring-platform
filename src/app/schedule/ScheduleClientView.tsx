@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import RevertSessionButton from '@/components/RevertSessionButton';
 import DeleteSessionButton from '@/components/DeleteSessionButton';
-import { scheduleSessionAction, cancelSessionAction } from '@/app/actions/schedule';
+import { scheduleSessionAction, cancelSessionAction, rescheduleSessionAction } from '@/app/actions/schedule';
 import { SessionStatus, SessionType } from '@prisma/client';
 import { describeError, isRedirectError } from '@/lib/errors';
 
@@ -49,13 +49,23 @@ function CancelReasons({
   session,
   canMarkAbsent,
   onPick,
+  onReschedule,
   compact = false,
 }: {
   session: SessionItem;
   canMarkAbsent: boolean;
   onPick: (status: SessionStatus) => void;
+  onReschedule: (newDate: string) => void;
   compact?: boolean;
 }) {
+  const [rescheduling, setRescheduling] = useState(false);
+  // Default to the same slot one week later.
+  const [newDate, setNewDate] = useState(() => {
+    const d = new Date(session.sessionDate);
+    d.setDate(d.getDate() + 7);
+    return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  });
+
   const option = compact
     ? 'text-left bg-white border border-[#ddd8cd] hover:bg-gray-50 px-2.5 py-1.5 rounded text-[11px] font-semibold text-[#2b2b28]'
     : 'bg-white border border-[#ddd8cd] hover:bg-gray-50 px-3 py-1.5 rounded text-[11px] font-semibold text-[#2b2b28]';
@@ -65,9 +75,37 @@ function CancelReasons({
 
   return (
     <div className={compact ? 'flex flex-col gap-1.5' : 'flex flex-wrap gap-2'}>
-      <button type="button" onClick={() => onPick('CANCELLED_WITH_NOTICE')} className={option}>
+      <button type="button" onClick={() => setRescheduling(!rescheduling)} className={option}>
         Rescheduled / Prior Notice (Pasal 7: No fine)
       </button>
+      {rescheduling && (
+        <div className="basis-full p-2.5 bg-white border border-[#3d6b52]/30 rounded-lg space-y-2">
+          <label className="block text-[10px] font-bold text-[#2b2b28]">New date & time (WIB)</label>
+          <input
+            type="datetime-local"
+            value={newDate}
+            onChange={(e) => setNewDate(e.target.value)}
+            className="w-full bg-[#faf9f6] border border-[#ddd8cd] rounded p-1.5 text-[11px] focus:outline-none focus:border-[#3d6b52]"
+          />
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              disabled={!newDate}
+              onClick={() => onReschedule(new Date(newDate).toISOString())}
+              className="bg-[#3d6b52] text-white px-3 py-1.5 rounded text-[11px] font-bold hover:bg-[#2d523e] disabled:opacity-50"
+            >
+              Reschedule to this time
+            </button>
+            <button
+              type="button"
+              onClick={() => onPick('CANCELLED_WITH_NOTICE')}
+              className="px-3 py-1.5 rounded border border-[#ddd8cd] text-[11px] font-semibold text-[#6f6b62] hover:bg-gray-50"
+            >
+              Just cancel, pick a time later
+            </button>
+          </div>
+        </div>
+      )}
       <button type="button" onClick={() => onPick('CANCELLED_BY_STUDENT')} className={option}>
         Student Cancelled (No fine)
       </button>
@@ -121,7 +159,7 @@ export default function ScheduleClientView({
   const now = new Date();
 
   const getSessionState = (s: SessionItem): 'UPCOMING' | 'NEEDS_LOG' | 'COMPLETED' | 'CANCELLED' => {
-    if (s.status.startsWith('CANCELLED') || s.status === 'ABSENT_UNNOTIFIED') {
+    if (s.status.startsWith('CANCELLED') || s.status === 'ABSENT_UNNOTIFIED' || s.status === 'RESCHEDULED') {
       return 'CANCELLED';
     }
     if (s.status === 'COMPLETED') {
@@ -195,6 +233,26 @@ export default function ScheduleClientView({
     } catch (err) {
       console.error('Failed to cancel session:', err);
       alert(describeError('Could not update that session. It may no longer be scheduled.', err));
+    }
+  };
+
+  const handleReschedule = async (sessionId: string, newDate: string) => {
+    try {
+      await rescheduleSessionAction(sessionId, newDate);
+      setCancellingId(null);
+      setSelectedSessionModal(null);
+      showToast(
+        `Rescheduled to ${new Date(newDate).toLocaleString('en-US', {
+          weekday: 'short',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        })}. No fine applies.`
+      );
+    } catch (err) {
+      console.error('Failed to reschedule session:', err);
+      alert(describeError('Could not reschedule that session.', err));
     }
   };
 
@@ -641,6 +699,7 @@ export default function ScheduleClientView({
                         session={s}
                         canMarkAbsent={state === 'NEEDS_LOG'}
                         onPick={(status) => handleCancel(s.id, status)}
+                        onReschedule={(date) => handleReschedule(s.id, date)}
                       />
                     </div>
                   )}
@@ -852,6 +911,7 @@ export default function ScheduleClientView({
                       session={selectedSessionModal}
                       canMarkAbsent={getSessionState(selectedSessionModal) === 'NEEDS_LOG'}
                       onPick={(status) => handleCancel(selectedSessionModal.id, status)}
+                      onReschedule={(date) => handleReschedule(selectedSessionModal.id, date)}
                     />
                   </div>
                 )}

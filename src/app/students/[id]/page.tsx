@@ -177,7 +177,9 @@ export default async function StudentDossierPage({ params, searchParams }: Props
             : 'Upcoming'
           : s.status === 'ABSENT_UNNOTIFIED'
             ? 'Absent'
-            : 'Cancelled';
+            : s.status === 'RESCHEDULED'
+              ? 'Rescheduled'
+              : 'Cancelled';
     return { ...s, meetingNumber: label };
   });
   const filteredSessions = [...chronologicalSessions]

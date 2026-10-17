@@ -4,7 +4,13 @@ import { prisma } from '../../lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { SessionStatus, SessionType } from '@prisma/client';
 import { assertEnrolled, assertOwnsStudent, requireTutor } from '../../lib/auth';
-import { cancelSessionSchema, deleteSessionSchema, parseInput, scheduleSessionSchema } from '../../lib/validation';
+import {
+  cancelSessionSchema,
+  deleteSessionSchema,
+  parseInput,
+  rescheduleSessionSchema,
+  scheduleSessionSchema,
+} from '../../lib/validation';
 import { absenceFine } from '../../lib/payroll';
 
 export type ScheduleSessionInput = {
@@ -91,8 +97,54 @@ export async function deleteSessionAction(sessionId: string) {
   return { ok: true as const };
 }
 
+/**
+ * Moves a scheduled lesson to a new time in one step. The original is kept as RESCHEDULED (no
+ * fine, no pay) and a fresh scheduled lesson carries over its link, homework and focus.
+ */
+export async function rescheduleSessionAction(sessionId: string, newDate: string) {
+  const input = parseInput(rescheduleSessionSchema, { sessionId, newDate });
+  const tutor = await requireTutor();
+
+  const when = new Date(input.newDate);
+  if (when <= new Date()) throw new Error('Pick a time in the future to reschedule to.');
+
+  const original = await prisma.session.findFirst({
+    where: { id: input.sessionId, status: 'SCHEDULED', student: { tutorId: tutor.id, archivedAt: null } },
+  });
+  if (!original) throw new Error('Only a scheduled lesson can be rescheduled.');
+
+  await prisma.$transaction(async (tx) => {
+    // Status-guarded so a double click cannot create two replacements.
+    const { count } = await tx.session.updateMany({
+      where: { id: original.id, status: 'SCHEDULED' },
+      data: { status: 'RESCHEDULED', fineAmount: 0 },
+    });
+    if (count === 0) throw new Error('Only a scheduled lesson can be rescheduled.');
+
+    await tx.session.create({
+      data: {
+        studentId: original.studentId,
+        courseId: original.courseId,
+        sessionDate: when,
+        durationMinutes: original.durationMinutes,
+        sessionType: original.sessionType,
+        status: 'SCHEDULED',
+        meetingUrl: original.meetingUrl,
+        assignedHomework: original.assignedHomework,
+        nextFocusTopic: original.nextFocusTopic,
+      },
+    });
+  });
+
+  revalidatePath('/schedule');
+  revalidatePath('/');
+  revalidatePath('/students/[id]', 'page');
+  return { ok: true as const };
+}
+
 const REOPENABLE_STATUSES: SessionStatus[] = [
   'COMPLETED',
+  'RESCHEDULED',
   'CANCELLED_BY_STUDENT',
   'CANCELLED_WITH_NOTICE',
   'ABSENT_UNNOTIFIED',
