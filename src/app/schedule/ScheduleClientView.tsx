@@ -1,5 +1,6 @@
 'use client';
 
+import LiquidText from '@/components/LiquidText';
 import LiquidPresence from '@/components/LiquidPresence';
 import GlassDatePicker from '@/components/GlassDatePicker';
 import GlassSelect from '@/components/GlassSelect';
@@ -369,10 +370,10 @@ export default function ScheduleClientView({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-black/5 pb-3">
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="text-base font-bold text-[#0f172a]">
-              {viewMode === 'CALENDAR' ? 'Weekly Timetable' : 'All Sessions'}
+              <LiquidText text={viewMode === 'CALENDAR' ? 'Weekly Timetable' : 'All Sessions'} />
             </h2>
             <span className="glass-pill text-xs font-bold px-2.5 py-0.5">
-              {totalSessions} Session{totalSessions !== 1 ? 's' : ''}
+              <LiquidText text={`${totalSessions} Session${totalSessions !== 1 ? 's' : ''}`} />
             </span>
           </div>
 
@@ -385,14 +386,14 @@ export default function ScheduleClientView({
               }}
               className="glass-btn"
             >
-              {viewMode === 'CALENDAR' ? '📋 List View' : '📅 Week View'}
+              <LiquidText text={viewMode === 'CALENDAR' ? '📋 List View' : '📅 Week View'} />
             </button>
             <button
               type="button"
               onClick={() => setShowScheduleForm(!showScheduleForm)}
               className="glass-btn glass-btn-primary"
             >
-              {showScheduleForm ? '✕ Close Form' : '+ Book Session'}
+              <LiquidText text={showScheduleForm ? '✕ Close Form' : '+ Book Session'} />
             </button>
           </div>
         </div>
@@ -519,7 +520,7 @@ export default function ScheduleClientView({
                 →
               </button>
               <span className="text-sm font-bold text-[#0f172a] ml-1">
-                {weekStartLabel} – {weekEndLabel}, {currentYear}
+                <LiquidText text={`${weekStartLabel} – ${weekEndLabel}, ${currentYear}`} />
               </span>
               <div className="w-44">
                 <GlassDatePicker

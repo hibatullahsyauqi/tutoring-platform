@@ -1,5 +1,6 @@
 'use client';
 
+import LiquidText from '@/components/LiquidText';
 import LiquidPresence from '@/components/LiquidPresence';
 import GlassSelect from '@/components/GlassSelect';
 import BlobTabs from '@/components/BlobTabs';
@@ -117,7 +118,7 @@ export default function LibraryView({
         <div className="flex flex-wrap items-center gap-2">
           <h2 className="text-base font-bold text-[#0f172a]">Teaching Assets</h2>
           <span className="glass-pill text-xs font-bold px-2.5 py-0.5">
-            {total} Asset{total !== 1 ? 's' : ''}
+            <LiquidText text={`${total} Asset${total !== 1 ? 's' : ''}`} />
           </span>
         </div>
         <button
@@ -125,7 +126,7 @@ export default function LibraryView({
           onClick={() => setShowAddForm(!showAddForm)}
           className="glass-btn glass-btn-primary"
         >
-          {showAddForm ? '✕ Close Form' : '+ Add Asset'}
+          <LiquidText text={showAddForm ? '✕ Close Form' : '+ Add Asset'} />
         </button>
       </div>
 

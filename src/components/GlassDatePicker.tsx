@@ -1,5 +1,6 @@
 'use client';
 
+import LiquidText from '@/components/LiquidText';
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTimeZone } from '@/components/TimeZoneProvider';
@@ -371,7 +372,9 @@ export default function GlassDatePicker({
           }
         }}
       >
-        <span className={`glass-select-value ${valueDate ? '' : 'opacity-60'}`}>{label}</span>
+        <span className={`glass-select-value ${valueDate ? '' : 'opacity-60'}`}>
+          <LiquidText text={label} clip />
+        </span>
         <svg
           width="14"
           height="14"

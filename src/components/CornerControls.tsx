@@ -1,5 +1,6 @@
 'use client';
 
+import LiquidText from '@/components/LiquidText';
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { signOutAction } from '@/app/actions/auth';
@@ -202,7 +203,7 @@ export default function CornerControls({ savedTimeZone }: { savedTimeZone: strin
             title="Auto switches to dark after sunset and light after sunrise, by your local time"
           >
             {themeIcon}
-            Display: {THEME_LABEL[setting]}
+            <LiquidText text={`Display: ${THEME_LABEL[setting]}`} />
           </button>
 
           {!onAuthScreen && savedTimeZone && (
@@ -223,7 +224,7 @@ export default function CornerControls({ savedTimeZone }: { savedTimeZone: strin
                 <circle cx="12" cy="12" r="9" />
                 <path d="M12 7v5l3 2" />
               </Icon>
-              {zoneDiffers ? `Switch to ${deviceZone}` : `Time zone: ${zone.label}`}
+              <LiquidText text={zoneDiffers ? `Switch to ${deviceZone}` : `Time zone: ${zone.label}`} />
             </button>
           )}
 

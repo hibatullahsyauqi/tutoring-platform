@@ -1,5 +1,6 @@
 'use client';
 
+import LiquidText from '@/components/LiquidText';
 import GlassSelect from '@/components/GlassSelect';
 import { useState } from 'react';
 import {
@@ -77,7 +78,7 @@ export default function FinancialGlassCard({
         <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
           {getExchangeQuote() && (
             <span className="text-[10px] font-mono text-slate-500 bg-black/5 px-2 py-1 rounded-md hidden md:inline-block">
-              {getExchangeQuote()}
+              <LiquidText text={getExchangeQuote() ?? ''} />
             </span>
           )}
           {selectedCurrency !== 'IDR' && (
@@ -112,25 +113,29 @@ export default function FinancialGlassCard({
         <div className="glass-card-subtle p-4">
           <div className="text-[11px] text-slate-600 font-medium">Gross Earnings</div>
           <div className="text-xl font-bold text-[#0f172a] mt-1">
-            {formatCurrency(grossSalaryIDR, selectedCurrency, rates)}
+            <LiquidText text={formatCurrency(grossSalaryIDR, selectedCurrency, rates)} />
           </div>
         </div>
 
         <div className="glass-card-subtle p-4">
           <div className="text-[11px] text-slate-600 font-medium">Deductions (Tax + Fines)</div>
           <div className="text-xl font-bold text-rose-600 mt-1">
-            -{formatCurrency(totalDeductionsIDR, selectedCurrency, rates)}
+            <LiquidText text={`-${formatCurrency(totalDeductionsIDR, selectedCurrency, rates)}`} />
           </div>
           <div className="text-[10px] text-slate-500 mt-1.5 space-y-0.5">
-            <div>PPh 2.5%: {formatCurrency(pphTaxIDR, selectedCurrency, rates)}</div>
-            <div>Fines: {formatCurrency(totalFinesIDR, selectedCurrency, rates)}</div>
+            <div>
+              <LiquidText text={`PPh 2.5%: ${formatCurrency(pphTaxIDR, selectedCurrency, rates)}`} />
+            </div>
+            <div>
+              <LiquidText text={`Fines: ${formatCurrency(totalFinesIDR, selectedCurrency, rates)}`} />
+            </div>
           </div>
         </div>
 
         <div className="p-4 glass-card-subtle outline outline-2 outline-[#3d6b52]/40">
           <div className="text-[11px] font-bold text-[#0f172a]">Net Due ({disbursementLabel})</div>
           <div className="text-xl font-bold text-emerald-800 mt-1">
-            {formatCurrency(netSalaryIDR, selectedCurrency, rates)}
+            <LiquidText text={formatCurrency(netSalaryIDR, selectedCurrency, rates)} />
           </div>
           {totalDeductionsIDR > grossSalaryIDR && (
             <div className="text-[10px] text-rose-600 mt-1.5">

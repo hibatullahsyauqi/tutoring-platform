@@ -1,5 +1,6 @@
 'use client';
 
+import LiquidText from '@/components/LiquidText';
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -213,7 +214,9 @@ export default function GlassSelect({
         onClick={() => (open ? closeList() : openList())}
         onKeyDown={onKeyDown}
       >
-        <span className="glass-select-value">{selected?.label ?? placeholder}</span>
+        <span className="glass-select-value">
+          <LiquidText text={selected?.label ?? placeholder} clip />
+        </span>
         <svg
           className="glass-select-chevron"
           width="12"

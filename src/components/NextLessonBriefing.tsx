@@ -1,5 +1,6 @@
 'use client';
 
+import LiquidText from '@/components/LiquidText';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { countdownLabel, reminderMessage } from '@/lib/lesson-briefing';
@@ -104,7 +105,7 @@ export default function NextLessonBriefing({
           <h2 className="text-base font-bold text-[#0f172a]">⚡ {mode === 'next' ? 'Next Lesson' : 'Latest Lesson'}</h2>
           {countdown ? (
             <span className={`glass-badge ${PHASE_STYLE[countdown.phase]}`} suppressHydrationWarning>
-              {countdown.text}
+              <LiquidText text={countdown.text} />
             </span>
           ) : (
             <span className="glass-chip px-2 py-0.5 text-[11px] font-semibold">Last class</span>
@@ -140,7 +141,7 @@ export default function NextLessonBriefing({
         </Link>
         {mode === 'next' ? (
           <button type="button" onClick={copyReminder} className="glass-btn glass-btn-sm">
-            {copied ? '✓ Copied' : 'Copy reminder'}
+            <LiquidText text={copied ? '✓ Copied' : 'Copy reminder'} />
           </button>
         ) : (
           <Link href="/schedule" className="glass-btn glass-btn-sm">
