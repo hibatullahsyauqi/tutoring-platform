@@ -20,15 +20,18 @@ export async function GET(request: Request) {
         'Tutor';
 
       if (email) {
-        // Automatic Multi-Tenant Sync: Link to existing or create new tutor profile
-        await prisma.tutor.upsert({
-          where: { email },
-          update: { name },
-          create: {
-            name,
-            email,
-          },
-        });
+        // Link to an existing tutor profile or create one. requireTutor() does the same on the
+        // first page load, so a database hiccup here must not turn a successful Google sign-in
+        // into a failed one.
+        try {
+          await prisma.tutor.upsert({
+            where: { email },
+            update: { name },
+            create: { name, email },
+          });
+        } catch (err) {
+          console.error('Tutor sync during sign-in failed; it will be retried on the first page load.', err);
+        }
       }
 
       return NextResponse.redirect(`${origin}${next}`);
