@@ -298,6 +298,9 @@ export default function ScheduleClientView({
 
   // Which way the week list slides in: later weeks from the right, earlier ones from the left.
   const [weekDirection, setWeekDirection] = useState<'next' | 'prev' | 'none'>('none');
+  // The view being left while the other one loads; it blurs and sinks, then the new one melts in.
+  const [leavingFrom, setLeavingFrom] = useState<'CALENDAR' | 'AGENDA' | null>(null);
+  const leaving = isNavigating && leavingFrom === viewMode;
   const goToWeek = (target: number) => {
     if (target === weekOffset) return;
     setWeekDirection(target > weekOffset ? 'next' : 'prev');
@@ -365,7 +368,10 @@ export default function ScheduleClientView({
           <div className="flex items-center gap-2 flex-wrap">
             <button
               type="button"
-              onClick={() => navigate({ view: viewMode === 'CALENDAR' ? 'list' : undefined })}
+              onClick={() => {
+                setLeavingFrom(viewMode);
+                navigate({ view: viewMode === 'CALENDAR' ? 'list' : undefined });
+              }}
               className="glass-btn"
             >
               {viewMode === 'CALENDAR' ? '📋 List View' : '📅 Week View'}
@@ -475,7 +481,7 @@ export default function ScheduleClientView({
 
       {/* VIEW 1: WEEKLY TIMETABLE */}
       {viewMode === 'CALENDAR' && (
-        <div className="space-y-4">
+        <div className={`liquid-in view-fade space-y-4 ${leaving ? 'view-leaving' : ''}`}>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2">
               <button
@@ -608,7 +614,7 @@ export default function ScheduleClientView({
 
       {/* VIEW 2: AGENDA / ALL SESSIONS LIST */}
       {viewMode === 'AGENDA' && (
-        <div className="divide-y divide-black/5">
+        <div className={`liquid-in view-fade divide-y divide-black/5 ${leaving ? 'view-leaving' : ''}`}>
           {sessions.length === 0 ? (
             <div className="glass-inset p-8 text-center text-xs text-slate-700">
               No sessions scheduled yet.

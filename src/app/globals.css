@@ -1436,3 +1436,22 @@ main:not(.no-enter) > div > *:nth-child(n + 6) { animation-delay: 0.3s; }
     transition: none;
   }
 }
+
+/* Switching between the week and list views: the old one sinks and blurs while the new one loads */
+.view-fade {
+  transition: opacity 0.25s ease, transform 0.25s ease, filter 0.25s ease;
+}
+.view-leaving {
+  opacity: 0.5;
+  transform: scale(0.985);
+  filter: blur(3px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .view-fade {
+    transition: none;
+  }
+  .view-leaving {
+    transform: none;
+    filter: none;
+  }
+}
