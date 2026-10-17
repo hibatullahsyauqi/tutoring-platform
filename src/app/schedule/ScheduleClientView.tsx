@@ -3,16 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { hrefWith } from '@/lib/pagination';
-import {
-  addDaysToKey,
-  dateKey,
-  formatInZone,
-  fromDateTimeLocal,
-  mondayKey,
-  toDateTimeLocal,
-  wallTimeToUtc,
-  zoneLabel,
-} from '@/lib/time';
+import { useTimeZone } from '@/components/TimeZoneProvider';
 import Link from 'next/link';
 import RevertSessionButton from '@/components/RevertSessionButton';
 import DeleteSessionButton from '@/components/DeleteSessionButton';
@@ -54,9 +45,6 @@ type SessionItem = {
   movedTo: { id: string; sessionDate: string } | null;
 };
 
-/** YYYY-MM-DD for a day offset from today, as a date input's min/max. */
-const dateInputBound = (days: number) => addDaysToKey(dateKey(new Date()), days);
-
 const SLOT_FORMAT: Intl.DateTimeFormatOptions = {
   weekday: 'short',
   month: 'short',
@@ -65,7 +53,6 @@ const SLOT_FORMAT: Intl.DateTimeFormatOptions = {
   minute: '2-digit',
 };
 
-const formatMoved = (iso: string) => formatInZone(iso, SLOT_FORMAT);
 
 const formatIDR = (n: number) => `Rp ${n.toLocaleString('id-ID')}`;
 
@@ -86,15 +73,16 @@ function CancelReasons({
   onReschedule: (newDate: string) => void;
   compact?: boolean;
 }) {
+  const zone = useTimeZone();
   const [rescheduling, setRescheduling] = useState(false);
-  const toLocalInput = (d: Date) => toDateTimeLocal(d);
+  const toLocalInput = (d: Date) => zone.toDateTimeLocal(d);
   // Default to the same slot one week later (same wall-clock time, in the app zone).
   const [newDate, setNewDate] = useState(() => {
     const original = new Date(session.sessionDate);
-    const [datePart, timePart] = toDateTimeLocal(original).split('T');
-    return `${addDaysToKey(datePart, 7)}T${timePart}`;
+    const [datePart, timePart] = zone.toDateTimeLocal(original).split('T');
+    return `${zone.addDaysToKey(datePart, 7)}T${timePart}`;
   });
-  const isPast = !newDate || fromDateTimeLocal(newDate) <= new Date();
+  const isPast = !newDate || zone.fromDateTimeLocal(newDate) <= new Date();
 
   const option = compact
     ? 'glass-btn justify-start text-left px-3 py-1.5 text-[11px] font-semibold'
@@ -110,7 +98,7 @@ function CancelReasons({
       </button>
       {rescheduling && (
         <div className="basis-full p-3 glass-inset space-y-2">
-          <label className="block text-[10px] font-bold text-[#0f172a]">New date & time ({zoneLabel()})</label>
+          <label className="block text-[10px] font-bold text-[#0f172a]">New date & time ({zone.label})</label>
           <input
             type="datetime-local"
             value={newDate}
@@ -127,7 +115,7 @@ function CancelReasons({
             <button
               type="button"
               disabled={isPast}
-              onClick={() => onReschedule(fromDateTimeLocal(newDate).toISOString())}
+              onClick={() => onReschedule(zone.fromDateTimeLocal(newDate).toISOString())}
               className="glass-btn glass-btn-primary glass-btn-sm"
             >
               Reschedule to this time
@@ -188,7 +176,11 @@ export default function ScheduleClientView({
   listFooter?: React.ReactNode;
 }) {
   const router = useRouter();
+  const zone = useTimeZone();
   const [isNavigating, startNavigation] = useTransition();
+  const formatMoved = (iso: string) => zone.format(iso, SLOT_FORMAT);
+  /** YYYY-MM-DD for a day offset from today, as a date input's min/max. */
+  const dateInputBound = (days: number) => zone.addDaysToKey(zone.dateKey(new Date()), days);
   const viewMode: 'CALENDAR' | 'AGENDA' = view === 'list' ? 'AGENDA' : 'CALENDAR';
   const navigate = (changes: Record<string, string | undefined>) =>
     startNavigation(() => router.push(hrefWith('/schedule', {}, changes), { scroll: false }));
@@ -208,7 +200,7 @@ export default function ScheduleClientView({
 
   const [selectedStudentId, setSelectedStudentId] = useState(students[0]?.id || '');
   // Today at the standard 18:30 slot, in the app's time zone.
-  const [sessionDate, setSessionDate] = useState(() => `${dateKey(new Date())}T18:30`);
+  const [sessionDate, setSessionDate] = useState(() => `${zone.dateKey(new Date())}T18:30`);
   const [durationMinutes, setDurationMinutes] = useState(90);
   const [sessionType, setSessionType] = useState<SessionType>('REGULAR_LESSON');
   const [meetingUrl, setMeetingUrl] = useState('');
@@ -250,7 +242,7 @@ export default function ScheduleClientView({
         studentId: activeStudent.id,
         courseId: activeStudent.courseId,
         // Send an absolute instant so the server's timezone can't shift the slot.
-        sessionDate: fromDateTimeLocal(sessionDate).toISOString(),
+        sessionDate: zone.fromDateTimeLocal(sessionDate).toISOString(),
         durationMinutes,
         sessionType,
         meetingUrl,
@@ -259,7 +251,7 @@ export default function ScheduleClientView({
       });
       setShowScheduleForm(false);
       showToast(
-        `Scheduled ${activeStudent.name} for ${formatInZone(fromDateTimeLocal(sessionDate), SLOT_FORMAT)}`
+        `Scheduled ${activeStudent.name} for ${zone.format(zone.fromDateTimeLocal(sessionDate), SLOT_FORMAT)}`
       );
     } catch (err) {
       if (isRedirectError(err)) throw err;
@@ -293,7 +285,7 @@ export default function ScheduleClientView({
       setCancellingId(null);
       setSelectedSessionModal(null);
       showToast(
-        `Rescheduled to ${formatInZone(newDate, SLOT_FORMAT)}. No fine applies.`
+        `Rescheduled to ${zone.format(newDate, SLOT_FORMAT)}. No fine applies.`
       );
     } catch (err) {
       console.error('Failed to reschedule session:', err);
@@ -312,22 +304,22 @@ export default function ScheduleClientView({
   // Days are calendar dates in the app's time zone, so the week looks the same wherever the
   // browser is and lessons land on the right day.
   const getDynamicWeek = (offset: number) => {
-    const monday = addDaysToKey(mondayKey(dateKey(new Date())), offset * 7);
-    const todayKey = dateKey(new Date());
+    const monday = zone.addDaysToKey(zone.mondayKey(zone.dateKey(new Date())), offset * 7);
+    const todayKey = zone.dateKey(new Date());
     const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
     return dayNames.map((name, i) => {
-      const dateStr = addDaysToKey(monday, i);
+      const dateStr = zone.addDaysToKey(monday, i);
       const [y, m, d] = dateStr.split('-').map(Number);
 
       let contractSlot: string | null = null;
-      if (i === 2 || i === 3 || i === 4) contractSlot = `18:30 ${zoneLabel()} Slot`;
+      if (i === 2 || i === 3 || i === 4) contractSlot = `18:30 ${zone.label} Slot`;
       if (i === 5) contractSlot = 'Weekend Slot';
 
       return {
         name,
         dateStr,
-        label: formatInZone(wallTimeToUtc(y, m, d, 12, 0), { day: '2-digit', month: 'short' }),
+        label: zone.format(zone.wallTimeToUtc(y, m, d, 12, 0), { day: '2-digit', month: 'short' }),
         contractSlot,
         isToday: dateStr === todayKey,
       };
@@ -393,7 +385,7 @@ export default function ScheduleClientView({
               Book Teaching Slot
             </h2>
             <span className="text-[11px] text-slate-600">
-              Auto-prefilled for {formatInZone(fromDateTimeLocal(sessionDate), { weekday: 'short', month: 'short', day: 'numeric' })}
+              Auto-prefilled for {zone.format(zone.fromDateTimeLocal(sessionDate), { weekday: 'short', month: 'short', day: 'numeric' })}
             </span>
           </div>
 
@@ -428,14 +420,14 @@ export default function ScheduleClientView({
             </div>
 
             <div>
-              <label className="block font-bold text-[#0f172a] mb-1">Date & Time ({zoneLabel()})</label>
+              <label className="block font-bold text-[#0f172a] mb-1">Date & Time ({zone.label})</label>
               <input
                 type="datetime-local"
                 value={sessionDate}
                 onChange={(e) => setSessionDate(e.target.value)}
                 className="w-full p-2.5 glass-input"
               />
-              <span className="text-[10px] text-slate-600 mt-0.5 block">Standard window: 18:30 {zoneLabel()}</span>
+              <span className="text-[10px] text-slate-600 mt-0.5 block">Standard window: 18:30 {zone.label}</span>
             </div>
 
             <div>
@@ -541,7 +533,7 @@ export default function ScheduleClientView({
             }`}
           >
             {weekDays.map((day) => {
-              const daySessions = sessions.filter((s) => dateKey(new Date(s.sessionDate)) === day.dateStr);
+              const daySessions = sessions.filter((s) => zone.dateKey(new Date(s.sessionDate)) === day.dateStr);
 
               return (
                 <div
@@ -566,7 +558,7 @@ export default function ScheduleClientView({
                   <div className="space-y-2">
                     {daySessions.map((s) => {
                       const state = getSessionState(s);
-                      const sTime = formatInZone(s.sessionDate, { hour: '2-digit', minute: '2-digit', hour12: false });
+                      const sTime = zone.format(s.sessionDate, { hour: '2-digit', minute: '2-digit', hour12: false });
 
                       const stateConfig = {
                         UPCOMING: { badge: 'bg-blue-50 text-blue-700 border-blue-200', text: 'Upcoming' },
@@ -649,8 +641,8 @@ export default function ScheduleClientView({
                             : stateBadge.label}
                         </span>
                         <span className="text-xs font-bold text-[#0f172a]">
-                          {formatInZone(sDate, { weekday: 'short', month: 'short', day: 'numeric' })} ·{' '}
-                          {formatInZone(sDate, { hour: '2-digit', minute: '2-digit', hour12: false })} {zoneLabel()}
+                          {zone.format(sDate, { weekday: 'short', month: 'short', day: 'numeric' })} ·{' '}
+                          {zone.format(sDate, { hour: '2-digit', minute: '2-digit', hour12: false })} {zone.label}
                         </span>
                         <span className="text-[11px] px-2 py-0.5 text-slate-600 glass-chip">
                           {s.durationMinutes} mins
@@ -779,8 +771,8 @@ export default function ScheduleClientView({
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-xs font-bold text-white bg-[#3d6b52] px-2.5 py-0.5 rounded-full">
-                    {formatInZone(selectedSessionModal.sessionDate, { hour: '2-digit', minute: '2-digit', hour12: false })}{' '}
-                    {zoneLabel()}
+                    {zone.format(selectedSessionModal.sessionDate, { hour: '2-digit', minute: '2-digit', hour12: false })}{' '}
+                    {zone.label}
                   </span>
                   <span className="text-xs text-slate-600">
                     {selectedSessionModal.durationMinutes} mins
@@ -890,7 +882,7 @@ export default function ScheduleClientView({
                 {/* State 1: UPCOMING (Future) */}
                 {getSessionState(selectedSessionModal) === 'UPCOMING' && (
                   <span className="text-[11px] text-slate-600 italic">
-                    Opens at {formatInZone(selectedSessionModal.sessionDate, { hour: '2-digit', minute: '2-digit', hour12: false })} {zoneLabel()}
+                    Opens at {zone.format(selectedSessionModal.sessionDate, { hour: '2-digit', minute: '2-digit', hour12: false })} {zone.label}
                   </span>
                 )}
 

@@ -1,4 +1,4 @@
-import { APP_TIME_ZONE, zoneLabel } from './time';
+import { DEFAULT_TIME_ZONE, zoneLabel } from './time';
 
 const MIN = 60_000;
 
@@ -41,21 +41,22 @@ export function reminderMessage(opts: {
   startIso: string;
   durationMinutes: number;
   meetingUrl?: string | null;
+  timeZone?: string;
 }): string {
   const start = new Date(opts.startIso);
   const day = start.toLocaleDateString('en-GB', {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
-    timeZone: APP_TIME_ZONE,
+    timeZone: opts.timeZone ?? DEFAULT_TIME_ZONE,
   });
   const time = start.toLocaleTimeString('en-GB', {
     hour: '2-digit',
     minute: '2-digit',
-    timeZone: APP_TIME_ZONE,
+    timeZone: opts.timeZone ?? DEFAULT_TIME_ZONE,
   });
   const lines = [
-    `Hi! Reminder: ${opts.studentName}'s ${opts.courseTitle} lesson is on ${day} at ${time} ${zoneLabel()} (${opts.durationMinutes} minutes).`,
+    `Hi! Reminder: ${opts.studentName}'s ${opts.courseTitle} lesson is on ${day} at ${time} ${zoneLabel(opts.timeZone)} (${opts.durationMinutes} minutes).`,
   ];
   if (opts.meetingUrl) lines.push(`Meeting link: ${opts.meetingUrl}`);
   return lines.join('\n');

@@ -10,7 +10,7 @@ import { finalRescheduleTarget, reopenMessage } from '@/lib/reschedule-chain';
 import { computeExamPace } from '@/lib/exam-pace';
 import { monthlyMomentum } from '@/lib/momentum';
 import Pagination from '@/components/Pagination';
-import { formatDateOnly, formatInZone, zoneLabel } from '@/lib/time';
+import { formatDateOnly, formatInZone, resolveTimeZone, zoneLabel } from '@/lib/time';
 import { paginate, parsePage } from '@/lib/pagination';
 import {
   matchesView,
@@ -104,6 +104,9 @@ export default async function StudentDossierPage({ params, searchParams }: Props
   const { view: viewParam, page: pageParam } = await searchParams;
   const view = parseTimelineView(viewParam);
   const tutor = await requireTutor();
+  const tz = resolveTimeZone(tutor.timeZone);
+  const fmt = (d: Date | string, o: Intl.DateTimeFormatOptions, locale?: string) => formatInZone(d, o, locale, tz);
+  const zoneName = zoneLabel(tz);
 
   const student = await prisma.student.findUnique({
     where: { id, tutorId: tutor.id, archivedAt: null },
@@ -170,7 +173,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
   const suggestions = suggestNext(topicProgress);
   const progressSessions = history;
   const examPace = computeExamPace(student.targetExamDate, new Date(), topicProgress, progressSessions);
-  const momentum = monthlyMomentum(progressSessions, new Date());
+  const momentum = monthlyMomentum(progressSessions, new Date(), 6, tz);
 
   const totalTopicsCount = allTopics.length;
   priorTopicIds.forEach((id) => coveredTopicIds.add(id));
@@ -313,6 +316,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
           courseTitle={course?.title ?? 'this course'}
           progress={topicProgress}
           suggestions={suggestions}
+          timeZone={tz}
         />
 
         {/* CHRONOLOGICAL SESSION TIMELINE */}
@@ -352,7 +356,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
             <div className="space-y-4">
               {displaySessions.map((session) => {
                 const sDate = new Date(session.sessionDate);
-                const formattedDate = formatInZone(sDate, { day: '2-digit', month: '2-digit', year: 'numeric' }, 'en-GB');
+                const formattedDate = fmt(sDate, { day: '2-digit', month: '2-digit', year: 'numeric' }, 'en-GB');
 
                 const primaryTopicTitle = session.segments[0]?.topic?.title
                   ? `${session.segments[0].topic.code} ${session.segments[0].topic.title}`
@@ -379,17 +383,17 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                           {session.meetingNumber}
                         </span>
                         <span className="text-xs font-bold text-[#0f172a]">
-                          {formatInZone(sDate, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+                          {fmt(sDate, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
                         </span>
                         <span className="text-xs font-semibold text-slate-600">
-                          {formatInZone(sDate, { hour: '2-digit', minute: '2-digit', hour12: false }, 'en-GB')}
+                          {fmt(sDate, { hour: '2-digit', minute: '2-digit', hour12: false }, 'en-GB')}
                           {'–'}
-                          {formatInZone(
+                          {fmt(
                             new Date(sDate.getTime() + session.durationMinutes * 60000),
                             { hour: '2-digit', minute: '2-digit', hour12: false },
                             'en-GB'
                           )}{' '}
-                          {zoneLabel()}
+                          {zoneName}
                         </span>
                         <span className="text-[11px] px-2 py-0.5 text-slate-600 glass-chip">
                           {session.durationMinutes} mins
@@ -443,7 +447,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                             message={reopenMessage({
                               fineAmount: session.fineAmount,
                               movedToLabel: session.movedTo
-                                ? `${formatInZone(session.movedTo.sessionDate, MOVED_FORMAT, 'en-GB')} ${zoneLabel()}`
+                                ? `${fmt(session.movedTo.sessionDate, MOVED_FORMAT, 'en-GB')} ${zoneName}`
                                 : null,
                             })}
                           />
@@ -465,7 +469,7 @@ export default async function StudentDossierPage({ params, searchParams }: Props
                               href={`/schedule?session=${session.movedTo.id}`}
                               className="font-semibold text-[#2d523e] hover:underline"
                             >
-                              {formatInZone(session.movedTo.sessionDate, MOVED_FORMAT, 'en-GB')} {zoneLabel()} →
+                              {fmt(session.movedTo.sessionDate, MOVED_FORMAT, 'en-GB')} {zoneName} →
                             </Link>
                           </>
                         ) : (

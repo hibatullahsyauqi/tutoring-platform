@@ -1,9 +1,26 @@
 /**
- * The one time zone the app thinks in. Lessons, the timetable's days and weeks, and the payroll
- * month all follow it, so the result no longer depends on where the server runs or which zone the
- * browser is in. Override with NEXT_PUBLIC_APP_TIME_ZONE (an IANA name such as "Asia/Makassar").
+ * Every helper below takes the time zone to think in as its last argument. Each tutor has their
+ * own (saved on their profile, set from their browser the first time they visit), and lessons,
+ * the timetable's days and weeks, and the payroll month all follow it, so nothing depends on
+ * where the server runs. This default is only used until a tutor's zone is known.
  */
-export const APP_TIME_ZONE = process.env.NEXT_PUBLIC_APP_TIME_ZONE || 'Asia/Jakarta';
+export const DEFAULT_TIME_ZONE = process.env.NEXT_PUBLIC_DEFAULT_TIME_ZONE || 'Asia/Jakarta';
+
+/** True for a real IANA zone name ("Asia/Jakarta"), false for anything else. */
+export function isValidTimeZone(tz: unknown): tz is string {
+  if (typeof tz !== 'string' || tz.length === 0 || tz.length > 64) return false;
+  try {
+    new Intl.DateTimeFormat('en-US', { timeZone: tz });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** A saved zone if it is valid, otherwise the default. */
+export function resolveTimeZone(tz: string | null | undefined): string {
+  return isValidTimeZone(tz) ? tz : DEFAULT_TIME_ZONE;
+}
 
 const ZONE_LABELS: Record<string, string> = {
   'Asia/Jakarta': 'WIB',
@@ -12,7 +29,7 @@ const ZONE_LABELS: Record<string, string> = {
 };
 
 /** Short name shown next to times, e.g. "WIB". */
-export function zoneLabel(tz: string = APP_TIME_ZONE): string {
+export function zoneLabel(tz: string = DEFAULT_TIME_ZONE): string {
   if (ZONE_LABELS[tz]) return ZONE_LABELS[tz];
   const part = new Intl.DateTimeFormat('en-US', { timeZone: tz, timeZoneName: 'short' })
     .formatToParts(new Date())
@@ -53,7 +70,7 @@ function formatter(tz: string) {
 }
 
 /** The wall-clock fields of an instant in a zone. */
-export function zonedParts(date: Date, tz: string = APP_TIME_ZONE): ZonedParts {
+export function zonedParts(date: Date, tz: string = DEFAULT_TIME_ZONE): ZonedParts {
   const out: Record<string, string> = {};
   for (const p of formatter(tz).formatToParts(date)) out[p.type] = p.value;
   return {
@@ -68,7 +85,7 @@ export function zonedParts(date: Date, tz: string = APP_TIME_ZONE): ZonedParts {
 }
 
 /** Minutes the zone is ahead of UTC at that instant (+420 for Jakarta). */
-export function zoneOffsetMinutes(date: Date, tz: string = APP_TIME_ZONE): number {
+export function zoneOffsetMinutes(date: Date, tz: string = DEFAULT_TIME_ZONE): number {
   const p = zonedParts(date, tz);
   const asUtc = Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second);
   return Math.round((asUtc - Math.floor(date.getTime() / 1000) * 1000) / 60000);
@@ -81,7 +98,7 @@ export function wallTimeToUtc(
   day: number,
   hour = 0,
   minute = 0,
-  tz: string = APP_TIME_ZONE
+  tz: string = DEFAULT_TIME_ZONE
 ): Date {
   const guess = Date.UTC(year, month - 1, day, hour, minute);
   let utc = guess - zoneOffsetMinutes(new Date(guess), tz) * 60000;
@@ -93,7 +110,7 @@ export function wallTimeToUtc(
 const pad = (n: number) => String(n).padStart(2, '0');
 
 /** YYYY-MM-DD of an instant in the zone. */
-export function dateKey(date: Date, tz: string = APP_TIME_ZONE): string {
+export function dateKey(date: Date, tz: string = DEFAULT_TIME_ZONE): string {
   const p = zonedParts(date, tz);
   return `${p.year}-${pad(p.month)}-${pad(p.day)}`;
 }
@@ -118,7 +135,7 @@ export function mondayKey(key: string): string {
 }
 
 /** Whole weeks between the weeks (Monday start) containing `target` and `now`. */
-export function weekOffsetBetween(target: Date, now: Date, tz: string = APP_TIME_ZONE): number {
+export function weekOffsetBetween(target: Date, now: Date, tz: string = DEFAULT_TIME_ZONE): number {
   const a = parseKey(mondayKey(dateKey(target, tz)));
   const b = parseKey(mondayKey(dateKey(now, tz)));
   const days = (Date.UTC(a.year, a.month - 1, a.day) - Date.UTC(b.year, b.month - 1, b.day)) / 86400000;
@@ -126,14 +143,14 @@ export function weekOffsetBetween(target: Date, now: Date, tz: string = APP_TIME
 }
 
 /** The Monday 00:00 (zone time) that starts the week `offset` weeks from now's week. */
-export function weekStartUtc(offset: number, now: Date, tz: string = APP_TIME_ZONE): Date {
+export function weekStartUtc(offset: number, now: Date, tz: string = DEFAULT_TIME_ZONE): Date {
   const key = addDaysToKey(mondayKey(dateKey(now, tz)), offset * 7);
   const { year, month, day } = parseKey(key);
   return wallTimeToUtc(year, month, day, 0, 0, tz);
 }
 
 /** Start (inclusive) and end (inclusive, last millisecond) of the zone's calendar month. */
-export function monthBoundsIn(now: Date, tz: string = APP_TIME_ZONE) {
+export function monthBoundsIn(now: Date, tz: string = DEFAULT_TIME_ZONE) {
   const p = zonedParts(now, tz);
   const start = wallTimeToUtc(p.year, p.month, 1, 0, 0, tz);
   const nextStart = wallTimeToUtc(p.year, p.month + 1, 1, 0, 0, tz);
@@ -141,19 +158,19 @@ export function monthBoundsIn(now: Date, tz: string = APP_TIME_ZONE) {
 }
 
 /** Last millisecond of the zone's current day. */
-export function endOfDayIn(now: Date, tz: string = APP_TIME_ZONE): Date {
+export function endOfDayIn(now: Date, tz: string = DEFAULT_TIME_ZONE): Date {
   const p = zonedParts(now, tz);
   return new Date(wallTimeToUtc(p.year, p.month, p.day + 1, 0, 0, tz).getTime() - 1);
 }
 
 /** Value for a <input type="datetime-local">: the instant's wall clock in the zone. */
-export function toDateTimeLocal(date: Date, tz: string = APP_TIME_ZONE): string {
+export function toDateTimeLocal(date: Date, tz: string = DEFAULT_TIME_ZONE): string {
   const p = zonedParts(date, tz);
   return `${p.year}-${pad(p.month)}-${pad(p.day)}T${pad(p.hour)}:${pad(p.minute)}`;
 }
 
 /** The instant a <input type="datetime-local"> value means, read as zone time. */
-export function fromDateTimeLocal(value: string, tz: string = APP_TIME_ZONE): Date {
+export function fromDateTimeLocal(value: string, tz: string = DEFAULT_TIME_ZONE): Date {
   const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(value);
   if (!m) return new Date(NaN);
   return wallTimeToUtc(Number(m[1]), Number(m[2]), Number(m[3]), Number(m[4]), Number(m[5]), tz);
@@ -164,7 +181,7 @@ export function formatInZone(
   date: Date | string,
   options: Intl.DateTimeFormatOptions,
   locale = 'en-US',
-  tz: string = APP_TIME_ZONE
+  tz: string = DEFAULT_TIME_ZONE
 ): string {
   return new Intl.DateTimeFormat(locale, { ...options, timeZone: tz }).format(new Date(date));
 }

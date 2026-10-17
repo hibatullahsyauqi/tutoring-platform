@@ -1,10 +1,13 @@
 import { describe, expect, test } from 'bun:test';
 import {
   addDaysToKey,
+  DEFAULT_TIME_ZONE,
   dateKey,
   endOfDayIn,
   formatInZone,
   fromDateTimeLocal,
+  isValidTimeZone,
+  resolveTimeZone,
   monthBoundsIn,
   mondayKey,
   toDateTimeLocal,
@@ -129,5 +132,32 @@ describe('formatInZone', () => {
   test('prints in the zone regardless of the machine', () => {
     expect(formatInZone('2026-10-19T11:30:00Z', { hour: '2-digit', minute: '2-digit', hour12: false }, 'en-GB', JKT)).toBe('18:30');
     expect(formatInZone('2026-10-19T11:30:00Z', { weekday: 'short', day: 'numeric', month: 'short' }, 'en-US', JKT)).toBe('Mon, Oct 19');
+  });
+});
+
+describe('time zone names', () => {
+  test('accepts real IANA names, rejects everything else', () => {
+    expect(isValidTimeZone('Asia/Jakarta')).toBe(true);
+    expect(isValidTimeZone('America/New_York')).toBe(true);
+    expect(isValidTimeZone('UTC')).toBe(true);
+    expect(isValidTimeZone('Mars/Olympus')).toBe(false);
+    expect(isValidTimeZone('')).toBe(false);
+    expect(isValidTimeZone(undefined)).toBe(false);
+    expect(isValidTimeZone('x'.repeat(100))).toBe(false);
+  });
+
+  test('resolve falls back to the default', () => {
+    expect(resolveTimeZone('Europe/London')).toBe('Europe/London');
+    expect(resolveTimeZone(null)).toBe(DEFAULT_TIME_ZONE);
+    expect(resolveTimeZone('nonsense')).toBe(DEFAULT_TIME_ZONE);
+  });
+
+  test('every helper works for another tutor in another zone', () => {
+    // 07:30 in Auckland (NZDT, +13) on 20 Oct is 18:30 UTC on 19 Oct.
+    const instant = wallTimeToUtc(2026, 10, 20, 7, 30, 'Pacific/Auckland');
+    expect(instant.toISOString()).toBe('2026-10-19T18:30:00.000Z');
+    expect(dateKey(instant, 'Pacific/Auckland')).toBe('2026-10-20');
+    expect(dateKey(instant, JKT)).toBe('2026-10-20'); // 01:30 WIB the next day
+    expect(dateKey(instant, NY)).toBe('2026-10-19');
   });
 });

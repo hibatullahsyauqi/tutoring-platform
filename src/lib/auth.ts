@@ -4,11 +4,10 @@ import { prisma } from './prisma';
 import { createClient } from './supabase/server';
 
 /**
- * Resolves the logged-in Supabase user to their Tutor row, creating it on first
- * sight. Redirects to /login when there is no session. Every server action and
- * data-loading page must call this and scope queries by the returned tutor id.
+ * The signed-in tutor, or null when nobody is signed in. Creates the tutor row on first sight.
+ * Shared per request (react cache), so the layout and the page together cost one lookup.
  */
-export const requireTutor = cache(async () => {
+export const getTutorOrNull = cache(async () => {
   const supabase = await createClient();
 
   // The proxy already validated this session with Supabase on the same request, so verify the
@@ -22,7 +21,7 @@ export const requireTutor = cache(async () => {
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    if (!user?.email) redirect('/login');
+    if (!user?.email) return null;
     email = user.email;
     fullName = user.user_metadata?.full_name ?? null;
   }
@@ -36,6 +35,17 @@ export const requireTutor = cache(async () => {
     update: {},
     create: { email, name: fullName || email.split('@')[0] },
   });
+});
+
+/**
+ * Resolves the logged-in Supabase user to their Tutor row. Redirects to /login when there is no
+ * session. Every server action and data-loading page must call this and scope queries by the
+ * returned tutor id.
+ */
+export const requireTutor = cache(async () => {
+  const tutor = await getTutorOrNull();
+  if (!tutor) redirect('/login');
+  return tutor;
 });
 
 /** Throws unless the student belongs to the tutor and is not archived. */

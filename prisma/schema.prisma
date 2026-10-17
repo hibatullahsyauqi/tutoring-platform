@@ -17,6 +17,8 @@ model Tutor {
   name      String
   email     String    @unique
   createdAt DateTime  @default(now()) @map("created_at")
+  // IANA zone such as "Asia/Jakarta". Null until the browser reports one on the first visit.
+  timeZone  String?   @map("time_zone")
   students  Student[]
 
   @@map("tutors")

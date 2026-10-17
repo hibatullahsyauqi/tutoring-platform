@@ -4,6 +4,10 @@ import './globals.css';
 import GlassPointer from '@/components/GlassPointer';
 import CornerControls from '@/components/CornerControls';
 import { themeBootstrapScript } from '@/lib/theme';
+import { TimeZoneProvider } from '@/components/TimeZoneProvider';
+import TimeZoneSync from '@/components/TimeZoneSync';
+import { getTutorOrNull } from '@/lib/auth';
+import { resolveTimeZone } from '@/lib/time';
 
 // 1. Fetch Besley for Headers
 const besley = Besley({
@@ -24,11 +28,14 @@ export const metadata: Metadata = {
   description: 'A multi-curriculum pedagogical operating system for STEM tutors.',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const tutor = await getTutorOrNull();
+  const timeZone = resolveTimeZone(tutor?.timeZone);
+
   return (
     <html lang="en" className={`${nunito.variable} ${besley.variable}`} suppressHydrationWarning>
       <head>
@@ -37,8 +44,11 @@ export default function RootLayout({
       <body className="antialiased">
         <div className="top-fade" aria-hidden="true" />
         <GlassPointer />
-        <CornerControls />
-        {children}
+        <TimeZoneProvider timeZone={timeZone}>
+          <CornerControls savedTimeZone={tutor?.timeZone ?? null} />
+          <TimeZoneSync savedTimeZone={tutor?.timeZone ?? null} signedIn={!!tutor} />
+          {children}
+        </TimeZoneProvider>
       </body>
     </html>
   );

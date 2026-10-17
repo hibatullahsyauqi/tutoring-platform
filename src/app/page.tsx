@@ -2,7 +2,7 @@ import RefreshButton from '@/components/RefreshButton';
 import NextLessonBriefing from '@/components/NextLessonBriefing';
 import { computeTopicProgress, shortTitle, suggestNext } from '@/lib/syllabus-progress';
 import { SESSION_HISTORY_CAP } from '@/lib/timeline';
-import { formatDateOnly, formatInZone, zonedParts } from '@/lib/time';
+import { formatDateOnly, formatInZone, resolveTimeZone, zonedParts } from '@/lib/time';
 import Pagination from '@/components/Pagination';
 import { paginate, parsePage, type PageWindow } from '@/lib/pagination';
 import { prisma } from '@/lib/prisma';
@@ -26,6 +26,7 @@ interface Props {
 export default async function DashboardPage({ searchParams }: Props) {
   const sp = await searchParams;
   const activeTutor = await requireTutor();
+  const tz = resolveTimeZone(activeTutor.timeZone);
 
   const now = new Date();
 
@@ -33,15 +34,15 @@ export default async function DashboardPage({ searchParams }: Props) {
   const ratesQuery = getLiveExchangeRates();
 
   // Monthly Payroll Calculations
-  const { start: startOfMonth, end: endOfMonth } = monthBounds(now);
+  const { start: startOfMonth, end: endOfMonth } = monthBounds(now, tz);
 
-  const activeMonthName = formatInZone(now, { month: 'long', year: 'numeric' });
-  const nextMonthDisbursement = nextDisbursementDate(now);
+  const activeMonthName = formatInZone(now, { month: 'long', year: 'numeric' }, undefined, tz);
+  const nextMonthDisbursement = nextDisbursementDate(now, tz);
   const disbursementLabel = formatInZone(nextMonthDisbursement, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
-  });
+  }, undefined, tz);
 
   const payrollQuery = prisma.session.findMany({
     where: {
@@ -253,7 +254,7 @@ export default async function DashboardPage({ searchParams }: Props) {
         {/* MULTI-CURRENCY FINANCIAL GLASS CARD */}
         <FinancialGlassCard
           activeMonthName={activeMonthName}
-          endOfMonthDay={zonedParts(endOfMonth).day}
+          endOfMonthDay={zonedParts(endOfMonth, tz).day}
           disbursementLabel={disbursementLabel}
           completedCount={payrollSessions.filter((s) => s.status === 'COMPLETED').length}
           grossSalaryIDR={grossSalary}
@@ -373,7 +374,7 @@ export default async function DashboardPage({ searchParams }: Props) {
                         </p>
                         {s.archivedAt && (
                           <p className="text-[11px] text-slate-500 mt-0.5">
-                            Archived {formatInZone(s.archivedAt, { day: 'numeric', month: 'short', year: 'numeric' })}
+                            Archived {formatInZone(s.archivedAt, { day: 'numeric', month: 'short', year: 'numeric' }, undefined, tz)}
                           </p>
                         )}
                       </div>

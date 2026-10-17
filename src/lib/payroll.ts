@@ -1,5 +1,5 @@
 import type { EducationLevel, SessionStatus, SessionType } from '@prisma/client';
-import { APP_TIME_ZONE, monthBoundsIn, wallTimeToUtc, zonedParts } from './time';
+import { DEFAULT_TIME_ZONE, monthBoundsIn, wallTimeToUtc, zonedParts } from './time';
 
 /** All amounts are whole IDR. */
 export const PPH_RATE = 0.025;
@@ -85,12 +85,12 @@ export function computePayroll(sessions: PayrollSession[]): PayrollSummary {
 }
 
 /** Calendar-month bounds in the app's time zone (see lib/time.ts), matching the dashboard. */
-export function monthBounds(now: Date, tz: string = APP_TIME_ZONE) {
+export function monthBounds(now: Date, tz: string = DEFAULT_TIME_ZONE) {
   return monthBoundsIn(now, tz);
 }
 
 /** Disbursement is the 20th of the month after `now`'s month (midnight, app zone). */
-export function nextDisbursementDate(now: Date, tz: string = APP_TIME_ZONE): Date {
+export function nextDisbursementDate(now: Date, tz: string = DEFAULT_TIME_ZONE): Date {
   const p = zonedParts(now, tz);
   return wallTimeToUtc(p.year, p.month + 1, PAYROLL_DAY_OF_MONTH, 0, 0, tz);
 }

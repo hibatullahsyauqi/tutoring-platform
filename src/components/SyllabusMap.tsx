@@ -31,11 +31,13 @@ export default function SyllabusMap({
   courseTitle,
   progress,
   suggestions,
+  timeZone,
 }: {
   studentId: string;
   courseTitle: string;
   progress: TopicProgress[];
   suggestions: Suggestion[];
+  timeZone: string;
 }) {
   if (progress.length === 0) {
     return (
@@ -164,7 +166,7 @@ export default function SyllabusMap({
                         className={`glass-badge ${STATE_STYLE[t.state].chip}`}
                         title={
                           t.lastTaught
-                            ? `Taught ${t.lessons}×, last ${formatInZone(t.lastTaught, { day: '2-digit', month: '2-digit', year: 'numeric' }, 'en-GB')}`
+                            ? `Taught ${t.lessons}×, last ${formatInZone(t.lastTaught, { day: '2-digit', month: '2-digit', year: 'numeric' }, 'en-GB', timeZone)}`
                             : 'Not taught yet'
                         }
                       >

@@ -33,8 +33,8 @@ export function finalRescheduleTarget(
 }
 
 /** How many weeks the week containing `target` is from the week containing `now` (Monday start, app zone). */
-export function weekOffsetFor(target: Date, now: Date): number {
-  return weekOffsetBetween(target, now);
+export function weekOffsetFor(target: Date, now: Date, tz?: string): number {
+  return weekOffsetBetween(target, now, tz);
 }
 
 /** Confirmation text for reopening a cancelled, absent or rescheduled lesson. */

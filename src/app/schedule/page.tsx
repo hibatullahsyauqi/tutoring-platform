@@ -6,7 +6,7 @@ import ScheduleClientView from './ScheduleClientView';
 import { absenceFine } from '@/lib/payroll';
 import { finalRescheduleTarget, weekOffsetFor, type ChainSession } from '@/lib/reschedule-chain';
 import Pagination from '@/components/Pagination';
-import { weekStartUtc, zoneLabel } from '@/lib/time';
+import { resolveTimeZone, wallTimeToUtc, weekStartUtc, zoneLabel } from '@/lib/time';
 import { paginate, parsePage } from '@/lib/pagination';
 
 const LIST_PAGE_SIZE = 12;
@@ -24,6 +24,7 @@ interface Props {
 
 export default async function SchedulePage({ searchParams }: Props) {
   const tutor = await requireTutor();
+  const tz = resolveTimeZone(tutor.timeZone);
   const sp = await searchParams;
   const view: 'week' | 'list' = sp.view === 'list' ? 'list' : 'week';
 
@@ -36,18 +37,22 @@ export default async function SchedulePage({ searchParams }: Props) {
         })
       : null;
   const explicitWeek = Number.isInteger(Number(sp.week)) && sp.week !== undefined && sp.week !== '' ? Number(sp.week) : null;
-  const focusDate = sp.date && !Number.isNaN(new Date(sp.date).getTime()) ? new Date(sp.date) : null;
+  // A picked date (YYYY-MM-DD) means that calendar day in the tutor's zone; use its midday.
+  const dateMatch = sp.date ? /^(\d{4})-(\d{2})-(\d{2})$/.exec(sp.date) : null;
+  const focusDate = dateMatch
+    ? wallTimeToUtc(Number(dateMatch[1]), Number(dateMatch[2]), Number(dateMatch[3]), 12, 0, tz)
+    : null;
   const weekOffset = Math.max(
     -MAX_WEEK_OFFSET,
     Math.min(
       MAX_WEEK_OFFSET,
       explicitWeek ??
-        (focusRow ? weekOffsetFor(focusRow.sessionDate, new Date()) : focusDate ? weekOffsetFor(focusDate, new Date()) : 0)
+        (focusRow ? weekOffsetFor(focusRow.sessionDate, new Date(), tz) : focusDate ? weekOffsetFor(focusDate, new Date(), tz) : 0)
     )
   );
 
   // The week's window, padded by a day each side so a timezone difference never drops a lesson.
-  const monday = weekStartUtc(weekOffset, new Date());
+  const monday = weekStartUtc(weekOffset, new Date(), tz);
   const windowStart = new Date(monday.getTime() - DAY_MS);
   const windowEnd = new Date(monday.getTime() + 8 * DAY_MS);
   const tutorScope = { student: { tutorId: tutor.id, archivedAt: null } };
@@ -168,7 +173,7 @@ export default async function SchedulePage({ searchParams }: Props) {
               Weekly Timetable & Session Schedule
             </h1>
             <p className="text-xs font-medium text-slate-700 mt-0.5">
-              Tutoring window: <span className="font-bold text-[#0f172a]">Wed, Thu, Fri (18:30 {zoneLabel()}) & Sat</span>
+              Tutoring window: <span className="font-bold text-[#0f172a]">Wed, Thu, Fri (18:30 {zoneLabel(tz)}) & Sat</span>
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
@@ -187,7 +192,7 @@ export default async function SchedulePage({ searchParams }: Props) {
           view={view}
           totalSessions={view === 'list' ? listWindow.total : formattedSessions.length}
           initialSessionId={focusRow?.id}
-          highlightDate={explicitWeek === null && focusDate && sp.date && /^\d{4}-\d{2}-\d{2}$/.test(sp.date) ? sp.date : undefined}
+          highlightDate={explicitWeek === null && dateMatch ? sp.date : undefined}
           listFooter={
             view === 'list' ? (
               <Pagination

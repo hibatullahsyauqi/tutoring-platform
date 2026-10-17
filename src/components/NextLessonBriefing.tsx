@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { countdownLabel, reminderMessage } from '@/lib/lesson-briefing';
-import { APP_TIME_ZONE, zoneLabel } from '@/lib/time';
+import { useTimeZone } from '@/components/TimeZoneProvider';
 
 export type BriefingLesson = {
   sessionId: string;
@@ -50,6 +50,7 @@ export default function NextLessonBriefing({
   notes: BriefingNotes | null;
   suggestions: BriefingSuggestion[];
 }) {
+  const zone = useTimeZone();
   const [now, setNow] = useState(() => Date.now());
   const [copied, setCopied] = useState(false);
 
@@ -74,7 +75,7 @@ export default function NextLessonBriefing({
 
   const start = new Date(lesson.startIso);
   const countdown = mode === 'next' ? countdownLabel(start.getTime(), lesson.durationMinutes, now) : null;
-  const dateLine = `${start.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: APP_TIME_ZONE })} at ${start.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: APP_TIME_ZONE })} ${zoneLabel()}`;
+  const dateLine = `${zone.format(start, { weekday: 'short', month: 'short', day: 'numeric' })} at ${zone.format(start, { hour: '2-digit', minute: '2-digit', hour12: false }, 'en-GB')} ${zone.label}`;
   const canLog = mode === 'next' && lesson.status === 'SCHEDULED' && start.getTime() <= now;
 
   const copyReminder = async () => {
@@ -86,6 +87,7 @@ export default function NextLessonBriefing({
           startIso: lesson.startIso,
           durationMinutes: lesson.durationMinutes,
           meetingUrl: lesson.meetingUrl,
+          timeZone: zone.tz,
         })
       );
       setCopied(true);

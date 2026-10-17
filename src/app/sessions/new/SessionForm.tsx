@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { createSessionAction, type MasteryStatus } from '@/app/actions/session';
 import { ActivityType, SessionType } from '@prisma/client';
 import { describeError, isRedirectError } from '@/lib/errors';
-import { formatInZone, fromDateTimeLocal, toDateTimeLocal } from '@/lib/time';
+import { useTimeZone } from '@/components/TimeZoneProvider';
 
 type StudentItem = {
   id: string;
@@ -21,9 +21,6 @@ type ToolItem = {
   category: string;
 };
 
-// The date field shows (and is read as) the app's time zone, whatever zone this browser is in.
-const toLocalInput = (date: Date) => toDateTimeLocal(date);
-const getNowLocalISO = () => toLocalInput(new Date());
 
 type InitialSession = {
   studentId: string;
@@ -52,6 +49,11 @@ export default function SessionForm({
   initialSession?: InitialSession;
 }) {
   const [isPending, startTransition] = useTransition();
+
+  // The date field shows (and is read as) the tutor's time zone, whatever zone this browser is in.
+  const zone = useTimeZone();
+  const toLocalInput = (date: Date) => zone.toDateTimeLocal(date);
+  const getNowLocalISO = () => toLocalInput(new Date());
 
   const initialStudentId =
     preselectedStudentId && students.some((s) => s.id === preselectedStudentId)
@@ -82,7 +84,7 @@ export default function SessionForm({
 
   // ACTIVE CLAMPING: Rejects keyboard bypass of future dates/times
   const handleDateChange = (val: string) => {
-    const selected = fromDateTimeLocal(val);
+    const selected = zone.fromDateTimeLocal(val);
     const now = new Date();
 
     if (selected > now) {
@@ -206,7 +208,7 @@ export default function SessionForm({
     if (!activeStudent) return;
 
     // Final safety check against future time before dispatching to server
-    if (fromDateTimeLocal(sessionDate) > new Date()) {
+    if (zone.fromDateTimeLocal(sessionDate) > new Date()) {
       setDateWarning('Future times are strictly forbidden.');
       return;
     }
@@ -218,7 +220,7 @@ export default function SessionForm({
           studentId: activeStudent.id,
           courseId: activeStudent.courseId,
           // Absolute instant, so the server's timezone can't shift the logged time.
-          sessionDate: fromDateTimeLocal(sessionDate).toISOString(),
+          sessionDate: zone.fromDateTimeLocal(sessionDate).toISOString(),
           durationMinutes,
           sessionType,
           meetingUrl,
@@ -261,7 +263,7 @@ export default function SessionForm({
                 className="glass-btn glass-btn-sm"
               >
                 Log{' '}
-                {formatInZone(p.sessionDate, {
+                {zone.format(p.sessionDate, {
                   weekday: 'short',
                   month: 'short',
                   day: 'numeric',

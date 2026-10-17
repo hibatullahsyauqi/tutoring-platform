@@ -4,13 +4,15 @@ import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { signOutAction } from '@/app/actions/auth';
 import { THEME_LABEL, useTheme } from '@/components/useTheme';
+import { setTimeZoneAction } from '@/app/actions/profile';
+import { useTimeZone } from '@/components/TimeZoneProvider';
 
 /**
  * One settings button pinned to the top-right corner, outside the cards. Click it and the
  * options pop out underneath: Display (theme) and Sign out. More (a profile link, say) can be
  * added as another entry in the menu below.
  */
-export default function CornerControls() {
+export default function CornerControls({ savedTimeZone }: { savedTimeZone: string | null }) {
   const pathname = usePathname();
   const railRef = useRef<HTMLDivElement>(null);
   const onAuthScreen = pathname === '/login' || pathname.startsWith('/auth');
@@ -22,6 +24,24 @@ export default function CornerControls() {
     setOpenFor(next ? pathname : null);
   };
   const { setting, cycle } = useTheme();
+  const zone = useTimeZone();
+  const [switching, setSwitching] = useState(false);
+  // Only read once the menu is open, i.e. in the browser, so it can never mismatch the server.
+  const deviceZone = open ? Intl.DateTimeFormat().resolvedOptions().timeZone : null;
+  const zoneDiffers = !!deviceZone && !!savedTimeZone && deviceZone !== savedTimeZone;
+
+  const useDeviceZone = async () => {
+    if (!deviceZone) return;
+    setSwitching(true);
+    try {
+      await setTimeZoneAction(deviceZone);
+    } catch (err) {
+      console.error('Could not change the time zone.', err);
+      alert('Could not change the time zone. Please try again.');
+    } finally {
+      setSwitching(false);
+    }
+  };
 
   // Close on Escape, on a click elsewhere, and when the page changes.
   useEffect(() => {
@@ -137,13 +157,37 @@ export default function CornerControls() {
             Display: {THEME_LABEL[setting]}
           </button>
 
+          {!onAuthScreen && savedTimeZone && (
+            <button
+              type="button"
+              role="menuitem"
+              className="glass-btn rail-item"
+              style={{ ['--i' as string]: 1 }}
+              disabled={switching || !zoneDiffers}
+              onClick={useDeviceZone}
+              title={
+                zoneDiffers
+                  ? `This device is in ${deviceZone}. Click to switch your lessons and payroll to it.`
+                  : 'Lessons, the timetable and payroll use this time zone. It follows this device the first time you sign in.'
+              }
+            >
+              {icon(
+                <>
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M12 7v5l3 2" />
+                </>
+              )}
+              {zoneDiffers ? `Switch to ${deviceZone}` : `Time zone: ${zone.label}`}
+            </button>
+          )}
+
           {!onAuthScreen && (
             <form action={signOutAction} role="none">
               <button
                 type="submit"
                 role="menuitem"
                 className="glass-btn glass-btn-danger rail-item"
-                style={{ ['--i' as string]: 1 }}
+                style={{ ['--i' as string]: 2 }}
               >
                 {icon(
                   <>
