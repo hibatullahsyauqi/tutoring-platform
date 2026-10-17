@@ -1,6 +1,5 @@
 import { prisma } from '@/lib/prisma';
 import { requireTutor } from '@/lib/auth';
-import Link from 'next/link';
 import BackButton from '@/components/BackButton';
 import { endOfDayIn, resolveTimeZone } from '@/lib/time';
 import SessionForm from './SessionForm';

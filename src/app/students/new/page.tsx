@@ -1,5 +1,4 @@
 import { prisma } from '@/lib/prisma';
-import Link from 'next/link';
 import BackButton from '@/components/BackButton';
 import NewStudentForm from './NewStudentForm';
 
